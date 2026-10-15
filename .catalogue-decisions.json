@@ -1,0 +1,9 @@
+{
+  "corpus": {
+    "adrs": "docs/decisions",
+    "scopeDecisions": "docs/implementation-log/scope-decisions.md",
+    "moduleCatalogue": null,
+    "libraryCatalogue": ".catalogue/library_catalogue"
+  },
+  "index": ".catalogue-decisions/index.json"
+}

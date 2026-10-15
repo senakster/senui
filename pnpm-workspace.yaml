@@ -1,0 +1,14 @@
+packages:
+  - packages/*
+  - apps/*
+
+# esbuild's install script only fetches its platform binary. Storybook's builder needs it.
+allowBuilds:
+  esbuild: true
+
+# Exceptions to pnpm's minimum release age. Keep this list short and give each entry a reason.
+minimumReleaseAgeExclude:
+  # 2026-10-14: patches shipped across every 19.x line on the same day (19.0.9, 19.1.10,
+  # 19.2.9, 19.3.1), the pattern of a security release. Drop this once it has aged past the gate.
+  - react@19.3.1
+  - react-dom@19.3.1

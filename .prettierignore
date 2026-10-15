@@ -1,0 +1,7 @@
+# Vendored, hash-verified catalogue snapshot: a reformat would mark it modified-locally.
+.catalogue/
+.catalogue-decisions/
+pnpm-lock.yaml
+dist/
+storybook-static/
+coverage/

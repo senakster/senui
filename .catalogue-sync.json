@@ -1,0 +1,33 @@
+{
+  "version": 1,
+  "profile": "library",
+  "progress": "docs/PROGRESS.md",
+  "pluginVersion": "0.3.0",
+  "syncedAt": "2026-10-15",
+  "files": {
+    "library_catalogue/L00-workspace-and-harness.md": {
+      "target": ".catalogue/library_catalogue/L00-workspace-and-harness.md",
+      "sha256": "5a8cc5b6b61f2f1ea6cd34493a5027fc4e6d80be0ab59538fe4e858717ff9a48"
+    },
+    "library_catalogue/L01-design-tokens.md": {
+      "target": ".catalogue/library_catalogue/L01-design-tokens.md",
+      "sha256": "e3961a9a0281ebc292705f1eb049e75b8caef1cb1a0bd1ab0e94f0b1d192f11b"
+    },
+    "library_catalogue/L02-component-api-conventions.md": {
+      "target": ".catalogue/library_catalogue/L02-component-api-conventions.md",
+      "sha256": "892533cd495b72713d5f7f4c208fe8947492e1379ec6b35c30db13f50877eafe"
+    },
+    "library_catalogue/L03-button.md": {
+      "target": ".catalogue/library_catalogue/L03-button.md",
+      "sha256": "6d829b8912d31259711df5d91c43bebb654db3f503a71db547963290449904aa"
+    },
+    "library_catalogue/L04-formfield-and-textinput.md": {
+      "target": ".catalogue/library_catalogue/L04-formfield-and-textinput.md",
+      "sha256": "557b688dbfbd6fdc00b3dc8bd05db7dccddb07db4c0a9d33a40eb62e750fe4e7"
+    },
+    "library_catalogue/PLAN.md": {
+      "target": ".catalogue/library_catalogue/PLAN.md",
+      "sha256": "e07a1c55d7ed96164c9d068538d2601301ed1ffb41f8176a5bc8bd3bfaf0b202"
+    }
+  }
+}

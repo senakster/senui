@@ -1,0 +1,25 @@
+{
+  "name": "@senakster/tokens",
+  "version": "0.0.0",
+  "description": "Design tokens for senui: CSS custom properties and a typed JS map.",
+  "type": "module",
+  "sideEffects": [
+    "**/*.css"
+  ],
+  "files": [
+    "dist"
+  ],
+  "exports": {
+    ".": "./dist/index.js",
+    "./package.json": "./package.json"
+  },
+  "scripts": {
+    "build": "tsdown",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "publint": "0.3.25",
+    "tsdown": "0.23.1",
+    "typescript": "6.0.3"
+  }
+}

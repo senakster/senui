@@ -1,0 +1,11 @@
+node_modules/
+dist/
+storybook-static/
+coverage/
+*.log
+.DS_Store
+
+# Vendored modular-web catalogue plans and the index built from them. Not this
+# project's to publish; re-vendor with /modular-web:new-project (ADR-0014 upstream).
+.catalogue/
+.catalogue-decisions/
