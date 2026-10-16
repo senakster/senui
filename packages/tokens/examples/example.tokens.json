@@ -1,0 +1,316 @@
+{
+  "$description": "Example token set covering every category and every $extensions.senui key. Not built or shipped: real tokens live in src/*.tokens.json. test/example.test.mjs builds this file so it stays valid.",
+  "primitive": {
+    "color": {
+      "neutral": {
+        "0": {
+          "$type": "color",
+          "$value": { "colorSpace": "oklch", "components": [0.99, 0.003, 260] }
+        },
+        "50": {
+          "$type": "color",
+          "$value": { "colorSpace": "oklch", "components": [0.97, 0.005, 260] }
+        },
+        "300": {
+          "$type": "color",
+          "$value": { "colorSpace": "oklch", "components": [0.85, 0.01, 260] }
+        },
+        "500": {
+          "$type": "color",
+          "$value": { "colorSpace": "oklch", "components": [0.6, 0.015, 260] }
+        },
+        "600": {
+          "$type": "color",
+          "$value": { "colorSpace": "oklch", "components": [0.5, 0.015, 260] }
+        },
+        "800": {
+          "$type": "color",
+          "$value": { "colorSpace": "oklch", "components": [0.3, 0.015, 260] }
+        },
+        "900": {
+          "$type": "color",
+          "$value": { "colorSpace": "oklch", "components": [0.22, 0.015, 260] }
+        },
+        "950": {
+          "$type": "color",
+          "$value": { "colorSpace": "oklch", "components": [0.16, 0.012, 260] }
+        }
+      },
+      "blue": {
+        "400": {
+          "$type": "color",
+          "$value": { "colorSpace": "oklch", "components": [0.72, 0.14, 255] }
+        },
+        "600": {
+          "$type": "color",
+          "$value": { "colorSpace": "oklch", "components": [0.52, 0.18, 260] }
+        }
+      },
+      "red": {
+        "400": {
+          "$type": "color",
+          "$value": { "colorSpace": "oklch", "components": [0.72, 0.16, 25] }
+        },
+        "600": {
+          "$type": "color",
+          "$value": { "colorSpace": "oklch", "components": [0.53, 0.2, 27] }
+        }
+      },
+      "black": {
+        "12": {
+          "$type": "color",
+          "$value": { "colorSpace": "srgb", "components": [0, 0, 0], "alpha": 0.12 }
+        },
+        "50": {
+          "$type": "color",
+          "$value": { "colorSpace": "srgb", "components": [0, 0, 0], "alpha": 0.5 }
+        }
+      }
+    }
+  },
+
+  "color": {
+    "bg": {
+      "default": {
+        "$type": "color",
+        "$description": "Page and surface background.",
+        "$value": "{primitive.color.neutral.0}",
+        "$extensions": { "senui": { "dark": "{primitive.color.neutral.950}", "contrast": [] } }
+      },
+      "subtle": {
+        "$type": "color",
+        "$description": "Recessed areas: wells, table stripes, disabled fields.",
+        "$value": "{primitive.color.neutral.50}",
+        "$extensions": { "senui": { "dark": "{primitive.color.neutral.900}", "contrast": [] } }
+      },
+      "accent": {
+        "$type": "color",
+        "$description": "Fill for primary actions.",
+        "$value": "{primitive.color.blue.600}",
+        "$extensions": { "senui": { "dark": "{primitive.color.blue.400}", "contrast": [] } }
+      }
+    },
+    "fg": {
+      "default": {
+        "$type": "color",
+        "$description": "Body text.",
+        "$value": "{primitive.color.neutral.900}",
+        "$extensions": {
+          "senui": {
+            "dark": "{primitive.color.neutral.50}",
+            "contrast": [
+              { "against": "{color.bg.default}", "min": 4.5 },
+              { "against": "{color.bg.subtle}", "min": 4.5 }
+            ]
+          }
+        }
+      },
+      "muted": {
+        "$type": "color",
+        "$description": "Secondary text: hints, captions, placeholders.",
+        "$value": "{primitive.color.neutral.600}",
+        "$extensions": {
+          "senui": {
+            "dark": "{primitive.color.neutral.300}",
+            "contrast": [
+              { "against": "{color.bg.default}", "min": 4.5 },
+              { "against": "{color.bg.subtle}", "min": 4.5 }
+            ]
+          }
+        }
+      },
+      "accent": {
+        "$type": "color",
+        "$description": "Links and accent text.",
+        "$value": "{primitive.color.blue.600}",
+        "$extensions": {
+          "senui": {
+            "dark": "{primitive.color.blue.400}",
+            "contrast": [{ "against": "{color.bg.default}", "min": 4.5 }]
+          }
+        }
+      },
+      "danger": {
+        "$type": "color",
+        "$description": "Error messages and destructive actions.",
+        "$value": "{primitive.color.red.600}",
+        "$extensions": {
+          "senui": {
+            "dark": "{primitive.color.red.400}",
+            "contrast": [{ "against": "{color.bg.default}", "min": 4.5 }]
+          }
+        }
+      },
+      "on-accent": {
+        "$type": "color",
+        "$description": "Text and icons on color.bg.accent.",
+        "$value": "{primitive.color.neutral.0}",
+        "$extensions": {
+          "senui": {
+            "dark": "{primitive.color.neutral.950}",
+            "contrast": [{ "against": "{color.bg.accent}", "min": 4.5 }]
+          }
+        }
+      }
+    },
+    "border": {
+      "default": {
+        "$type": "color",
+        "$description": "Decorative dividers. Not enough contrast to identify a control; use border.strong for that.",
+        "$value": "{primitive.color.neutral.300}",
+        "$extensions": { "senui": { "dark": "{primitive.color.neutral.800}", "contrast": [] } }
+      },
+      "strong": {
+        "$type": "color",
+        "$description": "Borders that identify a control, such as input outlines (WCAG 1.4.11).",
+        "$value": "{primitive.color.neutral.500}",
+        "$extensions": {
+          "senui": {
+            "dark": "{primitive.color.neutral.500}",
+            "contrast": [
+              { "against": "{color.bg.default}", "min": 3 },
+              { "against": "{color.bg.subtle}", "min": 3 }
+            ]
+          }
+        }
+      }
+    },
+    "focus": {
+      "ring": {
+        "$type": "color",
+        "$description": "Focus indicator (WCAG 2.4.11).",
+        "$value": "{primitive.color.blue.600}",
+        "$extensions": {
+          "senui": {
+            "dark": "{primitive.color.blue.400}",
+            "contrast": [
+              { "against": "{color.bg.default}", "min": 3 },
+              { "against": "{color.bg.subtle}", "min": 3 }
+            ]
+          }
+        }
+      }
+    },
+    "shadow": {
+      "$type": "color",
+      "$description": "Shadow colour used by the elevation tokens.",
+      "$value": "{primitive.color.black.12}",
+      "$extensions": { "senui": { "dark": "{primitive.color.black.50}", "contrast": [] } }
+    }
+  },
+
+  "space": {
+    "$type": "dimension",
+    "1": { "$value": { "value": 4, "unit": "px" } },
+    "2": { "$value": { "value": 8, "unit": "px" } },
+    "3": { "$value": { "value": 12, "unit": "px" } },
+    "4": { "$value": { "value": 16, "unit": "px" } },
+    "5": { "$value": { "value": 24, "unit": "px" } },
+    "6": { "$value": { "value": 32, "unit": "px" } },
+    "7": { "$value": { "value": 48, "unit": "px" } }
+  },
+
+  "radius": {
+    "$type": "dimension",
+    "sm": { "$value": { "value": 4, "unit": "px" } },
+    "md": { "$value": { "value": 8, "unit": "px" } },
+    "lg": { "$value": { "value": 12, "unit": "px" } },
+    "full": { "$value": { "value": 9999, "unit": "px" } }
+  },
+
+  "font": {
+    "family": {
+      "$type": "fontFamily",
+      "sans": { "$value": ["system-ui", "sans-serif"] },
+      "mono": { "$value": ["ui-monospace", "monospace"] }
+    },
+    "size": {
+      "$type": "dimension",
+      "sm": { "$value": { "value": 0.875, "unit": "rem" } },
+      "md": { "$value": { "value": 1, "unit": "rem" } },
+      "lg": { "$value": { "value": 1.25, "unit": "rem" } }
+    },
+    "weight": {
+      "$type": "fontWeight",
+      "regular": { "$value": 400 },
+      "medium": { "$value": 500 },
+      "bold": { "$value": 700 }
+    },
+    "line-height": {
+      "$type": "number",
+      "tight": { "$value": 1.25 },
+      "normal": { "$value": 1.5 }
+    }
+  },
+
+  "motion": {
+    "duration": {
+      "$type": "duration",
+      "fast": { "$value": { "value": 120, "unit": "ms" } },
+      "moderate": { "$value": { "value": 200, "unit": "ms" } },
+      "slow": { "$value": { "value": 320, "unit": "ms" } }
+    },
+    "easing": {
+      "$type": "cubicBezier",
+      "standard": { "$value": [0.2, 0, 0, 1] },
+      "enter": { "$value": [0, 0, 0, 1] },
+      "exit": { "$value": [0.3, 0, 1, 1] }
+    },
+    "distance": {
+      "$type": "dimension",
+      "$description": "How far things travel when they move. Collapses to 0 under reduced motion; durations do not, so fades remain.",
+      "sm": {
+        "$value": { "value": 4, "unit": "px" },
+        "$extensions": { "senui": { "reducedMotion": { "value": 0, "unit": "px" } } }
+      },
+      "md": {
+        "$value": { "value": 8, "unit": "px" },
+        "$extensions": { "senui": { "reducedMotion": { "value": 0, "unit": "px" } } }
+      }
+    },
+    "scale": {
+      "$type": "number",
+      "enter": {
+        "$description": "Starting scale for elements that grow in. 1 under reduced motion.",
+        "$value": 0.96,
+        "$extensions": { "senui": { "reducedMotion": 1 } }
+      }
+    }
+  },
+
+  "elevation": {
+    "$type": "shadow",
+    "1": {
+      "$value": {
+        "color": "{color.shadow}",
+        "offsetX": { "value": 0, "unit": "px" },
+        "offsetY": { "value": 1, "unit": "px" },
+        "blur": { "value": 2, "unit": "px" },
+        "spread": { "value": 0, "unit": "px" }
+      }
+    },
+    "2": {
+      "$value": {
+        "color": "{color.shadow}",
+        "offsetX": { "value": 0, "unit": "px" },
+        "offsetY": { "value": 4, "unit": "px" },
+        "blur": { "value": 12, "unit": "px" },
+        "spread": { "value": 0, "unit": "px" }
+      }
+    }
+  },
+
+  "size": {
+    "$type": "dimension",
+    "target": {
+      "min": {
+        "$description": "Smallest allowed pointer target (WCAG 2.5.8).",
+        "$value": { "value": 24, "unit": "px" }
+      },
+      "icon": {
+        "$description": "Default size of an icon-only control.",
+        "$value": { "value": 32, "unit": "px" }
+      }
+    }
+  }
+}

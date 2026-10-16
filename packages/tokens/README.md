@@ -19,6 +19,10 @@ Tokens are written by hand in `src/*.tokens.json`, in the
 [DTCG 2025.10](https://www.designtokens.org/tr/2025.10/format/) format, and built by
 `pnpm build` (`node sd.config.mjs && tsdown`). The pipeline is described in ADR-0004.
 
+[`examples/example.tokens.json`](examples/example.tokens.json) is a complete example covering
+every category and every `$extensions.senui` key. It isn't built or shipped, but a test builds it,
+so it always passes the pipeline's checks. Copy from it freely; the values are placeholders.
+
 ### Tiers
 
 - **Primitives** go under a top-level `primitive` group: `primitive.color.blue.600`. They are
@@ -41,8 +45,12 @@ Use the DTCG object forms:
 ```
 
 Colours are authored in oklch and emitted as `oklch()`. Any colour space DTCG allows also works,
-and it is kept as authored. A shadow's `color` must be a reference to a colour token, not an
-inline colour object.
+and it is kept as authored.
+
+Make a shadow's `color` a reference to a public colour token (`"{color.shadow}"`). It is then
+emitted as `var(--senui-color-shadow)`, so the shadow follows that token's dark value. A
+primitive reference or an inline colour is resolved to a single value and stays the same in both
+themes.
 
 ### `$extensions.senui`
 

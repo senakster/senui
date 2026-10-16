@@ -45,6 +45,37 @@ StyleDictionary.registerTransform({
   },
 });
 
+const unit = (v) => (isObject(v) ? `${String(v.value)}${String(v.unit)}` : String(v));
+const cssVarFor = (ref) =>
+  `var(--${PREFIX}-${ref
+    .slice(1, -1)
+    .split('.')
+    .map((s) => s.replace(/([a-z0-9])([A-Z])/g, '$1-$2').toLowerCase())
+    .join('-')})`;
+
+// The stock shadow shorthand inlines the resolved colour, which freezes it at the light value.
+// A shadow colour that references a public token stays a var(), so it follows light-dark().
+StyleDictionary.registerTransform({
+  name: 'senui/shadow/css',
+  type: 'value',
+  transitive: true,
+  filter: (token) => token.$type === 'shadow',
+  transform: (token) => {
+    const layers = [token.$value].flat();
+    const originals = [token.original.$value].flat();
+    return layers
+      .map((s, i) => {
+        const ref = originals[i]?.color;
+        const isPublicRef =
+          typeof ref === 'string' && ref.startsWith('{') && !ref.startsWith('{primitive.');
+        const color = isPublicRef ? cssVarFor(ref) : String(s.color);
+        const parts = [s.offsetX, s.offsetY, s.blur, s.spread].map(unit);
+        return [s.inset ? 'inset' : '', ...parts, color].filter(Boolean).join(' ');
+      })
+      .join(', ');
+  },
+});
+
 // A mode pass swaps each token's $value for its $extensions.senui[mode] value before resolution,
 // so aliases and transforms work the same way in every mode.
 for (const mode of MODES) {
@@ -73,7 +104,7 @@ const TRANSFORMS = [
   'senui/unit/css',
   'fontFamily/css',
   'cubicBezier/css',
-  'shadow/css/shorthand',
+  'senui/shadow/css',
   'border/css/shorthand',
   'typography/css/shorthand',
   'transition/css/shorthand',

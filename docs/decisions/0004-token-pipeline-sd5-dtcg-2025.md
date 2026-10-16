@@ -81,7 +81,7 @@ over unchanged.
   measuring it.
 - The mode passes and the `light-dark()` pairing are pipeline code I own. ADR-0002's revisit trigger
   for that code carries over.
-- At adoption the pipeline code (`sd.config.mjs` + `contrast.mjs`) was about 220 non-blank,
+- At adoption the pipeline code (`sd.config.mjs` + `contrast.mjs`) was about 245 non-blank,
   non-comment lines, and about a third of that is the CSS and TS output templates.
 - **Revisit when:** a third theme is needed (`light-dark()` covers two), the pipeline code grows
   past about 300 lines, Style Dictionary releases a new major, or consumers ask to re-theme at the
