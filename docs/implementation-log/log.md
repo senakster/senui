@@ -46,3 +46,28 @@ Entry format: date — module · Did · Verified · Scope decisions · Plan adju
 - **Overrides:** 22 findings (11 + 11, overlapping). Accepted all, rejected 0, escalated 1 ADR (ADR-0005, covering four of them). 1 accepted suggestion was materially changed by the agent (deviation 5), and is raised with Emil.
 - **Closed with Emil the same day:** token names accepted as public API, with values a generic starting point. ADR-0004's line-count trigger replaced in ADR-0005 by a trigger on the Style Dictionary workaround code (about 90 of 308 lines). Deviation 5 confirmed after checking that the offset gap replaces the pair for every existing surface; recorded as the first `OVERRIDES.md` row, with the uncovered case (a control on an accent container) added to ADR-0005's revisit triggers.
 - **Next:** Emil commits (and fills the `OVERRIDES.md` commit column), then opens a PR for CI. Then `/modular-web:implement-module` starts L02.
+
+## 2026-10-16 — L02 Component API conventions
+
+- **Did:** Emil chose no polymorphism (ADR-0006), Stylelint for the raw-value guard (ADR-0007), React 18.3 with `forwardRef`, and "Claude drafts, I review". Drafted `CONVENTIONS.md`, `useControllableState`, `deprecate`/`warnOnce`, the `A11yContract` type, the reference type test, and the contract and component-CSS check scripts. Enabled Vitest typecheck mode for `*.test-d.*`. Ran `component-api-reviewer` and `wcag-auditor` read-only in parallel, then triaged with Emil in three batches. Applied every finding:
+  - The contract is bound to the component's props with `defineA11yContract<P>()`. It has closed keys, roles and elements, non-empty evidence lists, a WCAG 2.2 table, per-method test runs, structured semantics, announcements and focus, and the `adaptation` section (ADR-0008). A runtime test loads every contract.
+  - The hook has a stable setter and an updater form. It warns about frozen controls, and continues from the last value on a switch.
+  - `dev.ts` survives a missing `process`.
+  - New helpers: `NativeProps`, `DistributiveOmit` (public), `mergeIds`, `useComposedRefs` and `useNameCheck`.
+  - Stylelint gains a specificity cap and no ids, a unit allow-list (ADR-0009), more token-only properties, an easing ban in shorthands, and `var()` lists for shadows.
+  - Component CSS is copied to `dist` and exported as `./styles/<Name>.css`, with a dist-CSS check.
+  - Entry exports are limited to components and `./types.js`.
+  - `CONVENTIONS.md` gains root ownership, state selectors, forced colours, prop naming, the disabled guard, deprecation of every public kind, and the public-surface table.
+- **Verified:** `pnpm check`, `pnpm test` (tokens 31, react 44, type tests clean) and build-storybook. Probes:
+  - Twelve raw CSS forms each fail Stylelint, and the token forms pass.
+  - Each script fails on its violation: a missing contract, a commented-out contract, an internal export, an extra entry import, an unlayered stylesheet, an unresolved dist import, and CSS left uncopied.
+  - A throwaway component fails the contract test on a wrong name and a missing `displayName`.
+
+  The probes found two real bugs, both fixed:
+  - With `flatten: false`, tsdown copied component CSS to `dist/components/components/`.
+  - Vitest's persistent module cache froze the contract test's glob results, so new components went unchecked locally.
+
+- **Scope decisions:** see scope-decisions.md § L02 (12 rows, 4 deviations).
+- **Plan adjustments:** `deprecate` takes the component name; contracts use `defineA11yContract` instead of `satisfies`.
+- **Overrides:** 24 findings (12 + 12, one shared). Accepted 24, rejected 0, escalated 2 ADRs (0008, 0009). No `OVERRIDES.md` rows. Not done: a positive-`tabIndex` type restriction, which was outside the accepted option (logged as out).
+- **Next:** Emil reviews and commits L01 + L02, then opens a PR so CI runs (L01 has never been through CI). Then `/modular-web:implement-module` starts L03 (Button), where Emil writes the component.

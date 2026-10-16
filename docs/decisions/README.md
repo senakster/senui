@@ -13,6 +13,10 @@ ADR that supersedes it. Every ADR names what was rejected and what the choice co
 | [0003](0003-library-build-tsdown.md)           | Library build tool: tsdown                                                                                       | Accepted                   |
 | [0004](0004-token-pipeline-sd5-dtcg-2025.md)   | Design-token pipeline: DTCG 2025.10 source, Style Dictionary 5, oklch, unpublished primitives                    | Accepted (amended by 0005) |
 | [0005](0005-token-contract-amendments.md)      | Token contract amendments: themed subtrees, motion factor, explicit surfaces, state names, pipeline-size trigger | Accepted                   |
+| [0006](0006-no-polymorphic-components.md)      | No polymorphic components (`as` / `asChild`)                                                                     | Accepted                   |
+| [0007](0007-stylelint-token-guard.md)          | Stylelint guards component CSS against raw values                                                                | Accepted (amended by 0009) |
+| [0008](0008-a11y-contract-adaptation.md)       | The a11y contract gains an `adaptation` section                                                                  | Accepted                   |
+| [0009](0009-stylelint-unit-allow-list.md)      | Stylelint: a unit allow-list, and selector specificity as a check                                                | Accepted                   |
 
 ## Template
 

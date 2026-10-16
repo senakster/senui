@@ -49,6 +49,10 @@ These are the contract. Change one only via an ADR.
 | [0003](docs/decisions/0003-library-build-tsdown.md)           | Both packages build with tsdown (tsup is unmaintained): ESM + `.d.ts`, CSS copied rather than bundled, `publint` in the build                                                                                                                                                                                                                                                                                                     |
 | [0004](docs/decisions/0004-token-pipeline-sd5-dtcg-2025.md)   | DTCG 2025.10 JSON → Style Dictionary 5 → `light-dark()` custom properties + a typed map. Colours authored in oklch. Primitives (`primitive.*`) are never emitted; semantic and component tokens are public. Dark, reduced-motion and contrast live in `$extensions.senui` (supersedes 0002)                                                                                                                                       |
 | [0005](docs/decisions/0005-token-contract-amendments.md)      | `[data-theme]` subtrees get their own bg/colour (`senui.base`); components multiply movement by `--senui-motion-reduce`; a colour needs contrast pairs or `surface: true`; states are suffixed siblings (`bg.accent-hover`); focus rings are an `outline` with `--senui-focus-ring-offset`, never `box-shadow`; Style Dictionary is revisited on workaround code (transforms + mode passes > ~150 lines), not total pipeline size |
+| [0006](docs/decisions/0006-no-polymorphic-components.md)      | No `as` / `asChild`: every component renders one known element, named in its a11y contract                                                                                                                                                                                                                                                                                                                                        |
+| [0007](docs/decisions/0007-stylelint-token-guard.md)          | Stylelint (built-in rules only) rejects raw colours, lengths, durations, easings, font values, shadows and primitive refs in component CSS                                                                                                                                                                                                                                                                                        |
+| [0008](docs/decisions/0008-a11y-contract-adaptation.md)       | Every a11y contract has an `adaptation` section with closed values: target size, activation, forced colours, reduced motion, RTL, text overflow                                                                                                                                                                                                                                                                                   |
+| [0009](docs/decisions/0009-stylelint-unit-allow-list.md)      | Amends 0007: units are an allow-list (`%`, `fr`, `ch`, `deg`, `turn`); selectors max `0,1,0` specificity and no ids, so base selectors stay in `:where()`                                                                                                                                                                                                                                                                         |
 
 ## Naming
 
@@ -79,15 +83,21 @@ must be something Emil can defend.
   there too, never into `.catalogue/`.
 - Update `docs/PROGRESS.md` and the checkpoint before marking anything done.
 - **Never use client, employer or third-party brand names** in code, docs, stories, fixtures or
-  commit messages. The project and its fixtures are generic.
+  commit messages. The project and its fixtures are generic. One exception: a component's
+  `testedWith` data in `*.a11y.ts` names the assistive technology, browser and OS actually tested,
+  because those are compatibility facts (scope decision, L02). Types and fixtures stay generic.
 - Commit as `senakster@gmail.com` (set in this repo's git config).
 
 ## Verification
 
-`pnpm check` (typecheck + lint + format:check) must pass before any module is marked done, and so
-must `pnpm test` (Vitest in `packages/react`; it passes with no test files until L03). CI
-(`.github/workflows/ci.yml`) also runs `pnpm --filter docs build-storybook`. `pnpm build` runs
-tsdown with publint, which fails on a broken `exports` map.
+`pnpm check` must pass before any module is marked done. It runs, in order: build + typecheck, lint
+(ESLint, then Stylelint on component CSS), `check:components` (every component has a typed
+`*.a11y.ts`; component CSS sits inside `@layer senui.components`; every `@import` in the built CSS
+resolves), and format:check. `pnpm test` must pass too: Vitest in `packages/tokens` and
+`packages/react`, including type tests (`*.test-d.tsx`, type-checked, never executed) and the
+runtime check of every a11y contract. CI (`.github/workflows/ci.yml`) also runs
+`pnpm --filter docs build-storybook`. `pnpm build` runs tsdown with publint, which fails on a broken
+`exports` map. Component conventions are in `packages/react/CONVENTIONS.md`.
 
 The toolchain is pinned below its newest majors on purpose: TypeScript 6.0 (typescript-eslint's
 ceiling) and ESLint 9 (eslint-plugin-jsx-a11y's ceiling). Don't bump either without checking those

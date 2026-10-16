@@ -56,6 +56,11 @@ This file is **parsed** into the decision index, so its shape matters:
   docs app type-checks against the built `@senakster/tokens` exports, the way a consumer would.
   `pnpm lint` on its own needs one build first on a fresh clone. `pnpm test` now covers
   `packages/tokens` as well.
+- **L02** — `pnpm lint` runs Stylelint on component CSS after ESLint (ADR-0007/0009).
+  `pnpm check` gains `check:components`: the a11y-contract, component-CSS and dist-CSS scripts in
+  `scripts/`, after lint (the dist check needs the build that `typecheck` runs). `pnpm test` in
+  `packages/react` type-checks `*.test-d.{ts,tsx}` and runs the contract test, with Vitest's
+  persistent module cache off. The react build copies component CSS into `dist/components/`.
 
 ### Deviations from the plan
 
@@ -166,3 +171,67 @@ var(--senui-color-focus-ring); outline-offset: var(--senui-focus-ring-offset)`, 
   message; colour alone never carries the error (WCAG 1.4.1).
 - **L11** — every movement is multiplied by `--senui-motion-reduce` (ADR-0005). Components must not
   add their own `prefers-reduced-motion` blocks for token-driven motion.
+
+## L02 — Component API conventions
+
+| Deliverable / criterion                               | Decision                                    | Reason                                                                                                                                 | Re-include when                                           |
+| ----------------------------------------------------- | ------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------- |
+| Polymorphic `as` / `asChild`                          | out (ADR-0006)                              | Emil: no polymorphism. Each component renders one element, named in its contract                                                       | ADR-0006's revisit triggers (link-styled Button, routers) |
+| Hook, `deprecate`, contract type, `CONVENTIONS.md`    | in, Claude drafts and Emil reviews          | Emil's call; L02 is conventions and tooling, not component source                                                                      | n/a                                                       |
+| Raw-value guard for component CSS                     | in, Stylelint (ADR-0007, amended by 0009)   | Built-in rules beat a grep script that reads CSS as text                                                                               | n/a                                                       |
+| Ref forwarding                                        | `forwardRef`, React 18.3 kept in peer range | On 18 a `ref` prop is silently dropped                                                                                                 | The peer range drops React 18                             |
+| `adaptation` section in the a11y contract             | in (ADR-0008)                               | WCAG review: target size, forced colours, motion, RTL and overflow had nowhere to go                                                   | n/a                                                       |
+| Contract bound to props, runtime contract test        | in                                          | WCAG review blocker: free strings let a contract drift from its component unnoticed                                                    | n/a                                                       |
+| Tested-with evidence per method, WCAG 2.2 table       | in                                          | WCAG review: empty lists, invalid criteria and unattributed runs passed the type                                                       | n/a                                                       |
+| AT, browser and OS product names in `testedWith` data | exempt from the no-brand rule               | Emil: compatibility facts, not branding. Types and fixtures stay generic (CLAUDE.md)                                                   | n/a                                                       |
+| Focus ring vs consumer resets                         | documented and tested, not `!important`     | Emil: keeps principle 3. Every focusable contract lists `RESPONSIBILITIES.keepFocusRing`; L08 tests a reset                            | A reset breaks the ring in a real consumer anyway         |
+| Per-component stylesheet export                       | in: `./styles/<Name>.css`                   | API review: ADR-0001 promised one; once published, the subpath is semver API                                                           | n/a                                                       |
+| Contract staleness                                    | warning only, skipped in shallow clones     | Failing on every refactor would block commits until a manual screen-reader run; CI checks out shallow, where commit dates mean nothing | Contracts drift despite the warning                       |
+| Positive `tabIndex` in the type                       | out                                         | Not in the accepted triage option (only `role` is removed from native props); the reviewer marked it "where practical"                 | A component ships with a positive tabindex in use         |
+
+### Review (2026-10-16)
+
+`component-api-reviewer` (12 findings) and `wcag-auditor` (12 findings, 2 blockers) ran read-only on
+the drafts. Emil accepted every finding, rejected none, and escalated two to ADRs: ADR-0008
+(`adaptation` section) and ADR-0009 (unit allow-list, amending ADR-0007). One finding was common to
+both reviews (the entry could export from `internal/` without a contract). No `OVERRIDES.md` rows.
+
+### Deviations from the plan
+
+1. **`deprecate(component, prop, migration)`** instead of the plan's two-argument form. The
+   component name makes the warning findable, and the key is per component and prop.
+2. **Contract export form.** The plan's `satisfies A11yContract` became
+   `export const a11y = defineA11yContract<Props>()({ … })`, so the contract is checked against the
+   component's props and the runtime test has a fixed export name to load.
+3. **Contract staleness check lives in `scripts/check-a11y-contracts.mjs`**, not in Vitest: the
+   react package has no Node types, and adding `@types/node` for one check wasn't worth a dependency.
+4. **Vitest's persistent module cache is off in `packages/react`** (`fsModuleCache: false`). A probe
+   showed the cached contract test kept its glob results from before a component existed, so a new
+   component went unchecked locally. Costs about a second per cold run.
+5. **The WCAG table is generated, not hand-written** (Emil, 2026-10-16: "I would expect this to come
+   from a maintained package"). No maintained npm package covers 2.2, so `pnpm sync:wcag`
+   (`scripts/sync-wcag.mjs`) generates `src/internal/wcag.ts` from W3C's machine-readable
+   `https://www.w3.org/WAI/WCAG22/wcag.json`. W3C's terms allow this with attribution and with the
+   content unchanged. The script runs by hand, never in `pnpm check`, which stays offline, and it
+   refuses to write anything other than 86 well-formed criteria. The generated file holds only W3C
+   data (number, level, title); senui's `FOCUSABLE_BASELINE` moved to `a11y-contract-check.ts`.
+   Rerun it when W3C publishes a new WCAG 2.x version. WCAG 3 would need an ADR, not a sync. The
+   hand-written table it replaced matched W3C exactly.
+
+### Cross-module notes
+
+- **L03** — Button is the first user of: `NativeProps<'button'>`, the icon-only union with icon
+  children, `useComposedRefs(forwardedRef, useNameCheck('Button'))`, root ownership (rest first,
+  merged class, resolved `data-variant` / `data-size`), and `aria-disabled` plus a guarded handler for
+  loading. Its contract needs a screen-reader and a keyboard run before `pnpm test` passes. Add
+  `@senakster/tokens` as a dependency of `@senakster/react`. `size.control.sm` must still meet the
+  24px minimum (see § L01). The component-CSS copy step and the `./styles/*.css` export are done;
+  publint warns that the export matches no files until Button's CSS exists.
+- **L04** — FormField wrapping TextInput is the first `DistributiveOmit` case. Error styling keys off
+  `[aria-invalid="true"]` only, and `aria-describedby` is merged with `mergeIds()`.
+- **L08** — add the server-render test per component; a Playwright spec that loads a typical consumer
+  reset (`:focus { outline: none }`, `all: unset`) and checks the ring survives; the keyboard spec
+  iterates each contract's `keyboard` keys; forced-colours and target-size checks derived from
+  `adaptation`.
+- **L09** — generate `components.json` / `llms.txt` from the contracts. Derive each criterion's level
+  from `WCAG22`; label `announces` as observed with the AT named in `testedWith`.

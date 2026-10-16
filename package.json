@@ -7,9 +7,11 @@
     "node": ">=24"
   },
   "scripts": {
-    "check": "pnpm typecheck && pnpm lint && pnpm format:check",
+    "check": "pnpm typecheck && pnpm lint && pnpm check:components && pnpm format:check",
     "typecheck": "pnpm build && pnpm -r typecheck",
-    "lint": "eslint . --max-warnings 0",
+    "lint": "eslint . --max-warnings 0 && stylelint \"packages/react/src/**/*.css\" --max-warnings 0 --allow-empty-input",
+    "sync:wcag": "node scripts/sync-wcag.mjs",
+    "check:components": "node scripts/check-a11y-contracts.mjs && node scripts/check-component-css.mjs && node scripts/check-dist-css.mjs",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "test": "pnpm -r --if-present test",
@@ -26,6 +28,7 @@
     "eslint-plugin-storybook": "10.6.2",
     "globals": "17.13.0",
     "prettier": "3.9.10",
+    "stylelint": "17.16.0",
     "typescript": "6.0.3",
     "typescript-eslint": "8.71.2"
   }

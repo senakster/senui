@@ -1,0 +1,4 @@
+/* The layer order, declared once (ADR-0001). It must be the first statement senui contributes, so
+   every later senui rule lands in a layer this statement has already ordered. tokens.css repeats
+   the same statement, so the two files can be loaded in either order. */
+@layer senui.tokens, senui.base, senui.components;
