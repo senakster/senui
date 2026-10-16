@@ -25,11 +25,17 @@ fight:
 
 ```css
 :root {
-  --senui-color-fg-accent: oklch(55% 0.2 150);
+  --senui-color-fg-accent: light-dark(oklch(50% 0.15 150), oklch(75% 0.15 150));
 }
 ```
 
+Override a colour with both themes, as above. A single value also replaces the dark one, and it
+skips the contrast check the token passed. Check your own pairs: at least 4.5:1 for text and 3:1
+for borders and icons.
+
 If you use `@layer` yourself, put `senui` first in your layer order so your layers win.
+
+A light-only app opts out of dark mode with one unlayered rule: `:root { color-scheme: light; }`.
 
 The tokens below are public API: renaming or removing one is a major version. The ramps they are
 built from are internal and are not shipped.
@@ -38,7 +44,9 @@ built from are internal and are not shipped.
 
 Colour tokens hold both themes in one `light-dark()` value. By default the page follows the
 operating system. Set `data-theme="light"` or `data-theme="dark"` on any element to fix the theme
-for that subtree. Both columns below render the same custom property; only the theme differs.
+for that subtree. That element also gets the theme's own background and text colour, so its
+contents never inherit the other theme's text colour. Both columns below render the same custom
+property; only the theme differs.
 
 <TokenTables />
 
@@ -49,6 +57,16 @@ different value. Movement distances collapse to nothing and scales to 1, while s
 remain. Components that use these tokens respect the preference without any code of their own.
 
 <ReducedMotionTable />
+
+senui components also multiply every movement by `--senui-motion-reduce`, which is `0` under
+reduced motion. Because of that, overriding a distance can't bring motion back for those users.
+Your own wrapper elements and animations should do the same:
+
+```css
+.my-panel {
+  translate: 0 calc(var(--senui-motion-distance-md) * var(--senui-motion-reduce));
+}
+```
 
 ## Contrast
 

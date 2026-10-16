@@ -1,11 +1,16 @@
 import Color from 'colorjs.io';
 
-// WCAG 2 contrast is defined in sRGB, so every colour is gamut-mapped into sRGB before measuring.
-const toSrgb = (css) => new Color(css).to('srgb').toGamut({ space: 'srgb' });
+// WCAG 2 contrast is defined in sRGB, so an out-of-gamut colour has to be brought into sRGB before
+// measuring. Browsers differ in how they do that: CSS gamut mapping or plain clipping. Both are
+// measured, and the lower ratio counts, so the check never passes a colour some browser renders
+// worse.
+const GAMUT_METHODS = ['css', 'clip'];
+const toSrgb = (css, method) => new Color(css).to('srgb').toGamut({ space: 'srgb', method });
+const alphaOf = (c) => (Number.isNaN(c.alpha) ? 1 : c.alpha);
 
 // A translucent foreground is measured as it renders: composited over its background.
 function composite(fg, bg) {
-  const a = Number.isNaN(fg.alpha) ? 1 : fg.alpha;
+  const a = alphaOf(fg);
   if (a >= 1) return fg;
   return new Color(
     'srgb',
@@ -31,17 +36,24 @@ export function checkContrast(entries) {
         continue;
       }
       for (const theme of THEMES) {
-        const back = toSrgb(bg[theme] ?? bg.value);
-        if ((Number.isNaN(back.alpha) ? 1 : back.alpha) < 1) {
+        if (alphaOf(new Color(bg[theme] ?? bg.value)) < 1) {
           errors.push(`${entry.key}: contrast target "${against}" must be opaque`);
           break;
         }
-        const fore = composite(toSrgb(entry[theme] ?? entry.value), back);
-        const ratio = fore.contrast(back, 'WCAG21');
+        const ratio = Math.min(
+          ...GAMUT_METHODS.map((method) => {
+            const back = toSrgb(bg[theme] ?? bg.value, method);
+            return composite(toSrgb(entry[theme] ?? entry.value, method), back).contrast(
+              back,
+              'WCAG21',
+            );
+          }),
+        );
         if (ratio < min) {
           const name = theme === 'value' ? 'light' : 'dark';
+          // Three decimals, so a ratio of 4.497 never prints as a passing-looking "4.50".
           errors.push(
-            `${entry.key} on ${against} (${name}): ${ratio.toFixed(2)}:1, needs ${String(min)}:1`,
+            `${entry.key} on ${against} (${name}): ${ratio.toFixed(3)}:1, needs ${String(min)}:1`,
           );
         }
       }

@@ -1,5 +1,5 @@
-/* Docs-app styling only; not part of the published library. System colours follow each cell's
-   color-scheme, so the dark column renders dark exactly as a [data-theme="dark"] subtree would. */
+/* Docs-app styling only; not part of the published library. Each themed cell gets its background
+   and text colour from the [data-theme] base rule in tokens.css (ADR-0005), as a consumer's would. */
 .docs-tokens {
   border-collapse: collapse;
   width: 100%;
@@ -11,11 +11,6 @@
   text-align: start;
   vertical-align: top;
   border-block-end: 1px solid GrayText;
-}
-
-.docs-tokens [data-theme] {
-  background: Canvas;
-  color: CanvasText;
 }
 
 .docs-tokens th p {

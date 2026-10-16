@@ -34,6 +34,10 @@ so it always passes the pipeline's checks. Copy from it freely; the values are p
 - **Component tokens** (`--senui-button-bg`) are not defined here. Each component defines its own
   with semantic defaults.
 
+**State variants are suffixed siblings, never children** (ADR-0005): `color.bg.accent`,
+`color.bg.accent-hover`, `color.bg.accent-active`. A base token stays a leaf, so adding a state
+never renames it.
+
 ### Values
 
 Use the DTCG object forms:
@@ -54,17 +58,39 @@ themes.
 
 ### `$extensions.senui`
 
-| Key             | On                  | Meaning                                                                                  |
-| --------------- | ------------------- | ---------------------------------------------------------------------------------------- |
-| `dark`          | every public colour | Required. The dark-theme value or alias; the build emits `light-dark(<$value>, <dark>)`. |
-| `contrast`      | every public colour | Required. `[{ "against": "{color.bg.default}", "min": 4.5 }, …]`, or `[]` for a surface. |
-| `reducedMotion` | any token           | The value under `prefers-reduced-motion: reduce`.                                        |
+| Key             | On                  | Meaning                                                                                      |
+| --------------- | ------------------- | -------------------------------------------------------------------------------------------- |
+| `dark`          | every public colour | Required. The dark-theme value or alias; the build emits `light-dark(<$value>, <dark>)`.     |
+| `contrast`      | public colours      | `[{ "against": "{color.bg.default}", "min": 4.5 }, …]`: at least one pair, unless `surface`. |
+| `surface`       | public colours      | `true` opts the colour out of contrast pairs. For backgrounds and WCAG-exempt colours only.  |
+| `reducedMotion` | any token           | The value under `prefers-reduced-motion: reduce`.                                            |
 
 `dark` is only allowed on colour tokens, because `light-dark()` only takes colours.
 
-Each `contrast` pair is checked in both themes, after compositing translucent colours and
-gamut-mapping to sRGB. Use 4.5 for text and 3 for non-text (borders, focus rings, icons). A pair
-below its minimum fails the build and names the token, the background, the theme and the ratio.
+Every public colour needs either contrast pairs or `"surface": true` (ADR-0005). Use `surface` for
+backgrounds and fills, and for colours WCAG exempts: disabled controls, decorative dividers and
+shadows. Say which in the token's `$description`, because opting out has to be visible.
+
+Each `contrast` pair is checked in both themes, after compositing translucent colours. An
+out-of-sRGB colour is measured both gamut-mapped and clipped, and the lower ratio counts. Use 4.5
+for text and 3 for non-text (borders, focus rings, icons). A pair below its minimum fails the build
+and names the token, the background, the theme and the ratio, to three decimals. So does a
+malformed pair, such as a missing or misspelled `min`.
+
+### Rules the CSS adds
+
+- **Themed subtrees are self-contained.** `tokens.css` sets `background-color`, `color` and
+  `accent-color` on every `[data-theme]` element, in `@layer senui.base`. A token set must define
+  `color.bg.default`, `color.fg.default` and `color.fg.accent`, or the build fails.
+- **Motion is multiplied by `--senui-motion-reduce`**, which is `1` normally and `0` under reduced
+  motion. Components write `calc(var(--senui-motion-distance-md) * var(--senui-motion-reduce))`, so
+  a consumer who overrides a distance can't bring motion back.
+- **Focus rings** are drawn as `outline: var(--senui-focus-ring-width) solid
+var(--senui-color-focus-ring)` with `outline-offset: var(--senui-focus-ring-offset)`. That puts
+  the ring on the page background, which is what its contrast pairs are checked against. Never use
+  `box-shadow` for a ring: forced-colours mode removes it.
+- **Elevated surfaces** (`bg.raised` plus an `elevation` shadow) also need a border, for the same
+  reason.
 
 Example:
 
@@ -87,7 +113,7 @@ Example:
       "default": {
         "$type": "color",
         "$value": "{primitive.color.paper}",
-        "$extensions": { "senui": { "dark": "{primitive.color.ink}", "contrast": [] } }
+        "$extensions": { "senui": { "dark": "{primitive.color.ink}", "surface": true } }
       }
     },
     "fg": {
@@ -110,4 +136,22 @@ Example:
 ## Theming
 
 `color-scheme: light dark` is set on `:where(:root)`, so the default follows the operating system.
-`data-theme="light"` or `data-theme="dark"` on any element fixes the theme for that subtree.
+`data-theme="light"` or `data-theme="dark"` on any element fixes the theme for that subtree, and
+that element gets its own background and text colour.
+
+A light-only app opts out of dark mode with one unlayered rule:
+
+```css
+:root {
+  color-scheme: light;
+}
+```
+
+To override a colour, give both themes. A single value replaces the dark value too, and it skips
+the contrast check that the token passed:
+
+```css
+:root {
+  --senui-color-fg-accent: light-dark(oklch(50% 0.15 150), oklch(75% 0.15 150));
+}
+```

@@ -87,30 +87,37 @@ This file is **parsed** into the decision index, so its shape matters:
 
 ## L01 — Design tokens
 
-| Deliverable / criterion                                               | Decision | Reason                                                                                                 | Re-include when                                   |
-| --------------------------------------------------------------------- | -------- | ------------------------------------------------------------------------------------------------------ | ------------------------------------------------- |
-| Pipeline: `sd.config.mjs` (Style Dictionary 5, modes, `light-dark()`) | in       | agent work; ADR-0004 replaces ADR-0002's Style Dictionary v4 + pre-stable format                       | —                                                 |
-| Build-time contrast check (`contrast.mjs`)                            | in       | acceptance criterion; pairs declared per token in `$extensions.senui.contrast`, checked in both themes | —                                                 |
-| Typed map (`dist/index.{js,d.ts}`) and `./tokens.css` export          | in       | generated into `src/generated/`, bundled and copied by tsdown (ADR-0003)                               | —                                                 |
-| Tokens docs page in `apps/docs`                                       | in       | renders every public token in both themes from the typed map, plus the reduced-motion table            | —                                                 |
-| Pipeline tests (`packages/tokens/test/`)                              | in       | not in the plan; makes every pipeline guard a check that can fail                                      | —                                                 |
-| Token values and names (`src/*.tokens.json`)                          | in       | owned by Emil, per the plan; the pipeline is built and tested against a fixture until they land        | —                                                 |
-| Colour space                                                          | in       | oklch (Emil, 2026-10-16); resolves L01's open question, recorded in ADR-0004                           | —                                                 |
-| Primitives in `tokens.css`                                            | out      | resolved away so that "internal" is enforced, not promised (Emil, 2026-10-16; ADR-0004)                | consumers need to re-theme at the primitive level |
-| Figma variable sync                                                   | out      | out of scope in the plan; DTCG keeps the door open                                                     | a Figma library becomes a source of truth         |
+| Deliverable / criterion                                               | Decision | Reason                                                                                             | Re-include when                                   |
+| --------------------------------------------------------------------- | -------- | -------------------------------------------------------------------------------------------------- | ------------------------------------------------- |
+| Pipeline: `sd.config.mjs` (Style Dictionary 5, modes, `light-dark()`) | in       | agent work; ADR-0004 replaces ADR-0002's Style Dictionary v4 + pre-stable format                   | —                                                 |
+| Build-time contrast check (`contrast.mjs`)                            | in       | acceptance criterion; hardened after review (malformed pairs fail, worse of mapped/clipped counts) | —                                                 |
+| Typed map (`dist/index.{js,d.ts}`) and `./tokens.css` export          | in       | generated into `src/generated/`, bundled and copied by tsdown (ADR-0003)                           | —                                                 |
+| Tokens docs page in `apps/docs`                                       | in       | renders every public token in both themes from the typed map, plus the reduced-motion table        | —                                                 |
+| Pipeline tests (`packages/tokens/test/`)                              | in       | not in the plan; makes every pipeline guard a check that can fail (31 tests)                       | —                                                 |
+| Token values and names (`src/*.tokens.json`)                          | in       | the plan gives them to Emil; after the review Emil chose "Claude drafts, I review" (2026-10-16)    | —                                                 |
+| Colour space                                                          | in       | oklch (Emil, 2026-10-16); resolves L01's open question, recorded in ADR-0004                       | —                                                 |
+| Primitives in `tokens.css`                                            | out      | resolved away so that "internal" is enforced, not promised (Emil, 2026-10-16; ADR-0004)            | consumers need to re-theme at the primitive level |
+| Figma variable sync                                                   | out      | out of scope in the plan; DTCG keeps the door open                                                 | a Figma library becomes a source of truth         |
+| `[data-theme]` base rule in `senui.base`                              | in       | review finding (modern-web-curator); Emil accepted as an ADR (ADR-0005)                            | —                                                 |
+| `--senui-motion-reduce` factor                                        | in       | review finding (both reviewers); Emil accepted as an ADR (ADR-0005)                                | —                                                 |
+| `surface: true` instead of a bare `contrast: []`                      | in       | review finding (wcag-auditor); Emil accepted as an ADR (ADR-0005)                                  | —                                                 |
+| State, invalid, focus-geometry and raised-surface tokens              | in       | review finding (both); Emil accepted all four groups; drafted and gated                            | —                                                 |
+| rem for space and control sizes; linear `space.N`; `size.control.*`   | in       | review findings (modern-web-curator); Emil accepted each                                           | —                                                 |
+| Focus-ring contrast pair against `bg.accent`                          | out      | proved impossible in dark mode (see deviation 5); replaced by a mandatory ring offset (ADR-0005)   | a ring is ever drawn flush against a fill         |
+
+### Review (2026-10-16)
+
+`modern-web-curator` (11 findings) and `wcag-auditor` (11 findings), with overlap between them.
+Emil accepted every finding; none were rejected or escalated beyond ADR-0005, so `OVERRIDES.md`
+has no new rows. One fix was applied before triage, because it was a defect in agent-written
+tooling rather than a design choice: a missing or misspelled `min` let any contrast pair pass.
 
 ### Known-unmet acceptance criteria
 
-These criteria are met by the pipeline, and were proved with a temporary fixture through the real CLI
-on 2026-10-16. They can't be ticked against the real token set until Emil writes it:
-
-- **Semantic fg/bg pairs meet 4.5:1 and 3:1 in both themes** — the check exists and fails the
-  build on a miss (exit 1, naming the token, background, theme and ratio). There are no real
-  pairs yet.
-- **Reduced-motion block present** — the media block is emitted whenever any token has
-  `reducedMotion`, and it is documented on the Tokens page. No real motion tokens yet.
-- **`light-dark(` count equals the semantic colour count** — true with the fixture (2 = 2), and
-  true but empty (0 = 0) on the real build.
+- None. Every L01 criterion holds on the real `src/` token set: deterministic build;
+  `light-dark(` 25 = 25 colour tokens; no primitive in `dist` or in `packages/react/src`; all CSS in
+  `senui` layers; every contrast pair passes in both themes (tightest: `fg.accent` on `bg.subtle`,
+  light, 5.20:1 against 4.5); one reduced-motion block, documented on the Tokens page.
 
 ### Deviations from the plan
 
@@ -118,14 +125,31 @@ on 2026-10-16. They can't be ticked against the real token set until Emil writes
    because ADR-0002's own revisit trigger fired.
 2. **Primitives are not emitted.** The plan says `tokens.css` carries all tiers. ADR-0004 resolves
    primitives away instead.
-3. **The primitive-reference guard is a different grep.** The plan greps for numbered primitive
-   colour names. Since primitives are never emitted, any `--senui-primitive-` reference, or any
-   numbered colour step `--senui-color-<name>-<n>`, is a bug:
+3. **The primitive-reference guard is a different grep.** Since primitives are never emitted, any
+   `--senui-primitive-` reference, or any numbered colour step `--senui-color-<name>-<n>`, is a bug:
    `grep -rnE -- '--senui-primitive-|--senui-color-[a-z]+-[0-9]+' packages/react/src` must return
    nothing.
-4. **Pipeline code is split in two.** `sd.config.mjs` holds the Style Dictionary passes and output
-   formats, and `contrast.mjs` holds the WCAG check. Both are plain `.mjs`, as the plan names the
-   config file, so they are linted but not type-checked. The pipeline tests cover them instead.
+4. **Pipeline code is split in two** (`sd.config.mjs`, `contrast.mjs`), plain `.mjs`, linted but not
+   type-checked; the tests cover them.
+5. **No focus-ring pair against `bg.accent`, although Emil accepted one.** When it was applied, the
+   pair turned out to be unsatisfiable: in dark mode a ring needs relative luminance ≥ 0.112 for 3:1
+   against the page, and ≤ 0.091 for 3:1 against the accent fill. Instead, ADR-0005 makes the ring an
+   `outline` with a mandatory `--senui-focus-ring-offset`, so it is only ever adjacent to the page
+   background, and its pairs are declared against `bg.default`, `bg.subtle` and `bg.raised`. This is
+   a material change to an accepted suggestion. Emil confirmed it on 2026-10-16, on the condition
+   that the offset really replaces the pair; it does for every surface in the token set. It is now
+   a row in `OVERRIDES.md`, and the one case it doesn't cover (a control on an accent-filled
+   container) is an ADR-0005 revisit trigger.
+6. **The tokens `tokens.css` writes now span two layers**: `senui.tokens` and `senui.base`
+   (ADR-0005).
+
+### Revisit triggers this module has fired
+
+- **ADR-0004, "the pipeline code grows past about 300 lines"** — it is 308 non-blank, non-comment
+  lines after the review changes. Resolved 2026-10-16 (Emil): measured by purpose, only about 90
+  lines work around Style Dictionary. ADR-0005 replaces the line count with a trigger aimed at
+  that code: revisit when the transforms and mode passes pass about 150 lines, a third mode pass is
+  needed, or Style Dictionary functionality is reimplemented.
 
 ### Cross-module notes
 
@@ -133,8 +157,12 @@ on 2026-10-16. They can't be ticked against the real token set until Emil writes
   `pnpm check`. A lint rule against raw colour, space, radius, type, motion and elevation values in
   component CSS (principle 4) belongs there too.
 - **L03** — component tokens (`--senui-button-*`) are defined in the component's CSS with semantic
-  defaults, not in `packages/tokens`. Use `var(--senui-size-target-min)` for target size once the
-  `size` tokens exist.
-- **L11** — the motion tokens' `reducedMotion` values are the single place reduced motion is
-  handled. Components must not add their own `prefers-reduced-motion` blocks for token-driven
-  motion.
+  defaults. Draw focus as `outline: var(--senui-focus-ring-width) solid
+var(--senui-color-focus-ring); outline-offset: var(--senui-focus-ring-offset)`, never with
+  `box-shadow`. `size.control.sm` is `1.5rem`, which drops below 24px when a user's root font size
+  is under 16px: use `min-block-size: max(var(--senui-size-control-sm), var(--senui-size-target-min))`.
+  Multiply any movement by `--senui-motion-reduce`.
+- **L04** — an invalid field uses `color.border.danger` with `border.width.strong` and an error
+  message; colour alone never carries the error (WCAG 1.4.1).
+- **L11** — every movement is multiplied by `--senui-motion-reduce` (ADR-0005). Components must not
+  add their own `prefers-reduced-motion` blocks for token-driven motion.
