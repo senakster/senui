@@ -1,6 +1,6 @@
 # 0002 — Design-token pipeline: DTCG source, Style Dictionary build, `light-dark()` themes
 
-- **Status:** Accepted
+- **Status:** Superseded by 0004
 - **Date:** 2026-10-15
 - **Deciders:** senakster (solo call, no review required)
 - **Affects modules:** L01, L02, L03, L04, L11

@@ -6,11 +6,12 @@ ADR that supersedes it. Every ADR names what was rejected and what the choice co
 
 ## Index
 
-| ADR                                            | Title                                                                             | Status   |
-| ---------------------------------------------- | --------------------------------------------------------------------------------- | -------- |
-| [0001](0001-plain-css-on-custom-properties.md) | Plain CSS on custom properties, no utility framework                              | Accepted |
-| [0002](0002-token-pipeline.md)                 | Design-token pipeline: DTCG source, Style Dictionary build, `light-dark()` themes | Accepted |
-| [0003](0003-library-build-tsdown.md)           | Library build tool: tsdown                                                        | Accepted |
+| ADR                                            | Title                                                                                         | Status             |
+| ---------------------------------------------- | --------------------------------------------------------------------------------------------- | ------------------ |
+| [0001](0001-plain-css-on-custom-properties.md) | Plain CSS on custom properties, no utility framework                                          | Accepted           |
+| [0002](0002-token-pipeline.md)                 | Design-token pipeline: DTCG source, Style Dictionary build, `light-dark()` themes             | Superseded by 0004 |
+| [0003](0003-library-build-tsdown.md)           | Library build tool: tsdown                                                                    | Accepted           |
+| [0004](0004-token-pipeline-sd5-dtcg-2025.md)   | Design-token pipeline: DTCG 2025.10 source, Style Dictionary 5, oklch, unpublished primitives | Accepted           |
 
 ## Template
 

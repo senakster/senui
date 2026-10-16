@@ -8,6 +8,9 @@
     "build-storybook": "storybook build",
     "typecheck": "tsc --noEmit"
   },
+  "dependencies": {
+    "@senakster/tokens": "workspace:*"
+  },
   "devDependencies": {
     "@storybook/addon-docs": "10.6.2",
     "@storybook/react-vite": "10.6.2",

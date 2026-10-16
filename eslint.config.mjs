@@ -13,6 +13,7 @@ export default defineConfig(
       '**/dist/**',
       '**/storybook-static/**',
       '**/coverage/**',
+      '**/src/generated/**',
       '.catalogue/**',
       '.catalogue-decisions/**',
     ],

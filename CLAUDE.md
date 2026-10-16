@@ -43,11 +43,11 @@ These are the contract. Change one only via an ADR.
 
 ## Locked decisions
 
-| ADR                                                           | Decision                                                                                                                                                    |
-| ------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| [0001](docs/decisions/0001-plain-css-on-custom-properties.md) | Plain CSS in `@layer senui.*` and `:where()`, variants as data attributes. No Tailwind, CSS Modules or CSS-in-JS                                            |
-| [0002](docs/decisions/0002-token-pipeline.md)                 | DTCG JSON → Style Dictionary v4 → `light-dark()` custom properties + a typed map, in three tiers (primitive is internal, semantic and component are public) |
-| [0003](docs/decisions/0003-library-build-tsdown.md)           | Both packages build with tsdown (tsup is unmaintained): ESM + `.d.ts`, CSS copied rather than bundled, `publint` in the build                               |
+| ADR                                                           | Decision                                                                                                                                                                                                                                                                                    |
+| ------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [0001](docs/decisions/0001-plain-css-on-custom-properties.md) | Plain CSS in `@layer senui.*` and `:where()`, variants as data attributes. No Tailwind, CSS Modules or CSS-in-JS                                                                                                                                                                            |
+| [0003](docs/decisions/0003-library-build-tsdown.md)           | Both packages build with tsdown (tsup is unmaintained): ESM + `.d.ts`, CSS copied rather than bundled, `publint` in the build                                                                                                                                                               |
+| [0004](docs/decisions/0004-token-pipeline-sd5-dtcg-2025.md)   | DTCG 2025.10 JSON → Style Dictionary 5 → `light-dark()` custom properties + a typed map. Colours authored in oklch. Primitives (`primitive.*`) are never emitted; semantic and component tokens are public. Dark, reduced-motion and contrast live in `$extensions.senui` (supersedes 0002) |
 
 ## Naming
 

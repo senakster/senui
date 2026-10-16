@@ -1,0 +1,57 @@
+import { Meta } from '@storybook/addon-docs/blocks';
+import { ReducedMotionTable, TokenTables } from './TokenTables';
+
+<Meta title="Tokens" />
+
+# Tokens
+
+Every visual value in senui comes from a design token. Load them once:
+
+```css
+@import '@senakster/tokens/tokens.css';
+```
+
+or from JavaScript, through your bundler:
+
+```js
+import '@senakster/tokens/tokens.css';
+```
+
+## Using and overriding tokens
+
+Components read semantic tokens such as `--senui-color-fg-default`. All token declarations sit in
+`@layer senui.tokens`, so any unlayered rule in your own CSS overrides them with no specificity
+fight:
+
+```css
+:root {
+  --senui-color-fg-accent: oklch(55% 0.2 150);
+}
+```
+
+If you use `@layer` yourself, put `senui` first in your layer order so your layers win.
+
+The tokens below are public API: renaming or removing one is a major version. The ramps they are
+built from are internal and are not shipped.
+
+## Light and dark
+
+Colour tokens hold both themes in one `light-dark()` value. By default the page follows the
+operating system. Set `data-theme="light"` or `data-theme="dark"` on any element to fix the theme
+for that subtree. Both columns below render the same custom property; only the theme differs.
+
+<TokenTables />
+
+## Reduced motion
+
+When the user asks for reduced motion (`prefers-reduced-motion: reduce`), the tokens below take a
+different value. Movement distances collapse to nothing and scales to 1, while short opacity fades
+remain. Components that use these tokens respect the preference without any code of their own.
+
+<ReducedMotionTable />
+
+## Contrast
+
+Each colour token declares the backgrounds it is used on, and the build checks every pair in both
+themes: at least 4.5:1 for text and 3:1 for non-text. A token that misses fails the build, so a
+published release cannot contain one.

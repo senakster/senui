@@ -1,0 +1,34 @@
+/* Docs-app styling only; not part of the published library. System colours follow each cell's
+   color-scheme, so the dark column renders dark exactly as a [data-theme="dark"] subtree would. */
+.docs-tokens {
+  border-collapse: collapse;
+  width: 100%;
+}
+
+.docs-tokens th,
+.docs-tokens td {
+  padding: 0.5rem 0.75rem;
+  text-align: start;
+  vertical-align: top;
+  border-block-end: 1px solid GrayText;
+}
+
+.docs-tokens [data-theme] {
+  background: Canvas;
+  color: CanvasText;
+}
+
+.docs-tokens th p {
+  margin: 0.25rem 0 0;
+  font-weight: normal;
+}
+
+.docs-swatch {
+  display: inline-block;
+  inline-size: 1.5rem;
+  block-size: 1.5rem;
+  margin-inline-end: 0.5rem;
+  vertical-align: middle;
+  border: 1px solid GrayText;
+  border-radius: 0.25rem;
+}
