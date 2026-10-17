@@ -66,6 +66,7 @@ This file is **parsed** into the decision index, so its shape matters:
   so locally it needs `pnpm --filter @senakster/react exec playwright install chromium` once; CI
   runs that with `--with-deps` before `pnpm test`. Kept in `pnpm test` rather than CI-only: the
   browser project is small and fast. Storybook's preview loads component CSS from source.
+- **2026-10-17 — branch rules and licence (Emil):** `main` changes only by squash-merged PR with a green `verify` check, resolved conversations, linear history, no force-push or deletion, and no bypass. Written as `.github/rulesets/main.json`, but **not applied**: rulesets need a public repo or GitHub Pro, and Emil chose to stay private for now. Followed by convention (CONTRIBUTING.md). Re-apply when the repo goes public or upgrades: one `gh api` call, in `.github/rulesets/README.md`. Licence: MIT, `LICENSE` at the root and `license` in both packages. **L10:** npm only packs a LICENSE from the package folder, so copy it into each package at publish.
 
 ### Deviations from the plan
 

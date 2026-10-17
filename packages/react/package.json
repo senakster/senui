@@ -2,6 +2,7 @@
   "name": "@senakster/react",
   "version": "0.0.0",
   "description": "senui React components: plain CSS on design tokens, accessible by contract.",
+  "license": "MIT",
   "type": "module",
   "sideEffects": [
     "**/*.css"
