@@ -2,6 +2,7 @@
   "name": "@senakster/tokens",
   "version": "0.0.0",
   "description": "Design tokens for senui: CSS custom properties and a typed JS map.",
+  "license": "MIT",
   "type": "module",
   "sideEffects": [
     "**/*.css"

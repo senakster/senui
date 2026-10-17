@@ -107,7 +107,22 @@ that supersedes it. A new dependency needs an ADR naming the native alternative 
   messages. The one exception is `testedWith` data in a11y contracts, which names the assistive
   technology and browser actually tested.
 
+## Branches and pull requests
+
+`main` only changes through a pull request:
+
+1. Branch from `main` (`feature/<module>-<topic>`, `fix/<topic>`, `docs/<topic>`).
+2. Push and open a PR. Its title becomes the commit message on `main`, so write it as one.
+3. Wait for the `verify` check to pass, with the branch up to date with `main`, and resolve every
+   review conversation.
+4. **Squash and merge.** Nobody pushes to `main` directly or force-pushes it, admins included.
+
+These rules are written down in [`.github/rulesets/main.json`](.github/rulesets/main.json). GitHub
+doesn't enforce them yet: rulesets need a public repository or GitHub Pro, and this one is private.
+Until it is enforced, follow it by hand.
+
 ## CI
 
 Every pull request and every push to `main` runs `pnpm check`, installs Chromium, runs `pnpm test`,
-and builds Storybook ([`.github/workflows/ci.yml`](.github/workflows/ci.yml)).
+and builds Storybook ([`.github/workflows/ci.yml`](.github/workflows/ci.yml)). The job is called
+`verify`, and the ruleset requires that name.
