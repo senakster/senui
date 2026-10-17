@@ -24,10 +24,14 @@ Components read semantic tokens such as `--senui-color-fg-default`. All token de
 fight:
 
 ```css
-:root {
+:root,
+[data-theme] {
   --senui-color-fg-accent: light-dark(oklch(50% 0.15 150), oklch(75% 0.15 150));
 }
 ```
+
+Include `[data-theme]` in the selector: tokens are declared on every themed subtree as well as the
+root (ADR-0010), so an override on `:root` alone stops at the first `data-theme` element.
 
 Override a colour with both themes, as above. A single value also replaces the dark one, and it
 skips the contrast check the token passed. Check your own pairs: at least 4.5:1 for text and 3:1

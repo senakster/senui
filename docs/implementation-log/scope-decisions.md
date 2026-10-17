@@ -61,6 +61,11 @@ This file is **parsed** into the decision index, so its shape matters:
   `scripts/`, after lint (the dist check needs the build that `typecheck` runs). `pnpm test` in
   `packages/react` type-checks `*.test-d.{ts,tsx}` and runs the contract test, with Vitest's
   persistent module cache off. The react build copies component CSS into `dist/components/`.
+- **L03** — `packages/react` has two Vitest projects: `unit` (jsdom, plus type tests) and `browser`
+  (Chromium through `@vitest/browser-playwright`, for `*.browser.test.tsx`). `pnpm test` runs both,
+  so locally it needs `pnpm --filter @senakster/react exec playwright install chromium` once; CI
+  runs that with `--with-deps` before `pnpm test`. Kept in `pnpm test` rather than CI-only: the
+  browser project is small and fast. Storybook's preview loads component CSS from source.
 
 ### Deviations from the plan
 
@@ -172,6 +177,24 @@ var(--senui-color-focus-ring); outline-offset: var(--senui-focus-ring-offset)`, 
 - **L11** — every movement is multiplied by `--senui-motion-reduce` (ADR-0005). Components must not
   add their own `prefers-reduced-motion` blocks for token-driven motion.
 
+### Defects found later
+
+- **2026-10-17: `data-theme` subtrees broke in production builds** (fixed by ADR-0010). Emil saw
+  an unreadable Dark column on the Tokens page. That had two causes:
+  - In dev, Storybook's unlayered docs styles set the `code` colour, beating the layered
+    `[data-theme]` rule. Fixed with `sb-unstyled` on the docs tables, which are now styled from
+    tokens.
+  - Investigating it showed the real defect. Vite 8's default production build rewrites
+    `light-dark()` through Lightning CSS into variables that resolve where the token is declared,
+    and tokens were declared only on `:root`, so dark subtrees rendered light. A default Vite
+    consumer app kept 0 of 28 `light-dark()` calls.
+
+  Tokens are now declared on `:where(:root, [data-theme])`, reduced motion included. Verified in
+  Chromium in source and in a default Vite build: dark subtree, nested light subtree, OS dark mode,
+  reduced motion in a subtree. Dark text in the docs table measures 16.8:1. The gap in L01's
+  verification: everything was checked against unminified CSS, and no check ran a production build
+  in a browser. L08's Playwright gate should run against built output.
+
 ## L02 — Component API conventions
 
 | Deliverable / criterion                               | Decision                                    | Reason                                                                                                                                 | Re-include when                                           |
@@ -183,8 +206,8 @@ var(--senui-color-focus-ring); outline-offset: var(--senui-focus-ring-offset)`, 
 | `adaptation` section in the a11y contract             | in (ADR-0008)                               | WCAG review: target size, forced colours, motion, RTL and overflow had nowhere to go                                                   | n/a                                                       |
 | Contract bound to props, runtime contract test        | in                                          | WCAG review blocker: free strings let a contract drift from its component unnoticed                                                    | n/a                                                       |
 | Tested-with evidence per method, WCAG 2.2 table       | in                                          | WCAG review: empty lists, invalid criteria and unattributed runs passed the type                                                       | n/a                                                       |
-| AT, browser and OS product names in `testedWith` data | exempt from the no-brand rule               | Emil: compatibility facts, not branding. Types and fixtures stay generic (CLAUDE.md)                                                   | n/a                                                       |
-| Focus ring vs consumer resets                         | documented and tested, not `!important`     | Emil: keeps principle 3. Every focusable contract lists `RESPONSIBILITIES.keepFocusRing`; L08 tests a reset                            | A reset breaks the ring in a real consumer anyway         |
+| AT, browser and OS product names in `testedWith` data | in: exempt from the no-brand rule           | Emil: compatibility facts, not branding. Types and fixtures stay generic (CLAUDE.md)                                                   | n/a                                                       |
+| Focus ring vs consumer resets                         | in: documented and tested, not `!important` | Emil: keeps principle 3. Every focusable contract lists `RESPONSIBILITIES.keepFocusRing`; L08 tests a reset                            | A reset breaks the ring in a real consumer anyway         |
 | Per-component stylesheet export                       | in: `./styles/<Name>.css`                   | API review: ADR-0001 promised one; once published, the subpath is semver API                                                           | n/a                                                       |
 | Contract staleness                                    | warning only, skipped in shallow clones     | Failing on every refactor would block commits until a manual screen-reader run; CI checks out shallow, where commit dates mean nothing | Contracts drift despite the warning                       |
 | Positive `tabIndex` in the type                       | out                                         | Not in the accepted triage option (only `role` is removed from native props); the reviewer marked it "where practical"                 | A component ships with a positive tabindex in use         |
@@ -235,3 +258,53 @@ both reviews (the entry could export from `internal/` without a contract). No `O
   `adaptation`.
 - **L09** — generate `components.json` / `llms.txt` from the contracts. Derive each criterion's level
   from `WCAG22`; label `announces` as observed with the AT named in `testedWith`.
+
+## L03 — Button
+
+| Deliverable / criterion                            | Decision                                       | Reason                                                                                                                                   | Re-include when                                      |
+| -------------------------------------------------- | ---------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------- |
+| Icon-only API                                      | in: `icon` prop, no children (plan decision 6) | Emil, over L02's `iconOnly` + children: the type can forbid children, but can't tell an icon child from text. CONVENTIONS rule 3 updated | n/a                                                  |
+| Unit axe                                           | in: `axe-core` + internal helper               | Emil: `vitest-axe` is 0.1.0 and unmaintained; the helper is a few lines (`src/internal/testing/axe.ts`)                                  | A maintained wrapper adds something the helper lacks |
+| Width identical in loading and idle (bounding box) | in, Vitest browser mode (Chromium)             | Emil: jsdom measures every box as 0, so the test would pass for any CSS                                                                  | n/a                                                  |
+| Component, CSS, contract, tests                    | in, Emil writes them (pair mode)               | CLAUDE.md working mode                                                                                                                   | n/a                                                  |
+| Stories                                            | in, agent only on request by name              | Plan: "agent on request"; pair-mode rule                                                                                                 | n/a                                                  |
+| First changeset (`minor`)                          | in                                             | Plan deliverable                                                                                                                         | n/a                                                  |
+
+### Deviations from the plan
+
+1. **`Button.css`, not `button.css`.** `check-component-css.mjs` requires `<Name>/<Name>.css` (L02).
+2. **Component tokens are `--senui-button-*`**, not `--ds-button-*` (CLAUDE.md naming).
+3. **Stories live in `packages/react/src/components/Button/Button.stories.tsx`**, not `apps/docs/src/`.
+   Decided in L00 (`apps/docs/.storybook/main.ts` loads colocated stories) and in CONVENTIONS.
+4. **The raw-value grep criterion is replaced by Stylelint** (ADR-0007, ADR-0009), which covers
+   every unit and colour form, not just hex and `px`.
+5. **Icon-only type test:** the plan's `<Button icon={x} />` without a name, and `icon` with
+   children, both fail. The reference type test in `src/internal/conventions.test-d.tsx` now models
+   exactly this shape.
+6. **`axe-core` instead of `vitest-axe`**, and colour contrast is off in jsdom (it needs layout).
+   Contrast is covered by the token build's pair check (L01) and, rendered, by Storybook/L08.
+7. **Pair mode: Claude wrote Button; Emil reviews it** (Emil, 2026-10-17: "Please write Button
+   example", then chose "The real Button, you review it" over a reference copy). Every component
+   file is agent-written, so Emil owns it through review: the reviewers still run, and each line of
+   public API must be one he accepts. Emil's stub `Button.types.ts` and empty folder `index.ts` were
+   removed; `ButtonProps` lives in `Button.tsx` per CONVENTIONS.
+8. **New token `motion.easing.linear`.** The spinner needs constant speed; Stylelint rejects the
+   raw `linear` keyword, and no existing easing token is linear. A minor in `@senakster/tokens`.
+9. **Spinner under reduced motion turns four times slower instead of stopping**, through
+   `--senui-motion-reduce`, so it still shows activity (modern-web-guidance `spinner`). ADR-0005's
+   factor is used to scale duration here, not distance.
+10. **Loading is `data-state="loading"`**, not `aria-busy` (decision 4: Button announces nothing).
+    The CONVENTIONS root-ownership example had `aria-busy`; corrected.
+
+### Known-unmet acceptance criteria
+
+- **Hover and active stories.** Storybook can't force `:hover`/`:active` without an addon (a new
+  dependency, so an ADR under principle 2). Every other state has a story; hover and active are
+  visible in the Matrix story by pointing at it. Re-include with a pseudo-states addon decision.
+- **Keyboard and screen-reader runs:** done 2026-10-17 (keyboard, and Narrator in Chrome). The first Narrator run found the loading button had no name; fixed before recording.
+
+### Cross-module notes
+
+- **L08** — the Vitest `browser` project (Chromium via Playwright, `*.browser.test.tsx`) exists from
+  L03. L08's Playwright gate can build on the same `playwright` pin; `@storybook/addon-vitest` would
+  run every story in that browser project.

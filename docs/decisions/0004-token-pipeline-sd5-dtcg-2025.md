@@ -1,6 +1,6 @@
 # 0004 — Design-token pipeline: DTCG 2025.10 source, Style Dictionary 5, oklch, unpublished primitives
 
-- **Status:** Accepted
+- **Status:** Accepted (amended by [0005](0005-token-contract-amendments.md) and [0010](0010-tokens-declared-on-themed-subtrees.md))
 - **Date:** 2026-10-16
 - **Deciders:** senakster (solo call, no review required)
 - **Affects modules:** L01, L02, L03, L04, L11

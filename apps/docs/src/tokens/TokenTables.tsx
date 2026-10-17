@@ -18,7 +18,7 @@ function Value({ token, theme }: { token: Token; theme: 'light' | 'dark' }) {
 
 function Table({ rows }: { rows: [string, Token][] }) {
   return (
-    <table className="docs-tokens">
+    <table className="docs-tokens sb-unstyled" data-theme="light">
       <thead>
         <tr>
           <th scope="col">Custom property</th>
@@ -62,7 +62,7 @@ export function ReducedMotionTable() {
   const rows = all.filter(([, token]) => token.reducedMotion !== undefined);
   if (rows.length === 0) return <p>No token changes under reduced motion yet.</p>;
   return (
-    <table className="docs-tokens">
+    <table className="docs-tokens sb-unstyled" data-theme="light">
       <thead>
         <tr>
           <th scope="col">Custom property</th>

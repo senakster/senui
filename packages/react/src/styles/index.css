@@ -1,3 +1,4 @@
 /* @senakster/react/styles.css: every component stylesheet. Load @senakster/tokens/tokens.css as
    well; components read its custom properties. layers.css must stay the first import. */
 @import './layers.css';
+@import '../components/Button/Button.css';

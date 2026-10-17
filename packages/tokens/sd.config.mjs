@@ -212,6 +212,9 @@ const THEME_BASE = [
   ['accent-color', 'color.fg.accent'],
 ];
 
+/** Where token custom properties are declared (ADR-0010). Exported for the test. */
+export const TOKEN_SCOPE = ':where(:root, [data-theme])';
+
 function formatCss(entries) {
   const decl = (e, value) => `    ${e.cssVar}: ${value};`;
   const reduced = entries.filter((e) => e.reducedMotion !== undefined);
@@ -225,9 +228,6 @@ function formatCss(entries) {
     '@layer senui.tokens {',
     '  :where(:root) {',
     '    color-scheme: light dark;',
-    ...entries.map((e) =>
-      decl(e, e.dark === undefined ? e.value : `light-dark(${e.value}, ${e.dark})`),
-    ),
     '  }',
     '',
     '  :where([data-theme="light"]) {',
@@ -237,12 +237,22 @@ function formatCss(entries) {
     '  :where([data-theme="dark"]) {',
     '    color-scheme: dark;',
     '  }',
+    '',
+    // ADR-0010: declared on every themed subtree as well as the root. Build tools that don't yet
+    // target light-dark() (Vite's default, through Lightning CSS) rewrite it into variables that
+    // resolve where the token is declared; declared only on :root, a dark subtree inherits the
+    // root's light values.
+    `  ${TOKEN_SCOPE} {`,
+    ...entries.map((e) =>
+      decl(e, e.dark === undefined ? e.value : `light-dark(${e.value}, ${e.dark})`),
+    ),
+    '  }',
     ...(reduced.length === 0
       ? []
       : [
           '',
           '  @media (prefers-reduced-motion: reduce) {',
-          '    :where(:root) {',
+          `    ${TOKEN_SCOPE} {`,
           ...reduced.map((e) => `  ${decl(e, e.reducedMotion)}`),
           '    }',
           '  }',

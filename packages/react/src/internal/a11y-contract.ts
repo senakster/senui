@@ -159,7 +159,7 @@ export type Announcement = {
 export interface RequiredProp<P> {
   /** The props, one of which is required (several means alternatives, e.g. `aria-label` or `aria-labelledby`). */
   readonly props: NonEmpty<Extract<KeysOfUnion<P>, string>>;
-  /** The condition, when it isn't always, e.g. `'iconOnly'`. */
+  /** The condition, when it isn't always, e.g. `'icon'`. */
   readonly when?: string;
   readonly why: string;
 }

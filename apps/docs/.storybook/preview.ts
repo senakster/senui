@@ -1,8 +1,10 @@
 import type { Preview } from '@storybook/react-vite';
-// Loaded through the package's public export, exactly as a consumer would load it.
+// Tokens load through the package's public export, as a consumer would load them. Component CSS
+// loads from source so edits show without a rebuild; scripts/check-dist-css.mjs guards the shipped
+// `@senakster/react/styles.css` path instead.
 import '@senakster/tokens/tokens.css';
+import '../../../packages/react/src/styles/index.css';
 
-// Component stylesheets are imported here once L03 ships them.
 const preview: Preview = {
   parameters: {
     controls: { expanded: true },

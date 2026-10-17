@@ -16,10 +16,16 @@ src/components/Button/
   Button.tsx          the component, exported as `Button`
   Button.css          its styles, inside @layer senui.components
   Button.a11y.ts      its accessibility contract, exported as `a11y`
-  Button.test.tsx     behaviour and axe tests
-  Button.test-d.tsx   type tests
-  Button.stories.tsx  one story per designed state (principle 5)
+  Button.test.tsx          behaviour and axe tests, in jsdom
+  Button.browser.test.tsx  what needs a real browser: layout, computed styles, real focus
+  Button.test-d.tsx        type tests
+  Button.stories.tsx       one story per designed state (principle 5)
 ```
+
+Axe runs through [`expectNoAxeViolations()`](src/internal/testing/axe.ts). To check every story,
+load them with `composeStories` from `@storybook/react-vite` and run it on each rendered story.
+`*.browser.test.tsx` runs in Chromium (Vitest browser mode), so a bounding box or `:focus-visible`
+is real there; in jsdom every box measures 0.
 
 Export it from `src/index.ts` as `export { Button } from './components/Button/Button.js'`, and
 import its CSS from `src/styles/index.css` as `@import '../components/Button/Button.css';`. The
@@ -58,7 +64,7 @@ a consumer can't override them by accident:
   className={className ? `senui-button ${className}` : 'senui-button'}
   data-variant={variant}
   data-size={size}
-  aria-busy={loading || undefined}
+  data-state={loading ? 'loading' : undefined}
 />
 ```
 
@@ -75,14 +81,18 @@ test per component in its `*.test.tsx`; `component-api-reviewer`.
 
 Where a component can't be accessible without a prop, the type requires it. Where two props are
 alternatives, they are a discriminated union. An icon-only control has no visible text, so it takes
-its icon as children and requires exactly one of `aria-label` or `aria-labelledby`:
+its icon as the `icon` prop, has no children, and requires exactly one of `aria-label` or
+`aria-labelledby`. Without `icon`, the visible label (children) is required:
 
 ```tsx
-<Button iconOnly aria-label="Close"><CloseIcon /></Button> // ok
-<Button iconOnly><CloseIcon /></Button>                   // compile error
+<Button icon={<CloseIcon />} aria-label="Close" />           // ok
+<Button icon={<CloseIcon />} />                              // compile error: no name
+<Button icon={<CloseIcon />} aria-label="Close">Close</Button> // compile error: children
+<Button>Save</Button>                                         // ok
 ```
 
-The type can't see that children are text, or that a label is non-empty. Every component that needs
+The type can't see that children are text (`<Button><CloseIcon /></Button>` compiles), or that a
+label is non-empty. Every component that needs
 a name composes [`useNameCheck`](src/internal/useNameCheck.ts) into its ref, which warns in
 development about an empty `aria-label` and about an element with no name at all:
 

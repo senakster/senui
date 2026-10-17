@@ -10,7 +10,7 @@ interface ExampleProps {
   children: string;
   'aria-label'?: string;
 }
-type IconProps = { iconOnly?: false; children: string } | { iconOnly: true; 'aria-label': string };
+type IconProps = { icon?: never; children: string } | { icon: object; 'aria-label': string };
 
 const define = defineA11yContract<ExampleProps>();
 
@@ -76,7 +76,7 @@ describe('A11yContract', () => {
     // A prop that exists in only one branch of a union is still a prop.
     void defineA11yContract<IconProps>()({
       ...minimal,
-      requiredProps: [{ props: ['aria-label'], when: 'iconOnly', why: 'No visible text' }],
+      requiredProps: [{ props: ['aria-label'], when: 'icon', why: 'No visible text' }],
     });
   });
 

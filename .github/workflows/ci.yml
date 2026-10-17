@@ -24,5 +24,8 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - run: pnpm check
+      # The react package's browser test project (L03) runs in Chromium. The version comes from the
+      # pinned playwright dev dependency; --with-deps adds the OS libraries it needs.
+      - run: pnpm --filter @senakster/react exec playwright install --with-deps chromium
       - run: pnpm test
       - run: pnpm --filter docs build-storybook

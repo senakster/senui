@@ -151,7 +151,14 @@ To override a colour, give both themes. A single value replaces the dark value t
 the contrast check that the token passed:
 
 ```css
-:root {
+:root,
+[data-theme] {
   --senui-color-fg-accent: light-dark(oklch(50% 0.15 150), oklch(75% 0.15 150));
 }
 ```
+
+Tokens are declared on `:root` and again on every `[data-theme]` element (ADR-0010). Build tools
+that don't yet target `light-dark()`, including Vite's default production build, rewrite it into
+variables that resolve where the token is declared; declaring it on each themed subtree keeps those
+subtrees correct. The cost is that an override on `:root` alone stops at the first `data-theme`
+element, so include `[data-theme]` in your selector.

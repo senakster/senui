@@ -1,29 +1,57 @@
 /* Docs-app styling only; not part of the published library. Each themed cell gets its background
-   and text colour from the [data-theme] base rule in tokens.css (ADR-0005), as a consumer's would. */
+   and text colour from the [data-theme] base rule in tokens.css (ADR-0005), as a consumer's would.
+
+   The tables carry `sb-unstyled`: Storybook's docs styles are unlayered, so they beat every layered
+   rule, and their `code` colour made the dark column dark-on-dark. Everything Storybook styled for
+   us is therefore styled here, from tokens.
+
+   The tables also carry `data-theme="light"`. Storybook's docs page is always light, but tokens.css
+   lets the page root follow the OS, so with the OS in dark mode, unthemed cells got dark-theme
+   (light grey) text on Storybook's white page. Each Dark cell overrides back to dark inside it. */
 .docs-tokens {
   border-collapse: collapse;
-  width: 100%;
+  inline-size: 100%;
+  font-family: var(--senui-font-family-sans);
+  font-size: var(--senui-font-size-sm);
+  line-height: var(--senui-font-line-height-normal);
 }
 
 .docs-tokens th,
 .docs-tokens td {
-  padding: 0.5rem 0.75rem;
+  padding: var(--senui-space-2) var(--senui-space-3);
   text-align: start;
   vertical-align: top;
-  border-block-end: 1px solid GrayText;
+  border-block-end: var(--senui-border-width-default) solid var(--senui-color-border-default);
+}
+
+.docs-tokens thead th {
+  font-weight: var(--senui-font-weight-bold);
+}
+
+.docs-tokens tbody th {
+  font-weight: var(--senui-font-weight-regular);
+}
+
+.docs-tokens code {
+  font-family: var(--senui-font-family-mono);
+  overflow-wrap: anywhere;
+}
+
+.docs-tokens th code {
+  font-weight: var(--senui-font-weight-bold);
 }
 
 .docs-tokens th p {
-  margin: 0.25rem 0 0;
-  font-weight: normal;
+  margin: var(--senui-space-1) 0 0;
+  color: var(--senui-color-fg-muted);
 }
 
 .docs-swatch {
   display: inline-block;
-  inline-size: 1.5rem;
-  block-size: 1.5rem;
-  margin-inline-end: 0.5rem;
+  inline-size: var(--senui-space-6);
+  block-size: var(--senui-space-6);
+  margin-inline-end: var(--senui-space-2);
   vertical-align: middle;
-  border: 1px solid GrayText;
-  border-radius: 0.25rem;
+  border: var(--senui-border-width-default) solid var(--senui-color-border-strong);
+  border-radius: var(--senui-radius-sm);
 }

@@ -1,0 +1,169 @@
+@layer senui.components {
+  /* Component tokens: the public override points, defaulting to semantic tokens. Variant and size
+     rules only change these; state rules below set properties directly, so no variant can
+     override a disabled or focused look. */
+  :where(.senui-button) {
+    --senui-button-bg: var(--senui-color-bg-accent);
+    --senui-button-bg-hover: var(--senui-color-bg-accent-hover);
+    --senui-button-bg-active: var(--senui-color-bg-accent-active);
+    --senui-button-fg: var(--senui-color-fg-on-accent);
+    --senui-button-border-color: transparent;
+    --senui-button-radius: var(--senui-radius-md);
+    --senui-button-block-size: var(--senui-size-control-md);
+    --senui-button-padding-inline: var(--senui-space-4);
+    --senui-button-font-size: var(--senui-font-size-md);
+
+    /* Label (or icon) and spinner share one grid cell, so loading never changes the width. */
+    display: inline-grid;
+    place-items: center;
+    box-sizing: border-box;
+    margin: 0;
+    min-block-size: max(var(--senui-button-block-size), var(--senui-size-target-min));
+    min-inline-size: var(--senui-size-target-min);
+    padding-block: 0;
+    padding-inline: var(--senui-button-padding-inline);
+    border: var(--senui-border-width-default) solid var(--senui-button-border-color);
+    border-radius: var(--senui-button-radius);
+    background-color: var(--senui-button-bg);
+    color: var(--senui-button-fg);
+    font-family: var(--senui-font-family-sans);
+    font-size: var(--senui-button-font-size);
+    font-weight: var(--senui-font-weight-medium);
+    line-height: var(--senui-font-line-height-tight);
+    cursor: pointer;
+    transition-property: background-color, border-color, color;
+    transition-duration: var(--senui-motion-duration-fast);
+    transition-timing-function: var(--senui-motion-easing-standard);
+  }
+
+  /* Variants */
+  :where(.senui-button)[data-variant='secondary'] {
+    --senui-button-bg: var(--senui-color-bg-subtle);
+    --senui-button-bg-hover: var(--senui-color-bg-subtle-hover);
+    --senui-button-bg-active: var(--senui-color-bg-subtle-active);
+    --senui-button-fg: var(--senui-color-fg-default);
+    --senui-button-border-color: var(--senui-color-border-default);
+  }
+
+  :where(.senui-button)[data-variant='ghost'] {
+    --senui-button-bg: transparent;
+    --senui-button-bg-hover: var(--senui-color-bg-subtle-hover);
+    --senui-button-bg-active: var(--senui-color-bg-subtle-active);
+    --senui-button-fg: var(--senui-color-fg-default);
+  }
+
+  :where(.senui-button)[data-variant='danger'] {
+    --senui-button-bg: var(--senui-color-bg-danger);
+    --senui-button-bg-hover: var(--senui-color-bg-danger-hover);
+    --senui-button-bg-active: var(--senui-color-bg-danger-active);
+    --senui-button-fg: var(--senui-color-fg-on-danger);
+  }
+
+  /* Sizes. `sm` stays at least 24×24 px through the max() above, whatever the root font size. */
+  :where(.senui-button)[data-size='sm'] {
+    --senui-button-block-size: var(--senui-size-control-sm);
+    --senui-button-padding-inline: var(--senui-space-3);
+    --senui-button-font-size: var(--senui-font-size-sm);
+  }
+
+  :where(.senui-button)[data-size='lg'] {
+    --senui-button-block-size: var(--senui-size-control-lg);
+    --senui-button-padding-inline: var(--senui-space-5);
+    --senui-button-font-size: var(--senui-font-size-lg);
+  }
+
+  /* Content */
+  :where(.senui-button__label, .senui-button__icon, .senui-button__spinner) {
+    grid-area: 1 / 1;
+  }
+
+  :where(.senui-button__icon) {
+    display: inline-flex;
+  }
+
+  /* Icon-only: square, at the control's height. */
+  :where(.senui-button:has(> .senui-button__icon)) {
+    inline-size: max(var(--senui-button-block-size), var(--senui-size-target-min));
+    padding-inline: 0;
+  }
+
+  /* States. Hover and active skip unavailable buttons; the label never moves. */
+  :where(.senui-button:hover:not(:disabled, [aria-disabled='true'])) {
+    background-color: var(--senui-button-bg-hover);
+  }
+
+  :where(.senui-button:active:not(:disabled, [aria-disabled='true'])) {
+    background-color: var(--senui-button-bg-active);
+  }
+
+  /* ADR-0005: an offset outline, never a box-shadow, so it sits on the page background. */
+  :where(.senui-button:focus-visible) {
+    outline: var(--senui-focus-ring-width) solid var(--senui-color-focus-ring);
+    outline-offset: var(--senui-focus-ring-offset);
+  }
+
+  /* Disabled, natively or with aria-disabled. A loading button keeps its colours. */
+  :where(.senui-button:disabled, .senui-button[aria-disabled='true']:not([data-state='loading'])) {
+    border-color: var(--senui-color-border-disabled);
+    background-color: var(--senui-color-bg-disabled);
+    color: var(--senui-color-fg-disabled);
+    cursor: not-allowed;
+  }
+
+  /* Loading: the label keeps its space and its place in the accessibility tree, but isn't seen;
+     the spinner sits in the same cell. Not `visibility: hidden`: that also removes the label from
+     the accessibility tree, and the button loses its name (found in a screen-reader run). */
+  :where(.senui-button[data-state='loading']) {
+    cursor: progress;
+  }
+
+  :where(.senui-button[data-state='loading']) > :where(.senui-button__label, .senui-button__icon) {
+    opacity: 0;
+  }
+
+  :where(.senui-button__spinner) {
+    box-sizing: border-box;
+    inline-size: var(--senui-button-font-size);
+    block-size: var(--senui-button-font-size);
+    border: var(--senui-border-width-strong) solid currentColor;
+    border-block-start-color: transparent;
+    border-radius: var(--senui-radius-full);
+    animation-name: senui-button-spin;
+    /* About a second per turn. Under reduced motion (--senui-motion-reduce: 0) it turns four times
+       slower rather than stopping, so it still shows that something is happening. */
+    animation-duration: calc(
+      var(--senui-motion-duration-slow) * 3 * (4 - 3 * var(--senui-motion-reduce))
+    );
+    animation-timing-function: var(--senui-motion-easing-linear);
+    animation-iteration-count: infinite;
+  }
+
+  @keyframes senui-button-spin {
+    to {
+      rotate: 1turn;
+    }
+  }
+
+  /* Forced colours replace backgrounds, so state is carried by the border and system colours. */
+  @media (forced-colors: active) {
+    :where(.senui-button) {
+      border-color: ButtonText;
+    }
+
+    :where(.senui-button:hover:not(:disabled, [aria-disabled='true'])) {
+      border-color: Highlight;
+    }
+
+    :where(.senui-button:focus-visible) {
+      outline-color: Highlight;
+    }
+
+    :where(
+      .senui-button:disabled,
+      .senui-button[aria-disabled='true']:not([data-state='loading'])
+    ) {
+      border-color: GrayText;
+      color: GrayText;
+    }
+  }
+}

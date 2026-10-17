@@ -71,3 +71,82 @@ Entry format: date — module · Did · Verified · Scope decisions · Plan adju
 - **Plan adjustments:** `deprecate` takes the component name; contracts use `defineA11yContract` instead of `satisfies`.
 - **Overrides:** 24 findings (12 + 12, one shared). Accepted 24, rejected 0, escalated 2 ADRs (0008, 0009). No `OVERRIDES.md` rows. Not done: a positive-`tabIndex` type restriction, which was outside the accepted option (logged as out).
 - **Next:** Emil reviews and commits L01 + L02, then opens a PR so CI runs (L01 has never been through CI). Then `/modular-web:implement-module` starts L03 (Button), where Emil writes the component.
+
+## 2026-10-16 — L03 Button (setup and brief)
+
+- **Did:**
+  - Found L02 committed (`bcb5b57`) and pushed, with no PR, so L01 and L02 still haven't run in CI.
+  - Read the L03 plan against the decision index: no ADR overrides it. Several details are superseded by L00 and L02: file casing, the token prefix, the stories location, and the raw-value grep.
+  - Emil chose:
+    - the plan's `icon` prop over L02's `iconOnly`;
+    - `axe-core` with an internal helper over the unmaintained `vitest-axe`;
+    - Vitest browser mode for the width test.
+  - Harness work:
+    - `unit` and `browser` Vitest projects;
+    - `src/internal/testing/axe.ts` with tests;
+    - a layout guard test that fails if the browser project ever runs in jsdom;
+    - the Playwright Chromium install in CI;
+    - `@senakster/tokens` as a dependency of `@senakster/react`, and `@storybook/react-vite` as a dev dependency for `composeStories`;
+    - Storybook's preview loads component CSS from source.
+  - CONVENTIONS rule 3, the reference type test, `useNameCheck` and the contract type test now describe the `icon` prop.
+  - Wrote the brief into checkpoint.md.
+- **Verified:**
+  - `pnpm check`, `pnpm test` (tokens 31, react 48, browser project in Chromium) and build-storybook all pass.
+  - Probes:
+    - The layout guard fails when run in jsdom.
+    - The browser test reports `|browser (chromium)|`.
+    - axe reports `button-name` and `image-alt` on a broken fixture.
+    - Every new `@ts-expect-error` in the reference type test fires.
+  - The L03 invariant commands ran clean on the empty tree.
+- **Scope decisions:** see scope-decisions.md § L03 (6 rows, 6 deviations), plus an L00 harness note.
+- **Plan adjustments:** the width criterion needs a real browser, so jsdom couldn't have met it as written. The plan's `vitest-axe` is replaced by `axe-core`.
+- **Overrides:** none yet (no component to review).
+- **Next:** Emil writes Button per the brief, including a manual keyboard and screen-reader run for the contract. Then rerun `/modular-web:implement-module` to run the reviewers and triage.
+
+## 2026-10-17 — READMEs (outside the module sequence)
+
+- **Did:** At Emil's request, wrote a root `README.md` (for users: what senui is, its status, quick start, guarantees), `packages/react/README.md` (for users, shipped on npm: CSS loading and order, overriding, theming, accessibility, TypeScript, versioning) and `CONTRIBUTING.md` (for developers: setup, scripts, layout, how work is organised, adding a component, decisions, surprises, CI). `packages/tokens/README.md` was already good and is unchanged.
+- **Verified:** Prettier check passes; every relative link resolves; `npm pack --dry-run` includes the react README.
+- **Not done:** there is no `LICENSE` file or `license` field yet (an L10 note), so the READMEs don't name a licence.
+- **Next:** unchanged. Emil writes Button per the brief in checkpoint.md.
+
+## 2026-10-17 — Dark-mode fix (an L01 defect, found during L03)
+
+- **Did:** Emil reported an unreadable Dark column on the Tokens docs page.
+  - **Cause 1 (docs only):** Storybook's unlayered docs styles coloured `code` and beat the layered `[data-theme]` rule. Fixed with `sb-unstyled` on the tables, which are now styled from tokens.
+  - **Cause 2 (library defect):** Vite 8's default production build rewrites `light-dark()` (via Lightning CSS) into variables that resolve where a token is declared. Tokens were declared only on `:root`, so every `data-theme` subtree rendered in the page's theme. Dev mode hid it.
+  - **Fix:** Emil chose to declare tokens on `:where(:root, [data-theme])` (ADR-0010, amending 0004 and 0005). Pipeline changed, with a regression test. The override guidance in the tokens README, the react README and the Tokens page now uses `:root, [data-theme]`.
+- **Verified:**
+  - A default Vite consumer app had kept 0 of 28 `light-dark()` calls before the fix.
+  - After it, in Chromium, both from source and from a default Vite build: a dark subtree, a light subtree nested in it, OS dark mode, and reduced motion inside a subtree all come out correct.
+  - In the built Storybook, the dark cell background is `oklch(0.16 …)` with `oklch(0.97 …)` text.
+  - `pnpm check`, `pnpm test` (tokens 32, react 48) and build-storybook pass, and every decision record parses.
+- **Recorded:** scope-decisions § L01, "Defects found later", which includes the verification gap: L08 must test built output in a browser.
+- **Next:** unchanged. Emil writes Button per the brief.
+- **Follow-up the same day:** Emil still saw unreadable text, with the OS in dark mode. Storybook's docs page is always light, but `tokens.css` lets the page root follow the OS, so unthemed cells got dark-theme text on a white page. My first check had only run with the OS set to light. The docs tables now carry `data-theme="light"`. Re-verified in the built Storybook with the OS in both light and dark: 277 text elements, worst contrast 5.81:1 in both.
+
+## 2026-10-17 — L03 Button written (by Claude, at Emil's request)
+
+- **Did:**
+  - Emil asked for a Button example, then chose the real Button for him to review over a reference copy (a pair-mode deviation, scope-decisions § L03, deviation 7).
+  - Checked modern-web-guidance (`spinner`, `color`).
+  - Wrote `Button.tsx`: `forwardRef`, `NativeProps`, the icon/children union, root ownership, the loading guard that also stops form submission, and the name check.
+  - Wrote `Button.css`: component tokens, variants and sizes as token-only rules, states as properties, a grid-stacked spinner, focus outline plus offset, forced-colours borders, and a spinner that slows under reduced motion.
+  - Also wrote the contract (automated run only), the unit tests with axe on every story, the browser tests, the type tests, 12 stories and the changeset.
+  - Wired up the entry export and the CSS import.
+  - Added the `motion.easing.linear` token, and `storybook` as a react dev dependency (for `storybook/test`).
+  - `pnpm dedupe` fixed a dangling `storybook` link: pnpm had resolved a peer-less variant that it never installed.
+  - CONVENTIONS' example now uses `data-state` instead of `aria-busy`.
+  - Removed Emil's stub `Button.types.ts` and empty `index.ts`.
+- **Verified:**
+  - `pnpm check` passes (Stylelint clean, contract present, CSS layered, dist imports resolve).
+  - `pnpm test`: tokens 32; react 87 of 88. The one failure is the intended contract gate, which reports exactly "no keyboard run" and "no screen-reader run".
+  - Type tests clean (every `@ts-expect-error` fires).
+  - 9 browser tests in Chromium: width and height held while loading at all three sizes, focus kept through loading, 24px target, outline rather than box-shadow.
+  - Probe: hiding the label with `display: none` fails the width test at all three sizes.
+  - build-storybook lists 12 Button stories.
+- **Known-unmet:** hover/active stories (need a pseudo-states addon decision); manual keyboard and screen-reader runs (Emil).
+- **Next:** Emil reviews the files, does the manual runs and records them, then "review it" for the reviewers and triage.
+- **2026-10-17, Emil's manual runs:** keyboard (Chrome 155.0.8059.40, Windows 11 26H2 build 26300.9711) all passed; recorded. Narrator heard "Save, button" on focus, but **"button, disabled" with no name while loading**: `visibility: hidden` on the label had removed it from the accessibility tree. jsdom doesn't apply the CSS, so the unit test passed. A new browser test reproduced the fault, and the label now uses `opacity: 0` (the test passes, and the width still holds). The Narrator run predates the fix, so it isn't recorded as a pass; Emil re-tests the Loading story. Contract test: now fails only on the missing screen-reader run.
+- **Narrator re-test after the fix:** "Save, button, disabled" while loading. Recorded the screen-reader run (Narrator, Chrome 155.0.8059.40, Windows 11 26H2 build 26300.9711, pass); 4.1.2 now cites it. Emil removed the `name` attribute from the IconOnly story. `pnpm check` and `pnpm test` pass in full (react 89/89). Next: the reviewers.
+- **Emil saw no activation on Enter.** Real key-press browser tests (Playwright) prove Enter and Space each activate once and do nothing while loading. The stories had no `onClick`, so nothing was visible; the meta now passes `onClick: fn()`, which logs to the Actions panel. 2.1.1 cites the automated key-press tests as well.

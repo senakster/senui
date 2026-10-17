@@ -5,191 +5,330 @@
       "neutral": {
         "0": {
           "$type": "color",
-          "$value": { "colorSpace": "oklch", "components": [0.99, 0.003, 260] }
+          "$value": {
+            "colorSpace": "oklch",
+            "components": [0.99, 0.003, 260]
+          }
         },
         "50": {
           "$type": "color",
-          "$value": { "colorSpace": "oklch", "components": [0.97, 0.005, 260] }
+          "$value": {
+            "colorSpace": "oklch",
+            "components": [0.97, 0.005, 260]
+          }
         },
         "100": {
           "$type": "color",
-          "$value": { "colorSpace": "oklch", "components": [0.94, 0.007, 260] }
+          "$value": {
+            "colorSpace": "oklch",
+            "components": [0.94, 0.007, 260]
+          }
         },
         "150": {
           "$type": "color",
-          "$value": { "colorSpace": "oklch", "components": [0.91, 0.008, 260] }
+          "$value": {
+            "colorSpace": "oklch",
+            "components": [0.91, 0.008, 260]
+          }
         },
         "300": {
           "$type": "color",
-          "$value": { "colorSpace": "oklch", "components": [0.85, 0.01, 260] }
+          "$value": {
+            "colorSpace": "oklch",
+            "components": [0.85, 0.01, 260]
+          }
         },
         "500": {
           "$type": "color",
-          "$value": { "colorSpace": "oklch", "components": [0.6, 0.015, 260] }
+          "$value": {
+            "colorSpace": "oklch",
+            "components": [0.6, 0.015, 260]
+          }
         },
         "600": {
           "$type": "color",
-          "$value": { "colorSpace": "oklch", "components": [0.5, 0.015, 260] }
+          "$value": {
+            "colorSpace": "oklch",
+            "components": [0.5, 0.015, 260]
+          }
         },
         "800": {
           "$type": "color",
-          "$value": { "colorSpace": "oklch", "components": [0.3, 0.015, 260] }
+          "$value": {
+            "colorSpace": "oklch",
+            "components": [0.3, 0.015, 260]
+          }
         },
         "850": {
           "$type": "color",
-          "$value": { "colorSpace": "oklch", "components": [0.26, 0.015, 260] }
+          "$value": {
+            "colorSpace": "oklch",
+            "components": [0.26, 0.015, 260]
+          }
         },
         "900": {
           "$type": "color",
-          "$value": { "colorSpace": "oklch", "components": [0.22, 0.015, 260] }
+          "$value": {
+            "colorSpace": "oklch",
+            "components": [0.22, 0.015, 260]
+          }
         },
         "925": {
           "$type": "color",
-          "$value": { "colorSpace": "oklch", "components": [0.19, 0.013, 260] }
+          "$value": {
+            "colorSpace": "oklch",
+            "components": [0.19, 0.013, 260]
+          }
         },
         "950": {
           "$type": "color",
-          "$value": { "colorSpace": "oklch", "components": [0.16, 0.012, 260] }
+          "$value": {
+            "colorSpace": "oklch",
+            "components": [0.16, 0.012, 260]
+          }
         }
       },
       "blue": {
         "200": {
           "$type": "color",
-          "$value": { "colorSpace": "oklch", "components": [0.86, 0.07, 255] }
+          "$value": {
+            "colorSpace": "oklch",
+            "components": [0.86, 0.07, 255]
+          }
         },
         "300": {
           "$type": "color",
-          "$value": { "colorSpace": "oklch", "components": [0.8, 0.11, 255] }
+          "$value": {
+            "colorSpace": "oklch",
+            "components": [0.8, 0.11, 255]
+          }
         },
         "400": {
           "$type": "color",
-          "$value": { "colorSpace": "oklch", "components": [0.72, 0.14, 255] }
+          "$value": {
+            "colorSpace": "oklch",
+            "components": [0.72, 0.14, 255]
+          }
         },
         "600": {
           "$type": "color",
-          "$value": { "colorSpace": "oklch", "components": [0.52, 0.18, 260] }
+          "$value": {
+            "colorSpace": "oklch",
+            "components": [0.52, 0.18, 260]
+          }
         },
         "700": {
           "$type": "color",
-          "$value": { "colorSpace": "oklch", "components": [0.46, 0.17, 260] }
+          "$value": {
+            "colorSpace": "oklch",
+            "components": [0.46, 0.17, 260]
+          }
         },
         "800": {
           "$type": "color",
-          "$value": { "colorSpace": "oklch", "components": [0.4, 0.15, 260] }
+          "$value": {
+            "colorSpace": "oklch",
+            "components": [0.4, 0.15, 260]
+          }
         }
       },
       "red": {
         "200": {
           "$type": "color",
-          "$value": { "colorSpace": "oklch", "components": [0.86, 0.07, 25] }
+          "$value": {
+            "colorSpace": "oklch",
+            "components": [0.86, 0.07, 25]
+          }
         },
         "300": {
           "$type": "color",
-          "$value": { "colorSpace": "oklch", "components": [0.8, 0.11, 25] }
+          "$value": {
+            "colorSpace": "oklch",
+            "components": [0.8, 0.11, 25]
+          }
         },
         "400": {
           "$type": "color",
-          "$value": { "colorSpace": "oklch", "components": [0.72, 0.16, 25] }
+          "$value": {
+            "colorSpace": "oklch",
+            "components": [0.72, 0.16, 25]
+          }
         },
         "600": {
           "$type": "color",
-          "$value": { "colorSpace": "oklch", "components": [0.53, 0.2, 27] }
+          "$value": {
+            "colorSpace": "oklch",
+            "components": [0.53, 0.2, 27]
+          }
         },
         "700": {
           "$type": "color",
-          "$value": { "colorSpace": "oklch", "components": [0.47, 0.19, 27] }
+          "$value": {
+            "colorSpace": "oklch",
+            "components": [0.47, 0.19, 27]
+          }
         },
         "800": {
           "$type": "color",
-          "$value": { "colorSpace": "oklch", "components": [0.41, 0.17, 27] }
+          "$value": {
+            "colorSpace": "oklch",
+            "components": [0.41, 0.17, 27]
+          }
         }
       },
       "black": {
         "12": {
           "$type": "color",
-          "$value": { "colorSpace": "srgb", "components": [0, 0, 0], "alpha": 0.12 }
+          "$value": {
+            "colorSpace": "srgb",
+            "components": [0, 0, 0],
+            "alpha": 0.12
+          }
         },
         "50": {
           "$type": "color",
-          "$value": { "colorSpace": "srgb", "components": [0, 0, 0], "alpha": 0.5 }
+          "$value": {
+            "colorSpace": "srgb",
+            "components": [0, 0, 0],
+            "alpha": 0.5
+          }
         }
       }
     }
   },
-
   "color": {
     "bg": {
       "default": {
         "$type": "color",
         "$description": "Page and surface background.",
         "$value": "{primitive.color.neutral.0}",
-        "$extensions": { "senui": { "dark": "{primitive.color.neutral.950}", "surface": true } }
+        "$extensions": {
+          "senui": {
+            "dark": "{primitive.color.neutral.950}",
+            "surface": true
+          }
+        }
       },
       "subtle": {
         "$type": "color",
         "$description": "Recessed areas: wells, table stripes, secondary buttons.",
         "$value": "{primitive.color.neutral.50}",
-        "$extensions": { "senui": { "dark": "{primitive.color.neutral.900}", "surface": true } }
+        "$extensions": {
+          "senui": {
+            "dark": "{primitive.color.neutral.900}",
+            "surface": true
+          }
+        }
       },
       "subtle-hover": {
         "$type": "color",
         "$description": "bg.subtle under the pointer.",
         "$value": "{primitive.color.neutral.100}",
-        "$extensions": { "senui": { "dark": "{primitive.color.neutral.850}", "surface": true } }
+        "$extensions": {
+          "senui": {
+            "dark": "{primitive.color.neutral.850}",
+            "surface": true
+          }
+        }
       },
       "subtle-active": {
         "$type": "color",
         "$description": "bg.subtle while pressed.",
         "$value": "{primitive.color.neutral.150}",
-        "$extensions": { "senui": { "dark": "{primitive.color.neutral.800}", "surface": true } }
+        "$extensions": {
+          "senui": {
+            "dark": "{primitive.color.neutral.800}",
+            "surface": true
+          }
+        }
       },
       "raised": {
         "$type": "color",
         "$description": "Popovers, menus, dialogs. Lighter than bg.default in dark mode, because shadows barely show there. Pair with a border: forced-colours mode removes shadows.",
         "$value": "{primitive.color.neutral.0}",
-        "$extensions": { "senui": { "dark": "{primitive.color.neutral.925}", "surface": true } }
+        "$extensions": {
+          "senui": {
+            "dark": "{primitive.color.neutral.925}",
+            "surface": true
+          }
+        }
       },
       "accent": {
         "$type": "color",
         "$description": "Fill for primary actions.",
         "$value": "{primitive.color.blue.600}",
-        "$extensions": { "senui": { "dark": "{primitive.color.blue.400}", "surface": true } }
+        "$extensions": {
+          "senui": {
+            "dark": "{primitive.color.blue.400}",
+            "surface": true
+          }
+        }
       },
       "accent-hover": {
         "$type": "color",
         "$description": "bg.accent under the pointer.",
         "$value": "{primitive.color.blue.700}",
-        "$extensions": { "senui": { "dark": "{primitive.color.blue.300}", "surface": true } }
+        "$extensions": {
+          "senui": {
+            "dark": "{primitive.color.blue.300}",
+            "surface": true
+          }
+        }
       },
       "accent-active": {
         "$type": "color",
         "$description": "bg.accent while pressed.",
         "$value": "{primitive.color.blue.800}",
-        "$extensions": { "senui": { "dark": "{primitive.color.blue.200}", "surface": true } }
+        "$extensions": {
+          "senui": {
+            "dark": "{primitive.color.blue.200}",
+            "surface": true
+          }
+        }
       },
       "danger": {
         "$type": "color",
         "$description": "Fill for destructive actions.",
         "$value": "{primitive.color.red.600}",
-        "$extensions": { "senui": { "dark": "{primitive.color.red.400}", "surface": true } }
+        "$extensions": {
+          "senui": {
+            "dark": "{primitive.color.red.400}",
+            "surface": true
+          }
+        }
       },
       "danger-hover": {
         "$type": "color",
         "$description": "bg.danger under the pointer.",
         "$value": "{primitive.color.red.700}",
-        "$extensions": { "senui": { "dark": "{primitive.color.red.300}", "surface": true } }
+        "$extensions": {
+          "senui": {
+            "dark": "{primitive.color.red.300}",
+            "surface": true
+          }
+        }
       },
       "danger-active": {
         "$type": "color",
         "$description": "bg.danger while pressed.",
         "$value": "{primitive.color.red.800}",
-        "$extensions": { "senui": { "dark": "{primitive.color.red.200}", "surface": true } }
+        "$extensions": {
+          "senui": {
+            "dark": "{primitive.color.red.200}",
+            "surface": true
+          }
+        }
       },
       "disabled": {
         "$type": "color",
         "$description": "Fill of a disabled control. Exempt from contrast (WCAG 1.4.3, 1.4.11).",
         "$value": "{primitive.color.neutral.50}",
-        "$extensions": { "senui": { "dark": "{primitive.color.neutral.900}", "surface": true } }
+        "$extensions": {
+          "senui": {
+            "dark": "{primitive.color.neutral.900}",
+            "surface": true
+          }
+        }
       }
     },
     "fg": {
@@ -201,11 +340,26 @@
           "senui": {
             "dark": "{primitive.color.neutral.50}",
             "contrast": [
-              { "against": "{color.bg.default}", "min": 4.5 },
-              { "against": "{color.bg.subtle}", "min": 4.5 },
-              { "against": "{color.bg.subtle-hover}", "min": 4.5 },
-              { "against": "{color.bg.subtle-active}", "min": 4.5 },
-              { "against": "{color.bg.raised}", "min": 4.5 }
+              {
+                "against": "{color.bg.default}",
+                "min": 4.5
+              },
+              {
+                "against": "{color.bg.subtle}",
+                "min": 4.5
+              },
+              {
+                "against": "{color.bg.subtle-hover}",
+                "min": 4.5
+              },
+              {
+                "against": "{color.bg.subtle-active}",
+                "min": 4.5
+              },
+              {
+                "against": "{color.bg.raised}",
+                "min": 4.5
+              }
             ]
           }
         }
@@ -218,9 +372,18 @@
           "senui": {
             "dark": "{primitive.color.neutral.300}",
             "contrast": [
-              { "against": "{color.bg.default}", "min": 4.5 },
-              { "against": "{color.bg.subtle}", "min": 4.5 },
-              { "against": "{color.bg.raised}", "min": 4.5 }
+              {
+                "against": "{color.bg.default}",
+                "min": 4.5
+              },
+              {
+                "against": "{color.bg.subtle}",
+                "min": 4.5
+              },
+              {
+                "against": "{color.bg.raised}",
+                "min": 4.5
+              }
             ]
           }
         }
@@ -233,9 +396,18 @@
           "senui": {
             "dark": "{primitive.color.blue.400}",
             "contrast": [
-              { "against": "{color.bg.default}", "min": 4.5 },
-              { "against": "{color.bg.subtle}", "min": 4.5 },
-              { "against": "{color.bg.raised}", "min": 4.5 }
+              {
+                "against": "{color.bg.default}",
+                "min": 4.5
+              },
+              {
+                "against": "{color.bg.subtle}",
+                "min": 4.5
+              },
+              {
+                "against": "{color.bg.raised}",
+                "min": 4.5
+              }
             ]
           }
         }
@@ -248,9 +420,18 @@
           "senui": {
             "dark": "{primitive.color.red.400}",
             "contrast": [
-              { "against": "{color.bg.default}", "min": 4.5 },
-              { "against": "{color.bg.subtle}", "min": 4.5 },
-              { "against": "{color.bg.raised}", "min": 4.5 }
+              {
+                "against": "{color.bg.default}",
+                "min": 4.5
+              },
+              {
+                "against": "{color.bg.subtle}",
+                "min": 4.5
+              },
+              {
+                "against": "{color.bg.raised}",
+                "min": 4.5
+              }
             ]
           }
         }
@@ -263,9 +444,18 @@
           "senui": {
             "dark": "{primitive.color.neutral.950}",
             "contrast": [
-              { "against": "{color.bg.accent}", "min": 4.5 },
-              { "against": "{color.bg.accent-hover}", "min": 4.5 },
-              { "against": "{color.bg.accent-active}", "min": 4.5 }
+              {
+                "against": "{color.bg.accent}",
+                "min": 4.5
+              },
+              {
+                "against": "{color.bg.accent-hover}",
+                "min": 4.5
+              },
+              {
+                "against": "{color.bg.accent-active}",
+                "min": 4.5
+              }
             ]
           }
         }
@@ -278,9 +468,18 @@
           "senui": {
             "dark": "{primitive.color.neutral.950}",
             "contrast": [
-              { "against": "{color.bg.danger}", "min": 4.5 },
-              { "against": "{color.bg.danger-hover}", "min": 4.5 },
-              { "against": "{color.bg.danger-active}", "min": 4.5 }
+              {
+                "against": "{color.bg.danger}",
+                "min": 4.5
+              },
+              {
+                "against": "{color.bg.danger-hover}",
+                "min": 4.5
+              },
+              {
+                "against": "{color.bg.danger-active}",
+                "min": 4.5
+              }
             ]
           }
         }
@@ -289,7 +488,12 @@
         "$type": "color",
         "$description": "Text of a disabled control. Exempt from contrast (WCAG 1.4.3).",
         "$value": "{primitive.color.neutral.500}",
-        "$extensions": { "senui": { "dark": "{primitive.color.neutral.600}", "surface": true } }
+        "$extensions": {
+          "senui": {
+            "dark": "{primitive.color.neutral.600}",
+            "surface": true
+          }
+        }
       }
     },
     "border": {
@@ -297,7 +501,12 @@
         "$type": "color",
         "$description": "Decorative dividers. Too faint to identify a control; use border.strong for that.",
         "$value": "{primitive.color.neutral.300}",
-        "$extensions": { "senui": { "dark": "{primitive.color.neutral.800}", "surface": true } }
+        "$extensions": {
+          "senui": {
+            "dark": "{primitive.color.neutral.800}",
+            "surface": true
+          }
+        }
       },
       "strong": {
         "$type": "color",
@@ -307,9 +516,18 @@
           "senui": {
             "dark": "{primitive.color.neutral.500}",
             "contrast": [
-              { "against": "{color.bg.default}", "min": 3 },
-              { "against": "{color.bg.subtle}", "min": 3 },
-              { "against": "{color.bg.raised}", "min": 3 }
+              {
+                "against": "{color.bg.default}",
+                "min": 3
+              },
+              {
+                "against": "{color.bg.subtle}",
+                "min": 3
+              },
+              {
+                "against": "{color.bg.raised}",
+                "min": 3
+              }
             ]
           }
         }
@@ -322,9 +540,18 @@
           "senui": {
             "dark": "{primitive.color.red.400}",
             "contrast": [
-              { "against": "{color.bg.default}", "min": 3 },
-              { "against": "{color.bg.subtle}", "min": 3 },
-              { "against": "{color.bg.raised}", "min": 3 }
+              {
+                "against": "{color.bg.default}",
+                "min": 3
+              },
+              {
+                "against": "{color.bg.subtle}",
+                "min": 3
+              },
+              {
+                "against": "{color.bg.raised}",
+                "min": 3
+              }
             ]
           }
         }
@@ -333,7 +560,12 @@
         "$type": "color",
         "$description": "Outline of a disabled control. Exempt from contrast (WCAG 1.4.11).",
         "$value": "{primitive.color.neutral.300}",
-        "$extensions": { "senui": { "dark": "{primitive.color.neutral.800}", "surface": true } }
+        "$extensions": {
+          "senui": {
+            "dark": "{primitive.color.neutral.800}",
+            "surface": true
+          }
+        }
       }
     },
     "focus": {
@@ -345,9 +577,18 @@
           "senui": {
             "dark": "{primitive.color.blue.400}",
             "contrast": [
-              { "against": "{color.bg.default}", "min": 3 },
-              { "against": "{color.bg.subtle}", "min": 3 },
-              { "against": "{color.bg.raised}", "min": 3 }
+              {
+                "against": "{color.bg.default}",
+                "min": 3
+              },
+              {
+                "against": "{color.bg.subtle}",
+                "min": 3
+              },
+              {
+                "against": "{color.bg.raised}",
+                "min": 3
+              }
             ]
           }
         }
@@ -357,60 +598,141 @@
       "$type": "color",
       "$description": "Shadow colour used by the elevation tokens. Decorative.",
       "$value": "{primitive.color.black.12}",
-      "$extensions": { "senui": { "dark": "{primitive.color.black.50}", "surface": true } }
-    }
-  },
-
-  "border": {
-    "width": {
-      "$type": "dimension",
-      "default": { "$value": { "value": 1, "unit": "px" } },
-      "strong": {
-        "$description": "Invalid and selected controls, so state is not shown by colour alone.",
-        "$value": { "value": 2, "unit": "px" }
+      "$extensions": {
+        "senui": {
+          "dark": "{primitive.color.black.50}",
+          "surface": true
+        }
       }
     }
   },
-
+  "border": {
+    "width": {
+      "$type": "dimension",
+      "default": {
+        "$value": {
+          "value": 1,
+          "unit": "px"
+        }
+      },
+      "strong": {
+        "$description": "Invalid and selected controls, so state is not shown by colour alone.",
+        "$value": {
+          "value": 2,
+          "unit": "px"
+        }
+      }
+    }
+  },
   "focus": {
     "ring-width": {
       "$type": "dimension",
       "$description": "Outline width of the focus ring.",
-      "$value": { "value": 2, "unit": "px" }
+      "$value": {
+        "value": 2,
+        "unit": "px"
+      }
     },
     "ring-offset": {
       "$type": "dimension",
       "$description": "Gap between a control and its focus ring, so the ring sits on the page background (ADR-0005).",
-      "$value": { "value": 2, "unit": "px" }
+      "$value": {
+        "value": 2,
+        "unit": "px"
+      }
     }
   },
-
   "space": {
+    "1": {
+      "$value": {
+        "value": 0.25,
+        "unit": "rem"
+      }
+    },
+    "2": {
+      "$value": {
+        "value": 0.5,
+        "unit": "rem"
+      }
+    },
+    "3": {
+      "$value": {
+        "value": 0.75,
+        "unit": "rem"
+      }
+    },
+    "4": {
+      "$value": {
+        "value": 1,
+        "unit": "rem"
+      }
+    },
+    "5": {
+      "$value": {
+        "value": 1.25,
+        "unit": "rem"
+      }
+    },
+    "6": {
+      "$value": {
+        "value": 1.5,
+        "unit": "rem"
+      }
+    },
+    "8": {
+      "$value": {
+        "value": 2,
+        "unit": "rem"
+      }
+    },
+    "10": {
+      "$value": {
+        "value": 2.5,
+        "unit": "rem"
+      }
+    },
+    "12": {
+      "$value": {
+        "value": 3,
+        "unit": "rem"
+      }
+    },
     "$type": "dimension",
-    "$description": "space.N is N × 0.25rem, so new steps never renumber old ones.",
-    "1": { "$value": { "value": 0.25, "unit": "rem" } },
-    "2": { "$value": { "value": 0.5, "unit": "rem" } },
-    "3": { "$value": { "value": 0.75, "unit": "rem" } },
-    "4": { "$value": { "value": 1, "unit": "rem" } },
-    "5": { "$value": { "value": 1.25, "unit": "rem" } },
-    "6": { "$value": { "value": 1.5, "unit": "rem" } },
-    "8": { "$value": { "value": 2, "unit": "rem" } },
-    "10": { "$value": { "value": 2.5, "unit": "rem" } },
-    "12": { "$value": { "value": 3, "unit": "rem" } }
+    "$description": "space.N is N × 0.25rem, so new steps never renumber old ones."
   },
-
   "radius": {
     "$type": "dimension",
-    "sm": { "$value": { "value": 4, "unit": "px" } },
-    "md": { "$value": { "value": 8, "unit": "px" } },
-    "lg": { "$value": { "value": 12, "unit": "px" } },
-    "full": { "$value": { "value": 9999, "unit": "px" } }
+    "sm": {
+      "$value": {
+        "value": 4,
+        "unit": "px"
+      }
+    },
+    "md": {
+      "$value": {
+        "value": 8,
+        "unit": "px"
+      }
+    },
+    "lg": {
+      "$value": {
+        "value": 12,
+        "unit": "px"
+      }
+    },
+    "full": {
+      "$value": {
+        "value": 9999,
+        "unit": "px"
+      }
+    }
   },
-
   "font": {
     "family": {
       "$type": "fontFamily",
-      "sans": { "$value": ["system-ui", "sans-serif"] },
+      "sans": {
+        "$value": ["system-ui", "sans-serif"]
+      },
       "mono": {
         "$value": [
           "ui-monospace",
@@ -425,53 +747,126 @@
     },
     "size": {
       "$type": "dimension",
-      "sm": { "$value": { "value": 0.875, "unit": "rem" } },
-      "md": { "$value": { "value": 1, "unit": "rem" } },
-      "lg": { "$value": { "value": 1.25, "unit": "rem" } }
+      "sm": {
+        "$value": {
+          "value": 0.875,
+          "unit": "rem"
+        }
+      },
+      "md": {
+        "$value": {
+          "value": 1,
+          "unit": "rem"
+        }
+      },
+      "lg": {
+        "$value": {
+          "value": 1.25,
+          "unit": "rem"
+        }
+      }
     },
     "weight": {
       "$type": "fontWeight",
-      "regular": { "$value": 400 },
-      "medium": { "$value": 500 },
-      "bold": { "$value": 700 }
+      "regular": {
+        "$value": 400
+      },
+      "medium": {
+        "$value": 500
+      },
+      "bold": {
+        "$value": 700
+      }
     },
     "line-height": {
       "$type": "number",
-      "tight": { "$value": 1.25 },
-      "normal": { "$value": 1.5 }
+      "tight": {
+        "$value": 1.25
+      },
+      "normal": {
+        "$value": 1.5
+      }
     }
   },
-
   "motion": {
     "reduce": {
       "$type": "number",
       "$description": "1 normally, 0 under prefers-reduced-motion. Multiply every movement by it, so an override of a distance can't bring motion back (ADR-0005).",
       "$value": 1,
-      "$extensions": { "senui": { "reducedMotion": 0 } }
+      "$extensions": {
+        "senui": {
+          "reducedMotion": 0
+        }
+      }
     },
     "duration": {
       "$type": "duration",
       "$description": "Not reduced under reduced motion, so opacity fades remain.",
-      "fast": { "$value": { "value": 120, "unit": "ms" } },
-      "moderate": { "$value": { "value": 200, "unit": "ms" } },
-      "slow": { "$value": { "value": 320, "unit": "ms" } }
+      "fast": {
+        "$value": {
+          "value": 120,
+          "unit": "ms"
+        }
+      },
+      "moderate": {
+        "$value": {
+          "value": 200,
+          "unit": "ms"
+        }
+      },
+      "slow": {
+        "$value": {
+          "value": 320,
+          "unit": "ms"
+        }
+      }
     },
     "easing": {
       "$type": "cubicBezier",
-      "standard": { "$value": [0.2, 0, 0, 1] },
-      "enter": { "$value": [0, 0, 0, 1] },
-      "exit": { "$value": [0.3, 0, 1, 1] }
+      "standard": {
+        "$value": [0.2, 0, 0, 1]
+      },
+      "enter": {
+        "$value": [0, 0, 0, 1]
+      },
+      "exit": {
+        "$value": [0.3, 0, 1, 1]
+      },
+      "linear": {
+        "$value": [0, 0, 1, 1],
+        "$description": "Constant speed, for continuous motion such as a loading spinner."
+      }
     },
     "distance": {
       "$type": "dimension",
       "$description": "How far things travel. Collapses to 0 under reduced motion; multiply by motion.reduce as well.",
       "sm": {
-        "$value": { "value": 4, "unit": "px" },
-        "$extensions": { "senui": { "reducedMotion": { "value": 0, "unit": "px" } } }
+        "$value": {
+          "value": 4,
+          "unit": "px"
+        },
+        "$extensions": {
+          "senui": {
+            "reducedMotion": {
+              "value": 0,
+              "unit": "px"
+            }
+          }
+        }
       },
       "md": {
-        "$value": { "value": 8, "unit": "px" },
-        "$extensions": { "senui": { "reducedMotion": { "value": 0, "unit": "px" } } }
+        "$value": {
+          "value": 8,
+          "unit": "px"
+        },
+        "$extensions": {
+          "senui": {
+            "reducedMotion": {
+              "value": 0,
+              "unit": "px"
+            }
+          }
+        }
       }
     },
     "scale": {
@@ -479,48 +874,92 @@
       "enter": {
         "$description": "Starting scale for elements that grow in. 1 under reduced motion; apply as 1 - (1 - scale) × motion.reduce.",
         "$value": 0.96,
-        "$extensions": { "senui": { "reducedMotion": 1 } }
+        "$extensions": {
+          "senui": {
+            "reducedMotion": 1
+          }
+        }
       }
     }
   },
-
   "elevation": {
-    "$type": "shadow",
-    "$description": "Decorative depth. Forced-colours mode removes shadows, so an elevated surface also needs a border.",
     "1": {
       "$value": {
         "color": "{color.shadow}",
-        "offsetX": { "value": 0, "unit": "px" },
-        "offsetY": { "value": 1, "unit": "px" },
-        "blur": { "value": 2, "unit": "px" },
-        "spread": { "value": 0, "unit": "px" }
+        "offsetX": {
+          "value": 0,
+          "unit": "px"
+        },
+        "offsetY": {
+          "value": 1,
+          "unit": "px"
+        },
+        "blur": {
+          "value": 2,
+          "unit": "px"
+        },
+        "spread": {
+          "value": 0,
+          "unit": "px"
+        }
       }
     },
     "2": {
       "$value": {
         "color": "{color.shadow}",
-        "offsetX": { "value": 0, "unit": "px" },
-        "offsetY": { "value": 4, "unit": "px" },
-        "blur": { "value": 12, "unit": "px" },
-        "spread": { "value": 0, "unit": "px" }
+        "offsetX": {
+          "value": 0,
+          "unit": "px"
+        },
+        "offsetY": {
+          "value": 4,
+          "unit": "px"
+        },
+        "blur": {
+          "value": 12,
+          "unit": "px"
+        },
+        "spread": {
+          "value": 0,
+          "unit": "px"
+        }
       }
-    }
+    },
+    "$type": "shadow",
+    "$description": "Decorative depth. Forced-colours mode removes shadows, so an elevated surface also needs a border."
   },
-
   "size": {
     "target": {
       "min": {
         "$type": "dimension",
         "$description": "Smallest allowed pointer target (WCAG 2.5.8). In px, because WCAG measures in CSS px.",
-        "$value": { "value": 24, "unit": "px" }
+        "$value": {
+          "value": 24,
+          "unit": "px"
+        }
       }
     },
     "control": {
       "$type": "dimension",
       "$description": "Control heights. In rem, so they grow with the user's font size. Never let a control drop below size.target.min.",
-      "sm": { "$value": { "value": 1.5, "unit": "rem" } },
-      "md": { "$value": { "value": 2, "unit": "rem" } },
-      "lg": { "$value": { "value": 2.5, "unit": "rem" } }
+      "sm": {
+        "$value": {
+          "value": 1.5,
+          "unit": "rem"
+        }
+      },
+      "md": {
+        "$value": {
+          "value": 2,
+          "unit": "rem"
+        }
+      },
+      "lg": {
+        "$value": {
+          "value": 2.5,
+          "unit": "rem"
+        }
+      }
     }
   }
 }

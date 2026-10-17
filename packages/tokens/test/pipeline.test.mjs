@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest';
-import { buildTokens } from '../sd.config.mjs';
+import { buildTokens, TOKEN_SCOPE } from '../sd.config.mjs';
 
 const oklch = (l, c, h) => ({ colorSpace: 'oklch', components: [l, c, h] });
 
@@ -105,6 +105,19 @@ describe('buildTokens', () => {
         '  }',
       ].join('\n'),
     );
+  });
+
+  test('tokens are declared on every themed subtree, not only the root (ADR-0010)', async () => {
+    // Vite's default production build rewrites light-dark() into variables that resolve where the
+    // token is declared. Declared only on :root, a data-theme="dark" subtree inherited the root's
+    // light values: correct in dev, wrong in production. Probed in a real build before this fix.
+    const { css, entries } = await buildTokens({ tokens: fixture() });
+    const scopes = [...css.matchAll(/^\s*(:where\([^{]*\)) \{\n\s*--senui-/gm)].map((m) => m[1]);
+    expect(scopes).toEqual([TOKEN_SCOPE, TOKEN_SCOPE]); // every token, then reduced motion
+    expect(TOKEN_SCOPE).toBe(':where(:root, [data-theme])');
+    // color-scheme stays per theme, so a subtree's own scheme isn't reset to `light dark`.
+    expect(css).toContain(':where(:root) {\n    color-scheme: light dark;\n  }');
+    expect(css.match(/--senui-/g)?.length).toBeGreaterThanOrEqual(entries.length);
   });
 
   test('DTCG unit objects serialize to CSS', async () => {

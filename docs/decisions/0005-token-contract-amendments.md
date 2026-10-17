@@ -1,6 +1,6 @@
 # 0005 — Token contract amendments: themed subtrees, motion factor, explicit surfaces, state names, pipeline-size trigger
 
-- **Status:** Accepted
+- **Status:** Accepted (amended by [0010](0010-tokens-declared-on-themed-subtrees.md): tokens are also declared on each `[data-theme]` element)
 - **Date:** 2026-10-16
 - **Deciders:** senakster (solo call, no review required); raised by the L01 review
   (`modern-web-curator`, `wcag-auditor`)

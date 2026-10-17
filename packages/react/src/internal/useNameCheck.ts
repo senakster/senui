@@ -4,7 +4,7 @@ import { DEV, warnOnce } from './dev.js';
 /**
  * A development check for the accessible-name cases the type can't catch (CONVENTIONS rule 3): an
  * empty `aria-label`, and an element with no text, `aria-label` or `aria-labelledby` (an icon
- * passed as children without `iconOnly`). Runs when the element mounts. Compose the returned ref
+ * passed as children instead of as `icon`). Runs when the element mounts. Compose the returned ref
  * with the forwarded one:
  *
  * ```tsx
@@ -28,7 +28,7 @@ export function useNameCheck(component: string): RefCallback<HTMLElement> {
       ) {
         warnOnce(
           `name-missing:${component}`,
-          `${component} has no accessible name: no text content, \`aria-label\` or \`aria-labelledby\`. For an icon-only ${component}, pass \`iconOnly\` and \`aria-label\`.`,
+          `${component} has no accessible name: no text content, \`aria-label\` or \`aria-labelledby\`. For an icon-only ${component}, pass the icon as \`icon\`, with \`aria-label\`.`,
         );
       }
     },
