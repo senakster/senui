@@ -1,6 +1,9 @@
 import { render } from '@testing-library/react';
 import { describe, expect, test, vi } from 'vitest';
 import { userEvent } from 'vitest/browser';
+import { composeStories } from '@storybook/react-vite';
+import { expectNoAxeViolations } from '../../internal/testing/axe.js';
+import * as stories from './Button.stories.js';
 import '@senakster/tokens/tokens.css';
 import '../../styles/index.css';
 import { Button } from './Button.js';
@@ -83,5 +86,14 @@ describe('Button in a browser', () => {
     expect(style.outlineStyle).toBe('solid');
     expect(parseFloat(style.outlineWidth)).toBeGreaterThan(0);
     expect(style.boxShadow).toBe('none');
+  });
+});
+
+// The rendered contrast check jsdom can't do: every story with the real CSS, light theme (the
+// page default). Evidence for 1.4.3 and 1.4.11 in Button.a11y.ts.
+describe('axe with rendered colour contrast, for every story', () => {
+  test.each(Object.entries(composeStories(stories)))('%s', async (_name, Story) => {
+    const { container } = render(<Story />);
+    await expectNoAxeViolations(container, { contrast: true });
   });
 });

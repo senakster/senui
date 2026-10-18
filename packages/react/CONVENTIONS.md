@@ -82,17 +82,19 @@ test per component in its `*.test.tsx`; `component-api-reviewer`.
 Where a component can't be accessible without a prop, the type requires it. Where two props are
 alternatives, they are a discriminated union. An icon-only control has no visible text, so it takes
 its icon as the `icon` prop, has no children, and requires exactly one of `aria-label` or
-`aria-labelledby`. Without `icon`, the visible label (children) is required:
+`aria-labelledby`. Without `icon`, the visible label (children) is required, typed
+`Exclude<ReactNode, null | undefined | boolean>` so a label that may be missing doesn't compile:
 
 ```tsx
 <Button icon={<CloseIcon />} aria-label="Close" />           // ok
 <Button icon={<CloseIcon />} />                              // compile error: no name
 <Button icon={<CloseIcon />} aria-label="Close">Close</Button> // compile error: children
 <Button>Save</Button>                                         // ok
+<Button>{maybeLabel}</Button>                                 // compile error: may be undefined
 ```
 
 The type can't see that children are text (`<Button><CloseIcon /></Button>` compiles), or that a
-label is non-empty. Every component that needs
+string is non-empty (`<Button>{''}</Button>` compiles). Every component that needs
 a name composes [`useNameCheck`](src/internal/useNameCheck.ts) into its ref, which warns in
 development about an empty `aria-label` and about an element with no name at all:
 
@@ -305,6 +307,10 @@ an optional prop required) is also a major.
 | Semantic tokens         | `--senui-color-fg-danger`                        | `@senakster/tokens`     |
 
 Adding to any of these is a minor.
+
+**Not public:** part classes with a double underscore (`.senui-button__label`, `__icon`,
+`__spinner`) are internal and can change in any release. Each component's CSS opens with a comment
+listing its public classes, data-attribute values and component tokens.
 
 ## Loading the CSS
 

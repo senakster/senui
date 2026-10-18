@@ -4,13 +4,13 @@ Single source of truth for **where the implementation is right now**. Overwritte
 `implement-module` skill at the end of every run. For history, see `log.md`; for status, see
 `docs/PROGRESS.md`.
 
-| Field         | Value                                                                         |
-| ------------- | ----------------------------------------------------------------------------- |
-| Target app    | repo root (pnpm workspace: `packages/tokens`, `packages/react`, `apps/docs`)  |
-| Active module | L03 — Button (in progress). Written by Claude at Emil's request; Emil reviews |
-| Sub-step      | Button done and manually tested; next: reviewers, then triage                 |
-| Last verified | 2026-10-17: `pnpm check`, `pnpm test` (tokens 32, react 89), build-storybook  |
-| Updated       | 2026-10-17                                                                    |
+| Field         | Value                                                                                      |
+| ------------- | ------------------------------------------------------------------------------------------ |
+| Target app    | repo root (pnpm workspace: `packages/tokens`, `packages/react`, `apps/docs`)               |
+| Active module | L04 — FormField + TextInput (next; not started). L03 Button done 2026-10-18                |
+| Sub-step      | L03 done; waiting on a PR for the L03 review fixes                                         |
+| Last verified | 2026-10-18: `pnpm check`, `pnpm test` (tokens 32, react 120), build-storybook (18 stories) |
+| Updated       | 2026-10-18                                                                                 |
 
 ## Brief — L03 Button
 
@@ -98,12 +98,10 @@ pnpm test                                               # unit + browser + type 
 
 ## Next action
 
-Button is written (scope-decisions § L03, deviation 7). Emil:
+L03 is done (PROGRESS, log). The L03 review fixes and manual runs are uncommitted: commit on a
+branch, open a PR, and squash-merge when `verify` is green. Then run `/modular-web:implement-module`
+to start L04 (FormField + TextInput); its notes are in scope-decisions § L02 and § L01 (cross-module
+notes).
 
-1. Reads `packages/react/src/components/Button/` and runs it: `pnpm --filter docs storybook`.
-2. Does the keyboard and screen-reader runs, and records them in `Button.a11y.ts` (the TODO at the
-   top says what to change). `pnpm test` passes once they're in.
-3. Says "review it": the reviewers (`component-api-reviewer`, `wcag-auditor`,
-   `modern-web-curator`) run read-only, then triage; rejections go to `OVERRIDES.md`.
-
-Open: hover/active stories need a pseudo-states addon decision (an ADR, since it's a dependency).
+Still open: hover/active stories (pseudo-states addon, needs an ADR); the squash-only repository
+setting (`.github/rulesets/README.md`).

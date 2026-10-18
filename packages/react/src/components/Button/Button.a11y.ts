@@ -14,7 +14,15 @@ export const a11y = defineA11yContract<ButtonProps>()({
         attribute: 'aria-disabled',
         when: 'Loading, so it stays focusable while ignoring activation',
       },
+      {
+        attribute: 'aria-disabled',
+        when: 'Set by the consumer: focusable but unavailable; click activation ignored, disabled look',
+      },
       { attribute: 'disabled', when: 'Disabled and not loading; it then leaves the tab order' },
+      {
+        attribute: 'aria-pressed',
+        when: 'Set by the consumer to make a toggle button; styled as pressed when true',
+      },
     ],
     relationships: [],
     hiddenFromAT: ['the loading spinner', 'the icon of an icon-only button'],
@@ -45,6 +53,13 @@ export const a11y = defineA11yContract<ButtonProps>()({
       owner: 'consumer',
       announces: 'Nothing from Button. Announce the outcome, for example as a status message.',
     },
+    {
+      when: 'When a toggle button (aria-pressed) changes',
+      mechanism: 'state-change',
+      owner: 'component',
+      announces:
+        '"Bold, toggle button, slået fra" (Narrator in Danish, Chrome; "slået fra" is "not pressed").',
+    },
   ],
   requiredProps: [
     {
@@ -57,7 +72,7 @@ export const a11y = defineA11yContract<ButtonProps>()({
     RESPONSIBILITIES.keepFocusRing,
     RESPONSIBILITIES.labelInName,
     'Announce the outcome of an action that sets `loading`: Button stays silent so it never announces twice.',
-    'Mark icons passed to Button `aria-hidden`; the button already carries the name.',
+    'While loading or `aria-disabled`, Button ignores click activation (`onClick`, `onClickCapture`); pointer handlers and native listeners on its ref still fire, so keep actions in click handlers.',
   ],
   adaptation: {
     targetSize: 'min-24',
@@ -83,7 +98,13 @@ export const a11y = defineA11yContract<ButtonProps>()({
     {
       criterion: '2.4.11',
       claim: 'enables',
-      how: 'The ring is an outline with an offset; the app must not cover focused buttons.',
+      how: 'Button never covers its own focus; the app keeps sticky headers and overlays from covering a focused button (for example with scroll-padding).',
+      evidence: ['automated'],
+    },
+    {
+      criterion: '1.4.3',
+      claim: 'meets',
+      how: 'Label colours have checked 4.5:1 token pairs against every fill state, and axe checks rendered contrast on every story in Chromium. Disabled text is exempt.',
       evidence: ['automated'],
     },
     {
@@ -95,8 +116,8 @@ export const a11y = defineA11yContract<ButtonProps>()({
     {
       criterion: '1.4.11',
       claim: 'meets',
-      how: 'Focus ring and borders use tokens with checked 3:1 pairs.',
-      evidence: ['automated'],
+      how: 'The focus ring, the secondary border (border.strong) and the pressed border (text colour) all meet 3:1. Primary, danger and ghost are identified by their text label (Understanding 1.4.11).',
+      evidence: ['automated', 'forced colours'],
     },
     {
       criterion: '4.1.2',
@@ -140,6 +161,25 @@ export const a11y = defineA11yContract<ButtonProps>()({
       packageVersion: '0.0.0',
       result: 'pass',
       date: '2026-10-17',
+    },
+    {
+      // After the review fixes: the toggle button (aria-pressed) and the aria-hidden icon wrapper.
+      method: 'screen reader',
+      at: 'Narrator (Danish)',
+      atVersion: 'Windows 11 26H2 (build 26300.9711)',
+      browser: 'Chrome',
+      browserVersion: '155.0.8059.40',
+      os: 'Windows 11 Pro 26H2 (build 26300.9711)',
+      packageVersion: '0.0.0',
+      result: 'pass',
+      date: '2026-10-18',
+    },
+    {
+      method: 'forced colours',
+      detail:
+        'Chrome 155.0.8059.40 DevTools emulation (forced-colors: active, dark scheme), Matrix and ForcedColors stories: borders, disabled, the spinner gap and pressed all distinguishable. The first check found pressed unreadable (backplate); fixed and re-checked the same day.',
+      result: 'pass',
+      date: '2026-10-18',
     },
   ],
   knownIssues: [],

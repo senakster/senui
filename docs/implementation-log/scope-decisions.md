@@ -297,6 +297,42 @@ both reviews (the entry could export from `internal/` without a contract). No `O
 10. **Loading is `data-state="loading"`**, not `aria-busy` (decision 4: Button announces nothing).
     The CONVENTIONS root-ownership example had `aria-busy`; corrected.
 
+### Review (2026-10-18)
+
+The `review-component` workflow ran `component-api-reviewer`, `wcag-auditor` and `modern-web-curator`
+read-only: 16 findings (5 major, 11 minor), no ADRs. Overlaps reduced them to 11 decisions. Emil
+accepted all 16, rejected 0, escalated 0, so there are no `OVERRIDES.md` rows. Applied:
+
+- **Label type narrowed** to `Exclude<ReactNode, null | undefined | boolean>`, in Button and in the
+  reference type; an empty string is still left to `useNameCheck` (CONVENTIONS rule 3).
+- **`aria-pressed` supported** (Emil chose support over removal): typed `boolean` (no `mixed`), a
+  pressed style with fill plus a text-colour border (shape, not colour alone), a forced-colours rule,
+  a contract state, and Toggle/Pressed stories. Its announcement is not yet heard with a screen
+  reader; the contract says so.
+- **Axe with rendered colour contrast** runs on every story in Chromium (WCAG 2.2 A/AA plus
+  best-practice tags). A probe that lowered the primary label's contrast failed 7 stories. The
+  contract gains 1.4.3, and 2.4.11 is reworded to what Button guarantees.
+- **Secondary border is `border.strong`**, so the 1.4.11 claim is true.
+- **Spinner in forced colours** keeps its gap with system colours (`ButtonText` / `ButtonFace`), not
+  `forced-color-adjust: none` (the two reviewers disagreed; Emil chose this).
+- **Consumer `aria-disabled` is public**: JSDoc, contract state, AriaDisabled story.
+- **Button hides the icon itself** (`aria-hidden` wrapper); the consumer responsibility is gone.
+- **`onClickCapture` is guarded** like `onClick`; the contract says pointer handlers and native
+  listeners are not.
+- **Hover only under `@media (hover: hover)`**.
+- **Public surface declared**: a comment at the top of Button.css and a CONVENTIONS note mark the
+  `__label` / `__icon` / `__spinner` part classes internal.
+- **Stories added**: IconOnlyLoading, IconOnlyLabelledBy, AriaDisabled, Toggle, Pressed, LongLabel,
+  plus loading icon-only and pressed cells in Matrix (18 stories).
+
+### More deviations
+
+11. **Loading label is `opacity: 0`, not `visibility: hidden`** (plan decision 5). Visibility also
+    removed the label from the accessibility tree, so Narrator heard a loading button with no name
+    (2026-10-17). Locked by a browser test.
+12. **`aria-pressed` is in scope for Button** (Emil, review triage), though the plan didn't mention
+    toggles. Only `true` / `false`; a tri-state toggle would be its own decision.
+
 ### Known-unmet acceptance criteria
 
 - **Hover and active stories.** Storybook can't force `:hover`/`:active` without an addon (a new
@@ -309,3 +345,10 @@ both reviews (the entry could export from `internal/` without a contract). No `O
 - **L08** — the Vitest `browser` project (Chromium via Playwright, `*.browser.test.tsx`) exists from
   L03. L08's Playwright gate can build on the same `playwright` pin; `@storybook/addon-vitest` would
   run every story in that browser project.
+- **L08: the `forcedColors` story parameter** (Emil, 2026-10-18). A story with
+  `parameters.forcedColors: 'active'` (Button's `ForcedColors`) is a contract with L08: the gate
+  screenshots it with Playwright's `forcedColors: 'active'`, under both `colorScheme: 'light'` and
+  `'dark'`. Until L08 reads it, the parameter does nothing and the story renders like Matrix; that's
+  why it exists separately (it was a plain duplicate before). L03's "forced-colors story" criterion
+  is met by the story now and enforced once L08 lands. A manual check with Chrome emulation on
+  2026-10-18 found the pressed backplate bug, fixed the same day.

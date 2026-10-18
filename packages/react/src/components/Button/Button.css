@@ -1,5 +1,9 @@
 @layer senui.components {
-  /* Component tokens: the public override points, defaulting to semantic tokens. Variant and size
+  /* Public surface (semver): the `.senui-button` class, `data-variant` / `data-size` /
+     `data-state="loading"` values, and the nine `--senui-button-*` tokens below. The part classes
+     (`.senui-button__label`, `__icon`, `__spinner`) are internal and may change in any release.
+
+     Component tokens: the public override points, defaulting to semantic tokens. Variant and size
      rules only change these; state rules below set properties directly, so no variant can
      override a disabled or focused look. */
   :where(.senui-button) {
@@ -42,7 +46,8 @@
     --senui-button-bg-hover: var(--senui-color-bg-subtle-hover);
     --senui-button-bg-active: var(--senui-color-bg-subtle-active);
     --senui-button-fg: var(--senui-color-fg-default);
-    --senui-button-border-color: var(--senui-color-border-default);
+    /* border.strong: the boundary has checked 3:1 pairs against every surface (1.4.11). */
+    --senui-button-border-color: var(--senui-color-border-strong);
   }
 
   :where(.senui-button)[data-variant='ghost'] {
@@ -87,12 +92,22 @@
     padding-inline: 0;
   }
 
-  /* States. Hover and active skip unavailable buttons; the label never moves. */
-  :where(.senui-button:hover:not(:disabled, [aria-disabled='true'])) {
-    background-color: var(--senui-button-bg-hover);
+  /* States. Hover and active skip unavailable buttons; the label never moves. Hover only on devices
+     that can hover, so a tap on a touch screen doesn't leave the hover colour behind. */
+  @media (hover: hover) {
+    :where(.senui-button:hover:not(:disabled, [aria-disabled='true'])) {
+      background-color: var(--senui-button-bg-hover);
+    }
   }
 
   :where(.senui-button:active:not(:disabled, [aria-disabled='true'])) {
+    background-color: var(--senui-button-bg-active);
+  }
+
+  /* Toggle button. Pressed is shown by shape as well as colour (WCAG 1.4.1): the pressed fill plus
+     a border in the text colour, which filled variants otherwise don't have. */
+  :where(.senui-button[aria-pressed='true']) {
+    border-color: currentColor;
     background-color: var(--senui-button-bg-active);
   }
 
@@ -150,8 +165,28 @@
       border-color: ButtonText;
     }
 
-    :where(.senui-button:hover:not(:disabled, [aria-disabled='true'])) {
+    @media (hover: hover) {
+      :where(.senui-button:hover:not(:disabled, [aria-disabled='true'])) {
+        border-color: Highlight;
+      }
+    }
+
+    /* Opted out so the browser doesn't paint its Canvas backplate behind the label: HighlightText on
+       that backplate was invisible (Emil's check, 2026-10-18). Highlight and HighlightText are a
+       system pair, so contrast is the user's theme's own. Pressed is essential state, the case
+       where opting out is allowed. */
+    :where(.senui-button[aria-pressed='true']) {
+      forced-color-adjust: none;
       border-color: Highlight;
+      background-color: Highlight;
+      color: HighlightText;
+    }
+
+    /* System colours aren't rewritten, so the spinner keeps its gap and still shows activity. A
+       transparent border would be forced to ButtonText, making a closed ring that looks static. */
+    :where(.senui-button__spinner) {
+      border-color: ButtonText;
+      border-block-start-color: ButtonFace;
     }
 
     :where(.senui-button:focus-visible) {
