@@ -19,7 +19,7 @@ type Variant = 'primary' | 'secondary' | 'danger';
 // `aria-labelledby`: a discriminated union, not docs. Without `icon`, children (the visible label)
 // are required. "Children are text" can't be typed; useNameCheck warns at runtime instead.
 type Labelled =
-  | { icon?: never; children: ReactNode }
+  | { icon?: never; children: Exclude<ReactNode, null | undefined | boolean> }
   | {
       icon: ReactElement;
       children?: never;
@@ -95,6 +95,6 @@ describe('conventions (reference)', () => {
     // A plain Omit collapses the union to its shared keys, so the same mistake compiles. This is
     // the reason DistributiveOmit exists; don't copy this line.
     type Collapsed = Omit<ExampleProps, 'variant'>;
-    expectTypeOf<{ icon: ReactElement; children?: undefined }>().toExtend<Collapsed>();
+    expectTypeOf<{ icon: ReactElement }>().toExtend<Collapsed>();
   });
 });

@@ -1,22 +1,36 @@
 import axe from 'axe-core';
 import { expect } from 'vitest';
 
+export interface AxeOptions {
+  /**
+   * Check rendered colour contrast. Only meaningful in the browser project (`*.browser.test.tsx`),
+   * with the real CSS loaded: jsdom has no layout or computed colours, so it stays off there.
+   */
+  contrast?: boolean;
+}
+
 /**
  * The unit axe gate (principle 6), without a wrapper package (L03 scope decision). Runs axe-core on
- * `container` and returns one line per violation, so a failure reads as rule, impact and element:
+ * `container` against the WCAG 2.2 A and AA rules and returns one line per violation, so a failure
+ * reads as rule, impact and element:
  *
  * ```ts
  * const { container } = render(<Button>Save</Button>);
- * await expectNoAxeViolations(container);
+ * await expectNoAxeViolations(container);                       // jsdom
+ * await expectNoAxeViolations(container, { contrast: true });   // browser, real CSS
  * ```
- *
- * jsdom has no layout or computed colours, so `color-contrast` is off here; the token build checks
- * contrast pairs (L01), and Storybook and L08 check rendered contrast in a browser.
  */
-export async function axeViolations(container: Element): Promise<string[]> {
+export async function axeViolations(
+  container: Element,
+  { contrast = false }: AxeOptions = {},
+): Promise<string[]> {
   const results = await axe.run(container, {
     resultTypes: ['violations'],
-    rules: { 'color-contrast': { enabled: false } },
+    runOnly: {
+      type: 'tag',
+      values: ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22a', 'wcag22aa', 'best-practice'],
+    },
+    rules: { 'color-contrast': { enabled: contrast } },
   });
   return results.violations.flatMap((violation) =>
     violation.nodes.map(
@@ -26,6 +40,9 @@ export async function axeViolations(container: Element): Promise<string[]> {
   );
 }
 
-export async function expectNoAxeViolations(container: Element): Promise<void> {
-  expect(await axeViolations(container)).toEqual([]);
+export async function expectNoAxeViolations(
+  container: Element,
+  options?: AxeOptions,
+): Promise<void> {
+  expect(await axeViolations(container, options)).toEqual([]);
 }

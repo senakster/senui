@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
+import { useState } from 'react';
 import { expect, fn, userEvent, within } from 'storybook/test';
 import { Button, type ButtonSize, type ButtonVariant } from './Button.js';
 
@@ -50,6 +51,55 @@ export const IconOnly: Story = {
   render: () => <Button icon={<CloseIcon />} aria-label="Close" />,
 };
 
+export const IconOnlyLoading: Story = {
+  render: () => <Button icon={<CloseIcon />} aria-label="Close" loading />,
+};
+
+/** Named by visible text elsewhere on the page. */
+export const IconOnlyLabelledBy: Story = {
+  render: () => (
+    <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+      <span id="filters-heading">Clear filters</span>
+      <Button icon={<CloseIcon />} aria-labelledby="filters-heading" />
+    </div>
+  ),
+};
+
+/**
+ * Unavailable but focusable, set by the consumer: activation is ignored and it looks disabled, but
+ * it stays in the tab order, so a tooltip or description can explain why.
+ */
+export const AriaDisabled: Story = { args: { 'aria-disabled': 'true' } };
+
+/** A toggle button: `aria-pressed` makes it announce "toggle button, pressed / not pressed". */
+export const Toggle: Story = {
+  render: function Render() {
+    const [pressed, setPressed] = useState(false);
+    return (
+      <Button
+        variant="secondary"
+        aria-pressed={pressed}
+        onClick={() => {
+          setPressed((value) => !value);
+        }}
+      >
+        Bold
+      </Button>
+    );
+  },
+};
+
+export const Pressed: Story = { args: { variant: 'secondary', 'aria-pressed': true } };
+
+/** In a narrow space the label wraps rather than overflowing or being cut off (WCAG 1.4.10). */
+export const LongLabel: Story = {
+  render: () => (
+    <div style={{ inlineSize: '12ch' }}>
+      <Button>Save changes and continue to payment</Button>
+    </div>
+  ),
+};
+
 /** Keyboard focus shows the ring; a mouse click does not. */
 export const FocusVisible: Story = {
   play: async ({ canvasElement }) => {
@@ -58,7 +108,7 @@ export const FocusVisible: Story = {
   },
 };
 
-/** Every variant at every size, idle, disabled and loading. */
+/** Every variant at every size, idle, disabled, loading, icon-only and pressed. */
 export const Matrix: Story = {
   render: () => (
     <div style={{ display: 'grid', gap: '1rem' }}>
@@ -76,6 +126,15 @@ export const Matrix: Story = {
             Loading
           </Button>
           <Button variant={variant} icon={<CloseIcon />} aria-label={`Close (${variant})`} />
+          <Button
+            variant={variant}
+            icon={<CloseIcon />}
+            aria-label={`Close (${variant}, loading)`}
+            loading
+          />
+          <Button variant={variant} aria-pressed>
+            Pressed
+          </Button>
         </div>
       ))}
     </div>
@@ -83,10 +142,22 @@ export const Matrix: Story = {
 };
 
 /**
- * Forced colours: open DevTools → Rendering → "Emulate CSS media feature forced-colors: active",
- * or turn on a Windows contrast theme. Every state must stay distinguishable by border and text.
+ * Matrix, for forced colours. A page can't switch forced colours on itself, so:
+ *
+ * - `parameters.forcedColors: 'active'` tells L08's Playwright gate to screenshot this story with
+ *   forced colours emulated, in light and dark schemes.
+ * - By hand: DevTools → Rendering → "Emulate CSS media feature forced-colors: active", or a Windows
+ *   contrast theme. Every state must stay distinguishable by border, text and the system colours.
  */
 export const ForcedColors: Story = {
   ...Matrix,
-  parameters: { docs: { description: { story: 'Check with forced-colors emulation on.' } } },
+  parameters: {
+    forcedColors: 'active',
+    docs: {
+      description: {
+        story:
+          'Screenshot with forced colours emulated by the L08 gate. To check by hand: DevTools → Rendering → forced-colors: active.',
+      },
+    },
+  },
 };

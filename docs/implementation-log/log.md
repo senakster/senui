@@ -156,3 +156,39 @@ Entry format: date — module · Did · Verified · Scope decisions · Plan adju
 - **Did:** Emil asked for a GitHub ruleset for PRs and merging. The repo is private on a free account, so GitHub's API refuses rulesets (HTTP 403). Checked the history before suggesting a public switch: one identity (`senakster@gmail.com`), no secret-like files, no employer name. Emil chose to stay private; MIT; squash only; no bypass. Wrote `.github/rulesets/main.json` (ready to POST) with a README, `LICENSE`, `license: MIT` in both packages, and a "Branches and pull requests" section in CONTRIBUTING.
 - **Verified:** the ruleset JSON parses; `pnpm check` passes. Not applied to GitHub: it can't be, on this plan.
 - **Next:** unchanged. Say "review it" for the Button reviewers; open a PR for CI.
+
+## 2026-10-18 — L03 Button: review and fixes
+
+- **Did:**
+  - Found PR #1 (licence and rules) merged, with CI green. It merged as a merge commit, because the squash-only repository setting isn't applied yet.
+  - Ran the `review-component` workflow at Emil's choice: 3 reviewers, read-only, no gaps.
+  - Triaged with Emil in three batches and applied every fix (scope-decisions § L03, "Review"):
+    - the label type narrowed;
+    - `aria-pressed` supported;
+    - axe with rendered contrast on every story in Chromium;
+    - the secondary border moved to `border.strong`;
+    - the forced-colours spinner gap;
+    - consumer `aria-disabled` made public;
+    - Button hides its own icon;
+    - `onClickCapture` guarded;
+    - hover limited to hover-capable devices;
+    - the public surface declared;
+    - 6 more stories.
+  - Recorded the `opacity: 0` deviation.
+- **Verified:**
+  - `pnpm check` passes. `pnpm test`: tokens 32, react 120, type tests clean.
+  - build-storybook builds 18 Button stories.
+  - Probe: lowering the primary label's contrast failed the browser axe check on 7 stories; the file was restored.
+- **Overrides:** 16 findings (API 8, a11y 6, platform 2): accepted 16, rejected 0, escalated 0. No `OVERRIDES.md` rows.
+- **Next:**
+  - Emil re-checks what changed for assistive technology and forced colours: the Toggle story with Narrator (pressed / not pressed), and loading plus pressed with forced-colors emulation.
+  - Then commit and open a PR (squash), and mark L03 done.
+  - The contract staleness check will warn after the commit, because Button.tsx changed after the 2026-10-17 runs. A fresh Narrator run clears it.
+- **Forced-colours check by Emil (Chrome emulation, dark):** the spinner gap, disabled (GrayText) and borders were fine, but **pressed** showed an empty box. Chrome paints a Canvas backplate behind text in forced colours, and `HighlightText` on it was black on black. The pressed rule now sets `forced-color-adjust: none` with the Highlight/HighlightText system pair; a Playwright screenshot of Matrix with forced colours and a dark scheme shows "Pressed" readable. Recorded as a forced-colours run once Emil confirms.
+- **Narrator re-check (2026-10-18, Danish Narrator, Chrome):** the Toggle story is announced "Bold, toggle button, slået fra" (not pressed). Recorded as a second screen-reader run; the toggle announcement in the contract now holds what was heard.
+
+## 2026-10-18 — L03 done
+
+- **Did:** Emil confirmed the Narrator toggle check and, after the fix, the forced-colours check ("Pressed is readable"). Recorded a forced-colours run; 1.4.11 cites it. Walked the acceptance checklist: all met except dedicated hover/active stories (known-unmet, pseudo-states addon decision).
+- **Verified:** `pnpm check`; `pnpm test` (tokens 32, react 120); build-storybook.
+- **Next:** Emil commits on a branch and opens a PR (squash). Then `/modular-web:implement-module` starts L04 (FormField + TextInput).

@@ -113,9 +113,28 @@ describe('Button', () => {
     expect(onClick).not.toHaveBeenCalled();
   });
 
-  test('icon-only takes its name from aria-label', () => {
-    render(<Button icon={<svg aria-hidden="true" />} aria-label="Close" />);
+  test('icon-only takes its name from aria-label, and hides the icon itself', () => {
+    const { container } = render(
+      <Button icon={<img src="x.svg" alt="close icon" />} aria-label="Close" />,
+    );
     expect(screen.getByRole('button', { name: 'Close' })).toBeInTheDocument();
+    expect(container.querySelector('.senui-button__icon')).toHaveAttribute('aria-hidden', 'true');
+  });
+
+  test('onClickCapture is guarded too while unavailable', () => {
+    const onClickCapture = vi.fn();
+    render(
+      <Button loading onClickCapture={onClickCapture}>
+        Save
+      </Button>,
+    );
+    fireEvent.click(screen.getByRole('button'));
+    expect(onClickCapture).not.toHaveBeenCalled();
+  });
+
+  test('aria-pressed makes it a toggle button', () => {
+    render(<Button aria-pressed>Bold</Button>);
+    expect(screen.getByRole('button', { name: 'Bold', pressed: true })).toBeInTheDocument();
   });
 
   test('forwards its ref to the button element', () => {

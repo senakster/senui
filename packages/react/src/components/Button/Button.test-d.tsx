@@ -35,6 +35,17 @@ describe('Button types', () => {
     void (<Button>Save</Button>);
     // @ts-expect-error -- nothing to name it
     void (<Button />);
+    const maybeLabel = undefined as string | undefined;
+    // @ts-expect-error -- a label that may be undefined renders an unnamed button
+    void (<Button>{maybeLabel}</Button>);
+    // @ts-expect-error -- null renders nothing
+    void (<Button children={null} />);
+  });
+
+  test('aria-pressed is a boolean: no "mixed" state to style', () => {
+    void (<Button aria-pressed={false}>Bold</Button>);
+    // @ts-expect-error -- tri-state toggles aren't designed
+    void (<Button aria-pressed="mixed">Bold</Button>);
   });
 
   test('no colour or role props; native attributes and ref pass through', () => {
