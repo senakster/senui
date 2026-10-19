@@ -67,6 +67,11 @@ This file is **parsed** into the decision index, so its shape matters:
   runs that with `--with-deps` before `pnpm test`. Kept in `pnpm test` rather than CI-only: the
   browser project is small and fast. Storybook's preview loads component CSS from source.
 - **2026-10-17 — branch rules and licence (Emil):** `main` changes only by squash-merged PR with a green `verify` check, resolved conversations, linear history, no force-push or deletion, and no bypass. Written as `.github/rulesets/main.json`, but **not applied**: rulesets need a public repo or GitHub Pro, and Emil chose to stay private for now. Followed by convention (CONTRIBUTING.md). Re-apply when the repo goes public or upgrades: one `gh api` call, in `.github/rulesets/README.md`. Licence: MIT, `LICENSE` at the root and `license` in both packages. **L10:** npm only packs a LICENSE from the package folder, so copy it into each package at publish.
+- **L04 (2026-10-19) — `SENUI_BROWSERS`:** the Vitest browser project's engines come from
+  `SENUI_BROWSERS` (comma-separated `chromium`, `firefox`, `webkit`), defaulting to Chromium, so
+  `pnpm test` and CI are unchanged. Firefox and WebKit are installed once with
+  `playwright install firefox webkit`. Not in CI: a manual cross-browser check until L08 decides the
+  gate's engines.
 
 ### Deviations from the plan
 
@@ -352,3 +357,119 @@ accepted all 16, rejected 0, escalated 0, so there are no `OVERRIDES.md` rows. A
   why it exists separately (it was a plain duplicate before). L03's "forced-colors story" criterion
   is met by the story now and enforced once L08 lands. A manual check with Chrome emulation on
   2026-10-18 found the pressed backplate bug, fixed the same day.
+
+### Defects found later
+
+- **2026-10-19: Storybook controls did nothing on six Button stories** (Emil: IconOnlyLoading
+  ignored `variant`). IconOnly, IconOnlyLoading, IconOnlyLabelledBy, Toggle and LongLabel rendered
+  hard-coded JSX, `render: () => …`, which never reads `args`; Matrix and ForcedColors are fixed
+  grids. The first five now spread their args (icon-only stories drop the meta's label and name args
+  through `iconOnlyArgs`). The grids, and L04's FormField compositions, disable their controls. A
+  new test per component renders every story that has controls with a changed arg and checks it
+  lands (`withControls()`); with the old IconOnlyLoading put back, it fails. CONVENTIONS' file
+  layout states the rule.
+
+## L04 — FormField + TextInput
+
+| Deliverable / criterion                    | Decision                                                 | Reason                                                                                                                                            | Re-include when                                          |
+| ------------------------------------------ | -------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------- |
+| Component, CSS, contracts, tests, stories  | in, Claude writes and Emil reviews (as L03, deviation 7) | Emil, 2026-10-18: "Claude writes, Emil reviews"                                                                                                   | n/a                                                      |
+| Live region (open question 1)              | in: `announce="polite"`, opt-in, off by default          | Emil took the plan's recommendation                                                                                                               | Consumers report missed errors with on-change validation |
+| `focusFirstInvalid(form)`                  | in, public export                                        | Emil: consumers running their own validation need it to meet decision 3; the submit story uses it                                                 | n/a                                                      |
+| TextInput `size` (`sm`/`md`/`lg`)          | in                                                       | Emil: aligns a field with a Button in a row (CONVENTIONS rule 11)                                                                                 | n/a                                                      |
+| Textarea, Select, Checkbox/Switch in field | out (plan)                                               | Plan: not first release / L05                                                                                                                     | L05 for Checkbox/Switch                                  |
+| Hover style for TextInput                  | out                                                      | No input-hover token, and a darker border than `border.strong` doesn't exist; the field isn't a target whose look should change under the pointer | A design asks for it; it needs a token first             |
+
+### Deviations from the plan
+
+1. **Invalid styling is `[aria-invalid="true"]` only; `:user-invalid` is not styled** (plan decision
+   5). A probe on 2026-10-18 showed Chromium matches `:user-invalid` while the accessibility tree still
+   reports `invalid: false`, which is exactly what CONVENTIONS rule 6 forbids. Emil chose to sync
+   instead: on the native `invalid` event the control sets `aria-invalid`, and FormField shows the
+   browser's `validationMessage` in its error node (replacing the bubble). The handler acts only when
+   the control already matches `:user-invalid`, which a second probe showed is true during a submit
+   and false for a `checkValidity()` on an untouched form. Nothing looks or reads invalid before a
+   submit attempt. ADR-0001 still lists `:user-invalid` among state signals; rule 6 and this module
+   say otherwise, so that wants an ADR (see cross-module notes).
+2. **A native error stays until the value is valid**, with the current message (Emil, over clearing
+   on any change; modern-web-guidance `required-field-feedback`: remove the error on correction).
+   A form reset clears it.
+3. **FormField wires its control through a sealed render-prop binding, not context** (plan decision 6
+   and the type-test criterion conflicted: a parent can't change a child's prop types). Emil chose
+   `<FormField label="…">{(field) => <TextInput field={field} />}</FormField>`. `FormFieldBinding` is
+   opaque, so only FormField makes one; it satisfies TextInput's name requirement and forbids a
+   competing `aria-label`, `id`, `required` or `aria-invalid`. `useFormFieldControl(binding, props)`
+   stays the one place wiring lives, for L05.
+4. **FormField's `id` prop is the control's id**, not the root `div`'s, so an error summary can link to
+   the field (plan: "consumer may pass `id` explicitly").
+5. **FormField suppresses the browser's bubble and moves focus itself** on a native submit failure:
+   cancelling `invalid` also cancels the browser's focus move. Standalone TextInput leaves both to the
+   browser. Known issue in the contract: `checkValidity()` after a submit attempt behaves like a submit.
+6. **`useNameCheck` counts `<label>` elements** (`node.labels`). It read only text content, so an input
+   named by a label would have warned.
+7. **TextInput passes native `value` / `defaultValue` / `onChange` through**, rather than adding
+   `onValueChange` (CONVENTIONS rules 5 and 11). The input owns its state; rule 5 is written for
+   components that own state themselves. **Confirmed by Emil, 2026-10-19: keep native.** Rules 5
+   and 11 now say so: a wrapped native control keeps its own `value` / `onChange`, and
+   `on<Prop>Change(value)` is for state a component owns. Reasons: form libraries
+   (`register()`, `handleChange`) expect the native event; one way to do it; adding a callback
+   later is a minor, removing one a major. **L05:** Checkbox passes native `checked` / `onChange`
+   through; Switch decides when it gets there.
+8. **Stories are colocated** and **axe is `axe-core` via the internal helper**, as L03 deviations 3 and 6.
+9. **TextInput's stories type their meta against the `aria-label` branch.** Storybook's arg types
+   collapse the three-way name union to `never`.
+10. **The paste criterion is checked in jsdom as "not cancelled"**: `fireEvent.paste` returns `true`,
+    then the value reaches `onChange`. jsdom doesn't insert clipboard text.
+
+### Review (2026-10-19)
+
+The `review-component` workflow ran `component-api-reviewer`, `wcag-auditor` and
+`modern-web-curator` read-only over FormField and TextInput. The API reviewer failed in the first
+run, and the re-run repeated all three, so there were two passes: 30 findings, 17 distinct
+decisions. Emil accepted 16, rejected 0, and escalated 1 to ADR-0011. No `OVERRIDES.md` rows.
+Applied:
+
+- **Focus on submit reaches an earlier field invalid only through `error`.** Each `invalid`
+  handler focuses the first field that shows or is about to show an error, not only itself.
+- **A native error clears when code sets a valid value.** While a native error shows, the control
+  re-checks validity after every render; a value set from code fires no change event.
+- **One reset listener per shown error**, removed when the error clears or the control unmounts
+  (it was added on every `invalid` event and never removed).
+- **Native messages are never live.** They render in their own non-live node, so with
+  `announce="polite"` a failed submit doesn't queue every field's message. The live node carries
+  the `error` prop only.
+- **FormField spaces only its own parts.** TextInput's `margin: 0` cancelled the old `* + *` gap,
+  depending on stylesheet order.
+- **The message is one element**, aligned to the first line's baseline, so a message with markup
+  isn't split into flex items.
+- **`error` is a message, never a boolean**: `error={true}` doesn't compile, and `true` cast past
+  the type counts as no error. `undefined` stays allowed for `error={errors.email}`.
+- **FormField's root takes no control ARIA props** (`aria-describedby`, `-label`, `-labelledby`,
+  `-invalid`, `-required`). They are declared `never`, not just omitted: JSX doesn't check
+  hyphenated attribute names it doesn't know.
+- **A development warning when the binding reaches no control, or more than one.**
+- **`useNameCheck` counts a `<label>` only if it has visible text**, so an empty FormField label
+  (the hidden `*` alone) warns.
+- **`focusFirstInvalid` (public) matches `aria-invalid` only** and skips controls that can't take
+  focus. The submit handler's native scan is internal (`focusFirstInvalidOnSubmit`).
+- **Read-only gets a dashed border in forced colours.** It was a fill only, which forced colours
+  replace. The contract's forced-colours detail no longer claims read-only was checked.
+- **`type="search"` gets `appearance: textfield`** (WebKit's search-field look overrode radius and
+  padding).
+- **`sm` takes md's text size on touch screens** (`pointer: coarse`), so iOS doesn't zoom on focus.
+- **The live-region announcement text is reworded** (Emil chose rewording over a re-run): the label
+  and role heard with it come from focus.
+- **Firefox and WebKit.** Both ran the FormField and TextInput browser tests (88 passed), including
+  the `:user-invalid` submit check, which had only been probed in Chromium. See § L00 for the
+  `SENUI_BROWSERS` switch.
+- **ADR-0011** records the `aria-invalid`-only rule and the sealed binding (escalated).
+
+### Cross-module notes
+
+- **ADR-0011 (accepted 2026-10-19):** form controls bind through a sealed render-prop binding, and
+  native validity reaches `aria-invalid` by syncing on `invalid`, never through `:user-invalid`
+  styling. It amends ADR-0001's list of state signals, and overrides this plan's decisions 5 and 6
+  (deviations 1 and 3).
+- **L05** — Checkbox and Switch take `field?: FormFieldBinding` the same way and call
+  `useFormFieldControl`. `FieldElement` is `HTMLInputElement`, which already fits.
+- **L08** — the FormField and TextInput `ForcedColors` stories carry `parameters.forcedColors`.

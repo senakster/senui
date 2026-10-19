@@ -1,0 +1,83 @@
+@layer senui.components {
+  /* Public surface (semver): the `.senui-form-field` class and the six `--senui-form-field-*`
+     tokens below. The part classes (`.senui-form-field__label`, `__required`, `__description`,
+     `__error`, `__error-icon…`) are internal and may change in any release. The control styles
+     itself; FormField only lays out the parts around it. */
+  :where(.senui-form-field) {
+    --senui-form-field-gap: var(--senui-space-1);
+    --senui-form-field-label-color: var(--senui-color-fg-default);
+    --senui-form-field-label-font-size: var(--senui-font-size-md);
+    --senui-form-field-hint-font-size: var(--senui-font-size-sm);
+    --senui-form-field-description-color: var(--senui-color-fg-muted);
+    --senui-form-field-error-color: var(--senui-color-fg-danger);
+
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    font-family: var(--senui-font-family-sans);
+    line-height: var(--senui-font-line-height-normal);
+  }
+
+  /* FormField spaces only its own parts, never the control's box: a control's own margin reset
+     can't cancel the gap, whatever order the stylesheets load in. The error node is always
+     rendered (it may be a live region), so only a non-empty one adds space. */
+  :where(.senui-form-field__label, .senui-form-field__description) {
+    margin-block-end: var(--senui-form-field-gap);
+  }
+
+  :where(.senui-form-field__error:not(:empty)) {
+    margin-block-start: var(--senui-form-field-gap);
+  }
+
+  :where(.senui-form-field__label) {
+    color: var(--senui-form-field-label-color);
+    font-size: var(--senui-form-field-label-font-size);
+    font-weight: var(--senui-font-weight-medium);
+  }
+
+  /* Hidden from assistive technology: the control's `required` is announced instead. */
+  :where(.senui-form-field__required) {
+    margin-inline-start: var(--senui-space-1);
+    color: var(--senui-form-field-error-color);
+  }
+
+  :where(.senui-form-field__description) {
+    color: var(--senui-form-field-description-color);
+    font-size: var(--senui-form-field-hint-font-size);
+  }
+
+  /* The message is text plus an icon, never colour alone (WCAG 1.4.1). Two flex items, the icon
+     and the message in one span, so a message with markup stays one run of text. The icon sits on
+     the first line's baseline, like an inline image. */
+  :where(.senui-form-field__error) {
+    display: flex;
+    gap: var(--senui-space-1);
+    align-items: baseline;
+    color: var(--senui-form-field-error-color);
+    font-size: var(--senui-form-field-hint-font-size);
+  }
+
+  :where(.senui-form-field__error-icon) {
+    flex: none;
+  }
+
+  :where(.senui-form-field__error-icon-disc) {
+    fill: currentColor;
+  }
+
+  :where(.senui-form-field__error-icon-mark) {
+    stroke: var(--senui-color-bg-default);
+  }
+
+  /* Forced colours replace text colours, so the icon carries the error: system colours keep its
+     mark visible against its disc. */
+  @media (forced-colors: active) {
+    :where(.senui-form-field__error-icon-disc) {
+      fill: CanvasText;
+    }
+
+    :where(.senui-form-field__error-icon-mark) {
+      stroke: Canvas;
+    }
+  }
+}

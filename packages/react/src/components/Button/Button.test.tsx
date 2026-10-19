@@ -3,6 +3,7 @@ import { fireEvent, render, screen } from '@testing-library/react';
 import { createRef, type SyntheticEvent } from 'react';
 import { describe, expect, test, vi } from 'vitest';
 import { expectNoAxeViolations } from '../../internal/testing/axe.js';
+import { withControls } from '../../internal/testing/stories.js';
 import { Button } from './Button.js';
 import * as stories from './Button.stories.js';
 
@@ -141,6 +142,15 @@ describe('Button', () => {
     const ref = createRef<HTMLButtonElement>();
     render(<Button ref={ref}>Save</Button>);
     expect(ref.current).toBeInstanceOf(HTMLButtonElement);
+  });
+});
+
+// A story with controls must render from its args, or the controls silently do nothing (found by
+// Emil: IconOnlyLoading ignored `variant`). Fixed grids disable their controls instead.
+describe('every story with controls passes its args through', () => {
+  test.each(withControls(composeStories(stories)))('%s', (_name, Story) => {
+    const { container } = render(<Story variant="danger" />);
+    expect(container.querySelector('.senui-button')).toHaveAttribute('data-variant', 'danger');
   });
 });
 

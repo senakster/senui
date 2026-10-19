@@ -1,0 +1,118 @@
+@layer senui.components {
+  /* Public surface (semver): the `.senui-text-input` class, `data-size` values, and the eight
+     `--senui-text-input-*` tokens below.
+
+     Component tokens: the public override points, defaulting to semantic tokens. State rules below
+     set properties directly, so a size can't override an invalid or disabled look. */
+  :where(.senui-text-input) {
+    --senui-text-input-bg: var(--senui-color-bg-default);
+    --senui-text-input-fg: var(--senui-color-fg-default);
+    --senui-text-input-placeholder: var(--senui-color-fg-muted);
+    /* border.strong: an input's outline identifies the control, so it needs 3:1 (WCAG 1.4.11). */
+    --senui-text-input-border-color: var(--senui-color-border-strong);
+    --senui-text-input-radius: var(--senui-radius-md);
+    --senui-text-input-block-size: var(--senui-size-control-md);
+    --senui-text-input-padding-inline: var(--senui-space-3);
+    --senui-text-input-font-size: var(--senui-font-size-md);
+
+    box-sizing: border-box;
+    inline-size: 100%;
+    min-inline-size: 0;
+    margin: 0;
+    min-block-size: max(var(--senui-text-input-block-size), var(--senui-size-target-min));
+    padding-block: 0;
+    padding-inline: var(--senui-text-input-padding-inline);
+    border: var(--senui-border-width-default) solid var(--senui-text-input-border-color);
+    border-radius: var(--senui-text-input-radius);
+    background-color: var(--senui-text-input-bg);
+    color: var(--senui-text-input-fg);
+    font-family: var(--senui-font-family-sans);
+    font-size: var(--senui-text-input-font-size);
+    line-height: var(--senui-font-line-height-tight);
+    transition-property: border-color, background-color;
+    transition-duration: var(--senui-motion-duration-fast);
+    transition-timing-function: var(--senui-motion-easing-standard);
+  }
+
+  /* WebKit draws type="search" with its own search-field look, which overrides the radius and
+     padding. `textfield` is the standard keyword for a plain field; Chromium keeps its clear
+     button. */
+  :where(.senui-text-input[type='search']) {
+    appearance: textfield;
+  }
+
+  :where(.senui-text-input)::placeholder {
+    color: var(--senui-text-input-placeholder);
+    opacity: 1;
+  }
+
+  /* Sizes. `sm` stays at least 24 px tall through the max() above, whatever the root font size. */
+  :where(.senui-text-input)[data-size='sm'] {
+    --senui-text-input-block-size: var(--senui-size-control-sm);
+    --senui-text-input-padding-inline: var(--senui-space-2);
+    --senui-text-input-font-size: var(--senui-font-size-sm);
+  }
+
+  /* iOS zooms the page when a field with text under 16 px takes focus, so on touch screens sm keeps
+     its height and padding but takes md's text size. Pointer devices keep sm's smaller text. */
+  @media (pointer: coarse) {
+    :where(.senui-text-input)[data-size='sm'] {
+      --senui-text-input-font-size: var(--senui-font-size-md);
+    }
+  }
+
+  :where(.senui-text-input)[data-size='lg'] {
+    --senui-text-input-block-size: var(--senui-size-control-lg);
+    --senui-text-input-padding-inline: var(--senui-space-4);
+    --senui-text-input-font-size: var(--senui-font-size-lg);
+  }
+
+  /* ADR-0005: an offset outline, never a box-shadow. */
+  :where(.senui-text-input:focus-visible) {
+    outline: var(--senui-focus-ring-width) solid var(--senui-color-focus-ring);
+    outline-offset: var(--senui-focus-ring-offset);
+  }
+
+  /* Invalid: the signal assistive technology gets (CONVENTIONS rule 6), never :user-invalid. A
+     thicker danger border, so it isn't colour alone (WCAG 1.4.1); FormField adds the message. The
+     padding gives back the extra border width, so the text doesn't move. */
+  :where(.senui-text-input[aria-invalid='true']) {
+    padding-inline: calc(
+      var(--senui-text-input-padding-inline) - var(--senui-border-width-strong) +
+        var(--senui-border-width-default)
+    );
+    border-width: var(--senui-border-width-strong);
+    border-color: var(--senui-color-border-danger);
+  }
+
+  /* Read-only: still focusable and readable, and its value is submitted, so it keeps its contrast;
+     the recessed fill says it can't be edited. */
+  :where(.senui-text-input:read-only:not(:disabled)) {
+    background-color: var(--senui-color-bg-subtle);
+  }
+
+  :where(.senui-text-input:disabled) {
+    border-color: var(--senui-color-border-disabled);
+    background-color: var(--senui-color-bg-disabled);
+    color: var(--senui-color-fg-disabled);
+    cursor: not-allowed;
+  }
+
+  /* Forced colours replace border colours, so invalid keeps its thicker border, and disabled uses
+     the system's grey. */
+  @media (forced-colors: active) {
+    :where(.senui-text-input:focus-visible) {
+      outline-color: Highlight;
+    }
+
+    :where(.senui-text-input:disabled) {
+      border-color: GrayText;
+      color: GrayText;
+    }
+
+    /* Read-only is otherwise only a fill, which forced colours replace: it would look editable. */
+    :where(.senui-text-input:read-only:not(:disabled)) {
+      border-style: dashed;
+    }
+  }
+}

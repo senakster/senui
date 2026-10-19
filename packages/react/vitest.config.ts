@@ -2,6 +2,19 @@ import react from '@vitejs/plugin-react';
 import { playwright } from '@vitest/browser-playwright';
 import { defineConfig } from 'vitest/config';
 
+declare const process: { env: { SENUI_BROWSERS?: string } };
+
+// The browser project runs in Chromium (what CI installs). For a cross-browser run, install the
+// others once (`pnpm --filter @senakster/react exec playwright install firefox webkit`), then:
+//   SENUI_BROWSERS=chromium,firefox,webkit pnpm --filter @senakster/react exec vitest run --project browser
+const BROWSERS = ['chromium', 'firefox', 'webkit'] as const;
+const browsers = (process.env.SENUI_BROWSERS ?? 'chromium')
+  .split(',')
+  .map((name) => name.trim())
+  .filter((name): name is (typeof BROWSERS)[number] =>
+    (BROWSERS as readonly string[]).includes(name),
+  );
+
 export default defineConfig({
   plugins: [react()],
   test: {
@@ -39,7 +52,7 @@ export default defineConfig({
             enabled: true,
             provider: playwright(),
             headless: true,
-            instances: [{ browser: 'chromium' }],
+            instances: browsers.map((browser) => ({ browser })),
           },
         },
       },

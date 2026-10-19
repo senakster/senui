@@ -48,6 +48,40 @@ describe('useNameCheck', () => {
     expect(warn.mock.calls[0]?.[0]).toContain('Example has no accessible name');
   });
 
+  test('is silent for an input named by a <label> element', async () => {
+    vi.resetModules();
+    const { useNameCheck } = await import('./useNameCheck.js');
+    function Input() {
+      return <input id="email" ref={useNameCheck('Input')} />;
+    }
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
+    render(
+      <>
+        <label htmlFor="email">Email</label>
+        <Input />
+      </>,
+    );
+    expect(warn).not.toHaveBeenCalled();
+  });
+
+  test('warns about an input whose only label is empty, or holds only hidden text', async () => {
+    vi.resetModules();
+    const { useNameCheck } = await import('./useNameCheck.js');
+    function Input() {
+      return <input id="email" ref={useNameCheck('Input')} />;
+    }
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
+    render(
+      <>
+        <label htmlFor="email">
+          <span aria-hidden="true">*</span>
+        </label>
+        <Input />
+      </>,
+    );
+    expect(warn.mock.calls[0]?.[0]).toContain('Input has no accessible name');
+  });
+
   test('the forwarded ref still receives the element', async () => {
     const Example = await load();
     const ref = createRef<HTMLButtonElement>();
