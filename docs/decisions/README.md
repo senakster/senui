@@ -8,7 +8,7 @@ ADR that supersedes it. Every ADR names what was rejected and what the choice co
 
 | ADR                                                | Title                                                                                                            | Status                           |
 | -------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------- | -------------------------------- |
-| [0001](0001-plain-css-on-custom-properties.md)     | Plain CSS on custom properties, no utility framework                                                             | Accepted                         |
+| [0001](0001-plain-css-on-custom-properties.md)     | Plain CSS on custom properties, no utility framework                                                             | Accepted (amended by 0011)       |
 | [0002](0002-token-pipeline.md)                     | Design-token pipeline: DTCG source, Style Dictionary build, `light-dark()` themes                                | Superseded by 0004               |
 | [0003](0003-library-build-tsdown.md)               | Library build tool: tsdown                                                                                       | Accepted                         |
 | [0004](0004-token-pipeline-sd5-dtcg-2025.md)       | Design-token pipeline: DTCG 2025.10 source, Style Dictionary 5, oklch, unpublished primitives                    | Accepted (amended by 0005, 0010) |
@@ -18,6 +18,7 @@ ADR that supersedes it. Every ADR names what was rejected and what the choice co
 | [0008](0008-a11y-contract-adaptation.md)           | The a11y contract gains an `adaptation` section                                                                  | Accepted                         |
 | [0009](0009-stylelint-unit-allow-list.md)          | Stylelint: a unit allow-list, and selector specificity as a check                                                | Accepted                         |
 | [0010](0010-tokens-declared-on-themed-subtrees.md) | Tokens are declared on every themed subtree                                                                      | Accepted                         |
+| [0011](0011-form-control-validity-and-binding.md)  | Form controls: validity reaches `aria-invalid`, and controls bind through a sealed binding                       | Accepted                         |
 
 ## Template
 

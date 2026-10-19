@@ -22,6 +22,11 @@ src/components/Button/
   Button.stories.tsx       one story per designed state (principle 5)
 ```
 
+A story with controls renders from its `args` (spread them into the component), or its controls
+silently do nothing. A fixed grid or a whole form sets `parameters: { controls: { disable: true } }`
+instead. Each component's `*.test.tsx` checks this for every story with controls, through
+[`withControls()`](src/internal/testing/stories.ts).
+
 Axe runs through [`expectNoAxeViolations()`](src/internal/testing/axe.ts). To check every story,
 load them with `composeStories` from `@storybook/react-vite` and run it on each rendered story.
 `*.browser.test.tsx` runs in Chromium (Vitest browser mode), so a bounding box or `:focus-visible`
@@ -102,6 +107,11 @@ development about an empty `aria-label` and about an element with no name at all
 const ref = useComposedRefs(forwardedRef, useNameCheck('Button'));
 ```
 
+A form control is named by its FormField through a sealed binding, the third branch of its name
+union (L04): `{(field) => <TextInput field={field} />}`. Only FormField can make a binding, and the
+branch forbids `aria-label`, `aria-labelledby`, `id`, `required` and `aria-invalid`, which the field
+owns. The control reads the wiring with `useFormFieldControl(field, props)`.
+
 A consumer wrapping a component with union props uses `DistributiveOmit` (exported from the package),
 not `Omit`, which collapses the union and drops the requirement.
 
@@ -124,6 +134,12 @@ Every component forwards its ref to the element it renders, with `forwardRef`, a
 Stateful components accept both a controlled triplet (`value` / `defaultValue` / `onValueChange`,
 or `checked` / `defaultChecked` / `onCheckedChange`) and use
 [`useControllableState`](src/internal/useControllableState.ts) for it.
+
+This is for state the component owns. A component that wraps a native form control (TextInput's
+`<input>`) passes that control's own `value` / `defaultValue` / `onChange` through, because the
+element already holds the state and form libraries expect the native event. It adds no
+`on<Prop>Change` of its own (L04, Emil 2026-10-19). Adding one later is a minor; removing it would
+be a major.
 
 ```tsx
 const [checked, setChecked] = useControllableState({
@@ -278,7 +294,8 @@ server-render test per component is part of L08's gate.
 
 ## 11. Prop names and defaults
 
-- Change callbacks are `on<Prop>Change(value)`: the new value first, no event.
+- Change callbacks for state a component owns are `on<Prop>Change(value)`: the new value first, no
+  event. A wrapped native control keeps its native `onChange(event)` instead (rule 5).
 - Booleans have no `is` prefix (`disabled`, `loading`) and default to `false`.
 - Sizes are `size?: 'sm' | 'md' | 'lg'`, defaulting to `'md'`. Each size meets the 24×24 target
   minimum (WCAG 2.5.8).

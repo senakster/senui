@@ -24,6 +24,7 @@ export function useNameCheck(component: string): RefCallback<HTMLElement> {
       } else if (
         label === null &&
         !node.hasAttribute('aria-labelledby') &&
+        !hasLabelElement(node) &&
         node.textContent.trim() === ''
       ) {
         warnOnce(
@@ -34,4 +35,17 @@ export function useNameCheck(component: string): RefCallback<HTMLElement> {
     },
     [component],
   );
+}
+
+/**
+ * A form control named by a `<label>` (FormField's, or the consumer's own `for`) with text in it.
+ * Text hidden from assistive technology, such as FormField's required marker, doesn't count.
+ */
+function hasLabelElement(node: HTMLElement): boolean {
+  if (!('labels' in node) || !(node.labels instanceof NodeList)) return false;
+  return Array.from(node.labels as NodeListOf<HTMLLabelElement>).some((label) => {
+    const copy = label.cloneNode(true) as HTMLElement;
+    for (const hidden of Array.from(copy.querySelectorAll('[aria-hidden="true"]'))) hidden.remove();
+    return copy.textContent.trim() !== '';
+  });
 }

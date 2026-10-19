@@ -192,3 +192,85 @@ Entry format: date — module · Did · Verified · Scope decisions · Plan adju
 - **Did:** Emil confirmed the Narrator toggle check and, after the fix, the forced-colours check ("Pressed is readable"). Recorded a forced-colours run; 1.4.11 cites it. Walked the acceptance checklist: all met except dedicated hover/active stories (known-unmet, pseudo-states addon decision).
 - **Verified:** `pnpm check`; `pnpm test` (tokens 32, react 120); build-storybook.
 - **Next:** Emil commits on a branch and opens a PR (squash). Then `/modular-web:implement-module` starts L04 (FormField + TextInput).
+
+## 2026-10-18 — L04 FormField + TextInput: written, awaiting Emil's review
+
+- **Oriented:** PR #2 (L03 review fixes) was already merged; the checkpoint still said "waiting on a PR". Catalogue current; decision index rebuilt.
+- **Scope (Emil, via questions):**
+  - Claude writes, and Emil reviews.
+  - Native validity syncs into `aria-invalid`; it is not styled through `:user-invalid`.
+  - The error stays until the value is valid.
+  - The live region is opt-in.
+  - `focusFirstInvalid` is public.
+  - TextInput has sizes.
+  - The binding is a sealed render prop.
+
+  All of this is recorded in scope-decisions § L04.
+
+- **Probes (Playwright, deleted afterwards):**
+  - Chromium matches `:user-invalid` on a touched, invalid field while the accessibility tree reports `invalid: false`. This confirms CONVENTIONS rule 6.
+  - During a submit, `:user-invalid` already matches when `invalid` fires. During `checkValidity()` on an untouched form it does not.
+- **Did:**
+  - `FormField` (label, description, error node, required marker, `announce`, control `id`), `useFormFieldControl` (the internal wiring hook for L05), `focusFirstInvalid`, and `TextInput` (six text types, three sizes, a three-way name union).
+  - CSS, contracts, unit, type and browser tests, 25 stories (including NativeValidation and SubmitWithErrors with `play` functions), and the changeset.
+  - `useNameCheck` now counts `<label>` elements. CONVENTIONS rule 3 describes the binding.
+- **Verified:**
+  - `pnpm check` passes.
+  - `pnpm test`: tokens 32; react 213 of 215. The two failures are the intended contract gate: FormField has no screen-reader run, and TextInput has no keyboard or screen-reader run.
+  - Type tests clean. Browser project 72/72 (axe with rendered contrast on every story).
+  - build-storybook: 12 FormField and 13 TextInput stories.
+  - Invariant greps clean (no `outline: none`, no `--ds-`, no `aria-errormessage`, no `:user-invalid` / `:invalid` styling).
+- **Probes on the tests themselves:** the first versions of two browser tests were dead.
+  - The `checkValidity()` test asserted before React rendered; it now uses `act()`.
+  - The "looks the same" test only visited the field, which never makes it `:user-invalid`; it now types, clears and leaves the field.
+
+  Re-probed: disabling the touched guard, adding `:user-invalid` styling, and removing the focus move each fail a test. All probes were restored.
+
+- **Overrides:** none yet (reviewers not run).
+- **Next:**
+  - Emil reviews the code.
+  - Emil runs the manual checks: keyboard for TextInput; a screen reader on NativeValidation, SubmitWithErrors, AnnounceOnChange and a TextInput story; forced colours on both ForcedColors stories.
+  - Then the review-component workflow, once for each of FormField and TextInput.
+
+## 2026-10-19 — Storybook controls ignored (L03 defect, fixed with L04's stories)
+
+- **Found by Emil:** setting `variant` to danger on Button's IconOnlyLoading story changed nothing. The story rendered fixed JSX and never read `args`, and so did four other Button stories and some of L04's.
+- **Did:** the stories now spread their args; fixed grids and whole-form stories disable their controls. Added `withControls()` (`src/internal/testing/stories.ts`) and a "passes its args through" test in each component's `*.test.tsx`. CONVENTIONS' file layout states the rule. Details: scope-decisions § L03, "Defects found later".
+- **Verified:** the probe (the old IconOnlyLoading put back) fails the new test and was restored. `pnpm check` passes. `pnpm test`: tokens 32; react 249 of 251, and the two failures are still only the L04 contract gate. Storybook builds.
+- **Next:** unchanged. Emil reviews L04 and does the manual runs.
+
+## 2026-10-19 — L04 manual runs recorded
+
+- **Emil's runs** (Chrome 155.0.8059.40, Windows 11 Pro 26H2 build 26300.9711, Narrator in English on a Danish system): keyboard on TextInput passed; Narrator passed. Heard:
+  - NativeValidation: focus on Name with both fields empty, and "Email, edit, Please fill out this field" with Name filled. The message is the browser's, so this run is NativeValidation, not SubmitWithErrors (inferred and stated to Emil).
+  - TextInput Default: "Search, edit".
+- **Did:** recorded a screen-reader run in both contracts and a keyboard run in TextInput's, and replaced the matching "not yet heard" announcements with what was heard. SubmitWithErrors and AnnounceOnChange stay "not yet heard".
+- **Verified:** `pnpm check`; `pnpm test`: tokens 32, react 251/251 (the contract gate now passes).
+- **Next:** the `review-component` workflow for FormField and TextInput (Emil's opt-in), then triage. Optional: hear SubmitWithErrors and AnnounceOnChange; a forced-colours check.
+
+## 2026-10-19 — L04 remaining manual runs recorded
+
+- **Emil:** forced colours good on both ForcedColors stories. SubmitWithErrors and AnnounceOnChange each read the label, the control role and the error message (Narrator in English).
+- **Did:** recorded forced-colours runs in both contracts (evidence for FormField 1.4.1 and TextInput 1.4.11); replaced the last two "not yet heard" announcements; FormField 4.1.3 now cites the screen-reader run.
+- **Verified:** `pnpm check`; `pnpm test`: tokens 32, react 251/251.
+- **Settled:** Narrator reads "required" and "invalid" (Emil). Recorded without exact wording: language mix made some phrasing hard to follow.
+- **Next:** the `review-component` workflow for FormField and TextInput (Emil's opt-in), then triage.
+
+## 2026-10-19 — L04 review: triaged and applied
+
+- **Reviewers:** the `review-component` workflow (API, accessibility, platform), read-only. The API reviewer failed in the first run; the re-run repeated all three. 30 findings across both passes, 17 distinct decisions.
+- **Triage with Emil (five batches):** accepted 16, rejected 0, escalated 1 (ADR-0011). No `OVERRIDES.md` rows. Every fix is listed in scope-decisions § L04, "Review".
+- **Probes:** making the submit focus ignore `error`-prop fields, and disabling the re-check after render, each failed its new browser test. Both restored.
+- **Found while fixing:** JSX doesn't type-check hyphenated attributes a component doesn't declare, so omitting `aria-*` from FormField's props did nothing. They are declared `never`, locked by type tests. `error` also needs explicit `undefined` for `error={errors.email}` under `exactOptionalPropertyTypes`.
+- **Cross-browser:** installed Playwright Firefox and WebKit. With `SENUI_BROWSERS=firefox,webkit`, the FormField and TextInput browser tests passed: 88 tests, both engines confirmed in the verbose output.
+- **ADR-0011** written and indexed (accepted; L04, L05; trigger extracted). CLAUDE.md's locked-decisions table and ADR-0001's index row updated.
+- **Verified:** `pnpm check`; `pnpm test`: tokens 32, react 265/265; build-storybook.
+- **Next:** Emil re-checks read-only in forced colours (TextInput ForcedColors, read-only row now dashed). Then mark L04 done and commit on a new branch.
+
+## 2026-10-19 — L04 done
+
+- **Emil:** read-only re-checked in forced colours ("fine"), recorded in TextInput's contract. Deviation 7: keep native `value` / `onChange`, after a pros/cons comparison.
+- **Did:** CONVENTIONS rules 5 and 11 now say a component wrapping a native form control passes its native `value` / `onChange` through, and `on<Prop>Change(value)` is for state a component owns. Deviation 7 closed in scope-decisions, with the L05 consequence.
+- **Acceptance:** every L04 criterion is met. Plan decisions 5 and 6 are replaced by ADR-0011 (deviations 1 and 3). The paste criterion is checked as "not cancelled" in jsdom (deviation 10).
+- **Verified:** `pnpm check`; `pnpm test`: tokens 32, react 265/265; build-storybook. Invariant greps clean.
+- **Next:** commit on a new branch (L04, the review fixes, the Button stories fix, ADR-0011), open a PR, and squash-merge when `verify` is green. Then `/modular-web:implement-module`: L05 (Checkbox / Switch) has no plan yet (`not-planned`).

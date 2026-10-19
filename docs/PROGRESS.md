@@ -10,7 +10,7 @@ Status legend — plan: `plan-ready` · `not-planned` (plan not written yet upst
 | L01 | Design tokens                     | L01-design-tokens             | plan-ready  | done           | 2026-10-16   |
 | L02 | Component API conventions         | L02-component-api-conventions | plan-ready  | done           | 2026-10-16   |
 | L03 | Button                            | L03-button                    | plan-ready  | done           | 2026-10-18   |
-| L04 | FormField + TextInput             | L04-formfield-and-textinput   | plan-ready  | not-started    | 2026-10-15   |
+| L04 | FormField + TextInput             | L04-formfield-and-textinput   | plan-ready  | done           | 2026-10-19   |
 | L05 | Checkbox / Switch                 | —                             | not-planned | not-started    | 2026-10-15   |
 | L06 | Dialog                            | —                             | not-planned | not-started    | 2026-10-15   |
 | L07 | EmptyState                        | —                             | not-planned | not-started    | 2026-10-15   |
@@ -20,6 +20,25 @@ Status legend — plan: `plan-ready` · `not-planned` (plan not written yet upst
 | L11 | Motion                            | —                             | not-planned | not-started    | 2026-10-15   |
 
 ## Changelog
+
+- **2026-10-19** — L04 done. Every acceptance criterion is met, with the plan's `:user-invalid` styling and context wiring replaced by ADR-0011. Emil re-checked read-only in forced colours. TextInput keeps native `value` / `onChange`; CONVENTIONS rules 5 and 11 now say a wrapped native control keeps its native callbacks. `pnpm check`; `pnpm test` (tokens 32, react 265); build-storybook. Waiting on a commit and PR.
+- **2026-10-19** — L04 reviewed: 17 decisions from the three reviewers. Emil accepted 16, rejected none and escalated one. Every fix is applied, including:
+  - submit focus reaches a field whose only error is the `error` prop;
+  - a native error clears when code sets a valid value;
+  - native messages stay out of the live region;
+  - FormField's spacing no longer depends on stylesheet order;
+  - `error` can't be `true`, and FormField's root takes no control ARIA props;
+  - development warnings for an unused or reused binding and an empty label;
+  - read-only shows in forced colours.
+
+  The escalation became ADR-0011: invalid is styled from `aria-invalid` only, and controls bind through a sealed render prop. It amends ADR-0001. The browser tests also pass in Firefox and WebKit (`SENUI_BROWSERS`). Manual runs by Emil: keyboard, Narrator and forced colours. `pnpm test`: react 265/265. Waiting on a read-only forced-colours re-check.
+
+- **2026-10-18** — L04 in progress: FormField, TextInput and `focusFirstInvalid` written by Claude for Emil's review. Three plan deviations, each Emil's call:
+  - FormField binds its control through a sealed render-prop binding, `{(field) => <TextInput field={field} />}`, so the name requirement holds at the type level. Context couldn't satisfy the plan's type test.
+  - Invalid styling stays `[aria-invalid="true"]` only. A probe showed Chromium styles `:user-invalid` while the accessibility tree reports valid. Native errors instead sync into `aria-invalid` and the field's message on a submit attempt, and stay until the value is valid.
+  - The live region is opt-in.
+
+  `pnpm check` passes. `pnpm test` passes except the intended contract gate: no keyboard or screen-reader runs yet. Storybook builds 12 FormField and 13 TextInput stories. Next: Emil's review, manual runs, then the reviewers.
 
 - **2026-10-18** — L03 done. Button meets every acceptance criterion except dedicated hover/active stories (they need a pseudo-states addon decision). Manual runs recorded in the contract: keyboard (Chrome), Narrator twice (English, then Danish after the review fixes), and forced colours (Chrome emulation), which found and fixed an unreadable pressed state. `ForcedColors` carries `parameters.forcedColors: 'active'` for L08 to screenshot. Waiting on a PR.
 - **2026-10-18** — L03 reviewed: the `review-component` workflow (API, accessibility, platform) returned 16 findings, all accepted, none rejected or escalated. Button now narrows its label type, supports `aria-pressed` toggles, hides its own icon, guards `onClickCapture`, documents consumer `aria-disabled`, uses `border.strong` for secondary, keeps the spinner visible in forced colours, and limits hover to hover devices. Axe now checks rendered contrast on all 18 stories in Chromium. Waiting on a Narrator re-check of the toggle and a PR before L03 is done.

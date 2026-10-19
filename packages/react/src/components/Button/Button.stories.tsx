@@ -1,7 +1,8 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { useState } from 'react';
 import { expect, fn, userEvent, within } from 'storybook/test';
-import { Button, type ButtonSize, type ButtonVariant } from './Button.js';
+import type { DistributiveOmit } from '../../types.js';
+import { Button, type ButtonProps, type ButtonSize, type ButtonVariant } from './Button.js';
 
 const variants: ButtonVariant[] = ['primary', 'secondary', 'ghost', 'danger'];
 const sizes: ButtonSize[] = ['sm', 'md', 'lg'];
@@ -46,21 +47,33 @@ export const Disabled: Story = { args: { disabled: true } };
 /** Still focusable; activation is ignored; the width doesn't change. */
 export const Loading: Story = { args: { loading: true } };
 
-/** Rendered rather than set through args: the meta's default label can't be combined with `icon`. */
+/**
+ * The args an icon-only story passes through: everything the controls set, minus the meta's default
+ * label and any name, because an icon-only button takes exactly one name and the story sets it.
+ */
+function iconOnlyArgs(args: ButtonProps) {
+  const rest: Partial<ButtonProps> = { ...args };
+  delete rest.children;
+  delete rest['aria-label'];
+  delete rest['aria-labelledby'];
+  return rest as DistributiveOmit<ButtonProps, 'children' | 'aria-label' | 'aria-labelledby'>;
+}
+
 export const IconOnly: Story = {
-  render: () => <Button icon={<CloseIcon />} aria-label="Close" />,
+  render: (args) => <Button {...iconOnlyArgs(args)} icon={<CloseIcon />} aria-label="Close" />,
 };
 
 export const IconOnlyLoading: Story = {
-  render: () => <Button icon={<CloseIcon />} aria-label="Close" loading />,
+  ...IconOnly,
+  args: { loading: true },
 };
 
 /** Named by visible text elsewhere on the page. */
 export const IconOnlyLabelledBy: Story = {
-  render: () => (
+  render: (args) => (
     <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
       <span id="filters-heading">Clear filters</span>
-      <Button icon={<CloseIcon />} aria-labelledby="filters-heading" />
+      <Button {...iconOnlyArgs(args)} icon={<CloseIcon />} aria-labelledby="filters-heading" />
     </div>
   ),
 };
@@ -73,18 +86,18 @@ export const AriaDisabled: Story = { args: { 'aria-disabled': 'true' } };
 
 /** A toggle button: `aria-pressed` makes it announce "toggle button, pressed / not pressed". */
 export const Toggle: Story = {
-  render: function Render() {
+  args: { variant: 'secondary', children: 'Bold' },
+  render: function Render(args) {
     const [pressed, setPressed] = useState(false);
     return (
       <Button
-        variant="secondary"
+        {...args}
         aria-pressed={pressed}
-        onClick={() => {
+        onClick={(event) => {
           setPressed((value) => !value);
+          args.onClick?.(event);
         }}
-      >
-        Bold
-      </Button>
+      />
     );
   },
 };
@@ -93,9 +106,10 @@ export const Pressed: Story = { args: { variant: 'secondary', 'aria-pressed': tr
 
 /** In a narrow space the label wraps rather than overflowing or being cut off (WCAG 1.4.10). */
 export const LongLabel: Story = {
-  render: () => (
+  args: { children: 'Save changes and continue to payment' },
+  render: (args) => (
     <div style={{ inlineSize: '12ch' }}>
-      <Button>Save changes and continue to payment</Button>
+      <Button {...args} />
     </div>
   ),
 };
@@ -108,8 +122,9 @@ export const FocusVisible: Story = {
   },
 };
 
-/** Every variant at every size, idle, disabled, loading, icon-only and pressed. */
+/** Every variant at every size, idle, disabled, loading, icon-only and pressed. A fixed grid: no controls. */
 export const Matrix: Story = {
+  parameters: { controls: { disable: true } },
   render: () => (
     <div style={{ display: 'grid', gap: '1rem' }}>
       {variants.map((variant) => (
@@ -152,6 +167,7 @@ export const Matrix: Story = {
 export const ForcedColors: Story = {
   ...Matrix,
   parameters: {
+    controls: { disable: true },
     forcedColors: 'active',
     docs: {
       description: {
