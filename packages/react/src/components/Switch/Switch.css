@@ -1,0 +1,168 @@
+@layer senui.components {
+  /* Public surface (semver): the `.senui-switch` class (on the row; the input is internal) and the
+     nine `--senui-switch-*` tokens below. The part classes (`__control`, `__label`,
+     `__description`) and the `--_senui-switch-*` variables are internal.
+
+     The input is the track (`appearance: none`, L05 decision 1); its `::before` is the thumb. The
+     track is never shorter than the 24 px target, whatever `--senui-switch-track-size` says, so
+     the hit area meets 2.5.8 with or without a visible label. */
+  :where(.senui-switch) {
+    --senui-switch-track-bg: var(--senui-color-bg-default);
+    --senui-switch-track-border-color: var(--senui-color-border-strong);
+    --senui-switch-track-border-color-hover: var(--senui-color-fg-default);
+    --senui-switch-thumb: var(--senui-color-border-strong);
+    --senui-switch-on-bg: var(--senui-color-bg-accent);
+    --senui-switch-on-bg-hover: var(--senui-color-bg-accent-hover);
+    --senui-switch-on-thumb: var(--senui-color-fg-on-accent);
+    --senui-switch-track-size: var(--senui-size-target-min);
+    --senui-switch-inset: var(--senui-space-1);
+
+    display: grid;
+    grid-template-columns: auto 1fr;
+    column-gap: var(--senui-space-2);
+    /* The first line of a wrapping label sits beside the track, not its middle line. */
+    align-items: start;
+    font-family: var(--senui-font-family-sans);
+    font-size: var(--senui-font-size-md);
+    line-height: var(--senui-font-line-height-normal);
+  }
+
+  /* The track: twice its height wide, less one inset. Internal variables use the `--_` prefix:
+     they aren't tokens, and setting them from outside does nothing (CONVENTIONS rule 6). */
+  :where(.senui-switch__control) {
+    /* The track height, clamped to the target size (L05 review). */
+    --_senui-switch-height: max(var(--senui-size-target-min), var(--senui-switch-track-size));
+    --_senui-switch-thumb-size: calc(
+      var(--_senui-switch-height) - 2 * var(--senui-switch-inset) - 2 *
+        var(--senui-border-width-default)
+    );
+    /* How far the thumb travels from off to on. */
+    --_senui-switch-travel: calc(var(--_senui-switch-height) - 2 * var(--senui-switch-inset));
+
+    appearance: none;
+    display: inline-flex;
+    align-items: center;
+    box-sizing: border-box;
+    inline-size: calc(var(--_senui-switch-height) * 2 - 2 * var(--senui-switch-inset));
+    block-size: var(--_senui-switch-height);
+    margin: 0;
+    padding-inline: var(--senui-switch-inset);
+    border: var(--senui-border-width-default) solid var(--senui-switch-track-border-color);
+    border-radius: var(--senui-radius-full);
+    background-color: var(--senui-switch-track-bg);
+    cursor: pointer;
+    transition-property: background-color, border-color;
+    transition-duration: var(--senui-motion-duration-fast);
+    transition-timing-function: var(--senui-motion-easing-standard);
+  }
+
+  /* The thumb's position is the non-colour cue (WCAG 1.4.1). Under reduced motion it still moves
+     the whole way, instantly: --senui-motion-reduce scales the duration, never the distance,
+     because the position is the state (L05 open question 1, resolved). */
+  :where(.senui-switch__control)::before {
+    content: '';
+    box-sizing: border-box;
+    inline-size: var(--_senui-switch-thumb-size);
+    block-size: var(--_senui-switch-thumb-size);
+    border-radius: var(--senui-radius-full);
+    background-color: var(--senui-switch-thumb);
+    transition-property: translate, background-color;
+    transition-duration: calc(var(--senui-motion-duration-fast) * var(--senui-motion-reduce));
+    transition-timing-function: var(--senui-motion-easing-standard);
+  }
+
+  :where(.senui-switch__control:checked) {
+    border-color: var(--senui-switch-on-bg);
+    background-color: var(--senui-switch-on-bg);
+  }
+
+  :where(.senui-switch__control:checked)::before {
+    translate: var(--_senui-switch-travel) 0;
+    background-color: var(--senui-switch-on-thumb);
+  }
+
+  /* Right to left, on is on the left. */
+  :where(.senui-switch__control:checked:dir(rtl))::before {
+    translate: calc(var(--_senui-switch-travel) * -1) 0;
+  }
+
+  @media (hover: hover) {
+    :where(.senui-switch__control:hover:not(:disabled, :checked)) {
+      border-color: var(--senui-switch-track-border-color-hover);
+    }
+
+    :where(.senui-switch__control:hover:not(:disabled):checked) {
+      border-color: var(--senui-switch-on-bg-hover);
+      background-color: var(--senui-switch-on-bg-hover);
+    }
+  }
+
+  /* ADR-0005: an offset outline, never a box-shadow. */
+  :where(.senui-switch__control:focus-visible) {
+    outline: var(--senui-focus-ring-width) solid var(--senui-color-focus-ring);
+    outline-offset: var(--senui-focus-ring-offset);
+  }
+
+  :where(.senui-switch__control:disabled) {
+    border-color: var(--senui-color-border-disabled);
+    background-color: var(--senui-color-bg-disabled);
+    cursor: not-allowed;
+  }
+
+  :where(.senui-switch__control:disabled)::before {
+    background-color: var(--senui-color-fg-disabled);
+  }
+
+  :where(.senui-switch__label) {
+    color: var(--senui-color-fg-default);
+    cursor: pointer;
+  }
+
+  :where(.senui-switch__control:disabled + .senui-switch__label) {
+    color: var(--senui-color-fg-disabled);
+    cursor: not-allowed;
+  }
+
+  :where(.senui-switch__description) {
+    grid-column: 2;
+    margin-block-start: var(--senui-space-1);
+    color: var(--senui-color-fg-muted);
+    font-size: var(--senui-font-size-sm);
+  }
+
+  /* Forced colours: the control opts out so the thumb keeps its system colour; a forced background
+     would hide it. On is a filled track, and the thumb's position says the same. */
+  @media (forced-colors: active) {
+    :where(.senui-switch__control) {
+      forced-color-adjust: none;
+      border-color: CanvasText;
+      background-color: Canvas;
+    }
+
+    :where(.senui-switch__control)::before {
+      background-color: CanvasText;
+    }
+
+    :where(.senui-switch__control:checked) {
+      border-color: Highlight;
+      background-color: Highlight;
+    }
+
+    :where(.senui-switch__control:checked)::before {
+      background-color: HighlightText;
+    }
+
+    :where(.senui-switch__control:focus-visible) {
+      outline-color: CanvasText;
+    }
+
+    :where(.senui-switch__control:disabled) {
+      border-color: GrayText;
+      background-color: Canvas;
+    }
+
+    :where(.senui-switch__control:disabled)::before {
+      background-color: GrayText;
+    }
+  }
+}

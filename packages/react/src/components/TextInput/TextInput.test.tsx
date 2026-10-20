@@ -22,9 +22,9 @@ describe('TextInput', () => {
     expect(input).toHaveAttribute('data-size', 'md');
   });
 
-  test('standalone aria-invalid is a boolean, absent when false', () => {
+  test('standalone aria-invalid is a boolean, rendered "false" when not invalid (ADR-0013)', () => {
     const { rerender } = render(<TextInput aria-label="Search" aria-invalid={false} />);
-    expect(screen.getByRole('textbox')).not.toHaveAttribute('aria-invalid');
+    expect(screen.getByRole('textbox')).toHaveAttribute('aria-invalid', 'false');
     rerender(<TextInput aria-label="Search" aria-invalid />);
     expect(screen.getByRole('textbox')).toHaveAttribute('aria-invalid', 'true');
   });

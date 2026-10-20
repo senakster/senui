@@ -67,7 +67,7 @@ describe('TextInput in a browser', () => {
     expect(input).toHaveAttribute('aria-invalid', 'true');
     expect(input).toHaveFocus();
     await userEvent.type(input, 'ada@example.com');
-    expect(input).not.toHaveAttribute('aria-invalid');
+    expect(input).toHaveAttribute('aria-invalid', 'false');
   });
 });
 

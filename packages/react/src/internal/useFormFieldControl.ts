@@ -7,7 +7,7 @@ import {
   type RefCallback,
   type SyntheticEvent,
 } from 'react';
-import { mergeIds } from '../../internal/ids.js';
+import { mergeIds } from './ids.js';
 import { focusFirstInvalidOnSubmit } from './focusFirstInvalid.js';
 
 declare const sealed: unique symbol;
@@ -149,9 +149,10 @@ export function useFormFieldControl(
     id: wiring?.id ?? props.id,
     required: wiring?.required ?? props.required,
     'aria-describedby': mergeIds(props['aria-describedby'], wiring?.describedBy),
-    // Absent when valid, never "false" (L04 acceptance criteria).
-    'aria-invalid':
-      (wiring?.invalid ?? false) || nativeInvalid || props['aria-invalid'] || undefined,
+    // Always "true" or "false", never absent (ADR-0013): with no attribute, browsers announce a
+    // control's native invalidity (a pattern mismatch, a custom validity message, an unchecked
+    // required checkbox) from page load, before the user has done anything.
+    'aria-invalid': (wiring?.invalid ?? false) || nativeInvalid || props['aria-invalid'] === true,
     onInvalid,
     onChange,
     ref,

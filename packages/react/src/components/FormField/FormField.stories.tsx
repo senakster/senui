@@ -113,7 +113,7 @@ export const NativeValidation: Story = {
     await userEvent.type(name, 'Ada');
     await userEvent.clear(name);
     await userEvent.tab();
-    await expect(name).not.toHaveAttribute('aria-invalid');
+    await expect(name).toHaveAttribute('aria-invalid', 'false');
     await userEvent.click(canvas.getByRole('button', { name: 'Send' }));
     await expect(name).toHaveFocus();
     await expect(name).toHaveAttribute('aria-invalid', 'true');

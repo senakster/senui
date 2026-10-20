@@ -274,3 +274,97 @@ Entry format: date — module · Did · Verified · Scope decisions · Plan adju
 - **Acceptance:** every L04 criterion is met. Plan decisions 5 and 6 are replaced by ADR-0011 (deviations 1 and 3). The paste criterion is checked as "not cancelled" in jsdom (deviation 10).
 - **Verified:** `pnpm check`; `pnpm test`: tokens 32, react 265/265; build-storybook. Invariant greps clean.
 - **Next:** commit on a new branch (L04, the review fixes, the Button stories fix, ADR-0011), open a PR, and squash-merge when `verify` is green. Then `/modular-web:implement-module`: L05 (Checkbox / Switch) has no plan yet (`not-planned`).
+
+## 2026-10-19 — L04 merged; paused before L05
+
+- **Oriented:** PR #3 (L04) squash-merged as `18f5133`, CI `verify` green; local `main` up to date. Catalogue current (plugin 0.3.0).
+- **Blocked:** L05 (Checkbox / Switch) has no plan. `PLAN.md` says "plan TBD", and the planner repo's library catalogue ends at L04; the same holds for L06–L11. Offered: draft L05 upstream in the planner (recommended), or plan it locally. **Emil chose to pause.**
+- **Next:** give L05 a plan (draft upstream, then sync), then `/modular-web:implement-module`.
+
+## 2026-10-19 — L05 Checkbox / Switch: written, awaiting Emil's review
+
+- **Oriented:** the planner gained L05 to L07 plans (`89ae68b`, by Emil, after ADR-0011), and L04 and PLAN.md changed upstream. Emil chose to re-sync: copied the plugin's 9 library plans into `.catalogue/`, updated `.catalogue-sync.json` (hashes from the lock) and SYNC.md; `catalogue-status` reports all current. PROGRESS: L05 to L07 now `plan-ready`, L05 `in-progress`.
+- **Conflict settled by Emil:** L05 decision 4 (own label) over ADR-0011's L05 note (FormField binding). Recorded as ADR-0012, which amends ADR-0011.
+- **Scope (Emil):**
+  - Claude writes, and Emil reviews.
+  - `onCheckedChange` through `useControllableState`, with native `onChange` passed through. CONVENTIONS rule 5's exception narrowed to text-entry controls, and the L04 deviation 7 note corrected.
+  - Screen readers: Narrator and NVDA.
+  - Thumb under reduced motion: the duration scales, never the distance.
+  - `className` / `style` on the row.
+  - Group `required` is the message.
+  - Group children use context, with a development warning when one has no `value`.
+
+  All in scope-decisions § L05.
+
+- **Did:**
+  - Shared wiring: `useFormFieldControl` and `focusFirstInvalid` moved to `internal/`. New `internal/useFieldWiring` (ids, description and error state) and `internal/FieldError`. FormField now consumes them; its API is unchanged and its L04 tests pass as before.
+  - Checkbox, CheckboxGroup (its own directory, which the layout checks require) and Switch: TSX, CSS, three contracts (automated run only), unit, type and browser tests, 30 stories, changeset.
+  - ADR-0012; CLAUDE.md's locked-decisions row.
+- **Verified:**
+  - `pnpm check`.
+  - `pnpm test`: tokens 32, react 390 of 393. The 3 failures are the contract gate: no keyboard or screen-reader runs yet.
+  - build-storybook.
+  - Firefox and WebKit: 126 browser tests (L05 and FormField).
+- **Probes:** the indeterminate effect made to run once, the group's custom validity removed, and the input shrunk to the box each failed a test; all restored.
+- **Next:**
+  - Emil reviews the code.
+  - Manual runs:
+    - keyboard: Checkbox and Switch;
+    - Narrator and NVDA: Checkbox (incl. Indeterminate, SelectAll), CheckboxGroup (RequiredSubmit, WithError), Switch;
+    - forced colours: the three ForcedColors stories.
+  - Then the `review-component` workflow.
+
+## 2026-10-20 — L05: two findings from Emil's Narrator runs
+
+- **"News emits invalid, the others don't"** (Emil, RequiredSubmit story). Reproduced:
+  - The DOM was right: after a submit, all three boxes had `aria-invalid="true"`.
+  - Chromium's accessibility tree was wrong. With no `aria-invalid` attribute, it reports native invalidity from page load: the group's custom validity message, an unchecked required checkbox, a text field holding a bad value. Only an empty required text field is held back, the one case L04's probe had tested, so L04's TextInput was affected too.
+  - An explicit `"false"` overrides it (probed).
+  - **Emil chose: always render `aria-invalid` `"true"` or `"false"`.** ADR-0013 records it; it amends ADR-0011 and L04 decision 1.
+  - Changes: one line in `useFormFieldControl` (TextInput and Checkbox); Switch always renders `"false"`. Contracts and the useFieldWiring docs updated. About 15 assertions moved from "absent" to `"false"`.
+  - New browser tests pin `"false"` on each natively invalid, untouched case. They check the attribute, since Vitest's browser mode has no CDP access; the accessibility tree was probed by hand. All probes deleted.
+- **"Enter toggles a tab-focused box"** (Emil). Not reproduced: real key presses in the built Storybook, in Chrome, left all four stories unchanged. Emil confirmed it happens only with Narrator on: the screen reader turns Enter into a click. Not a component defect; nothing changed.
+- **Verified:** `pnpm check`; `pnpm test`: tokens 32, react 393 of 396 (the 3 failures are still only the contract gate); browser 119/119; build-storybook.
+- **Next:** Emil records the remaining manual results (the keyboard, Narrator and NVDA announcements, forced colours) for the contracts, then the reviewers. The commit Emil asked for was interrupted by the bug report; branch and commit on request.
+
+## 2026-10-20 — L05 manual runs recorded
+
+- **Emil:** keyboard OK (Checkbox, Switch); forced colours OK (all three ForcedColors stories); NVDA OK:
+  - "required" is announced;
+  - the mixed state is announced (Emil: "partially marked");
+  - the Switch is announced as a switch;
+  - nothing is announced invalid before a submit, and a failed submit announces it.
+- **Recorded:**
+  - keyboard runs (Checkbox, Switch); NVDA runs (all three, version not recorded); forced-colours runs (all three, method not stated);
+  - the heard announcements, replacing "not yet heard";
+  - evidence on 2.1.1, 2.4.7, 4.1.2, 1.4.11, 1.4.1 and 3.3.1.
+
+  Narrator's L05 run found the ADR-0013 bug and wasn't repeated, so it isn't recorded as a pass. Not reported, and left as expected text: entering the group, and the switch's toggle announcement.
+
+- **Verified:** `pnpm check`; `pnpm test`: tokens 32, react 396/396 (the contract gate passes).
+- **Next:** the `review-component` workflow for Checkbox, CheckboxGroup and Switch (Emil's opt-in), then triage. Commit on a branch when Emil asks.
+
+## 2026-10-20 — L05: NVDA group and switch readings
+
+- **Switch** (NVDA in Danish, Chrome): "Wi-Fi, switch, til", then "fra" / "til" on each toggle; the name isn't repeated. Recorded in the contract.
+- **Group:** the first reading missed the legend because focus crossed the Storybook frame boundary. Entered from outside (Shift+Tab from Subscribe), NVDA read "Topics, gruppering, News, check box, ikke markeret, ugyldig indtastning", but **never the group's error**. Chromium exposed it correctly (probed: the group named "Topics" and described by the error), so NVDA doesn't read a group's description.
+- **Fix (Emil):** the error now describes every checkbox, and the fieldset keeps only its description. Scope deviation 6 replaces decision 13's fieldset-only rule and resolves open question 2. Unit and browser tests updated. Not yet re-heard.
+- **Verified:** typecheck, lint; unit 216/216; L05 browser 43/43.
+- **Next:** Emil re-hears WithError (each box should now read the message), then the reviewers. Commit on request.
+- **Re-heard (Emil, NVDA):** with the error on each box, NVDA now reads the group's message after "ugyldig indtastning". Contract and scope deviation 6 updated.
+
+## 2026-10-20 — L05 review: triaged and applied
+
+- **Reviewers:** the `review-component` workflow (API, accessibility, platform) over Checkbox, CheckboxGroup, Switch and the shared wiring. 18 findings, 14 distinct.
+- **Triage with Emil (three batches):** accepted 14, rejected 0, escalated 0. No `OVERRIDES.md` rows. Details in scope-decisions § L05, "Review (2026-10-20)".
+- **Probes:** four breaks (host on the first box, narrow effect dependencies, no group reset, no Switch clamp) each failed its new browser test; all restored.
+- **Verified:** `pnpm check`; `pnpm test`: tokens 32, react 415/415; build-storybook; Firefox and WebKit 152/152 (L05 and FormField browser tests).
+- **Also this session:** lessons from L03 to L05 fed into the planner repo (branch `feedback/library-l03-l05`, uncommitted): a field report, revised L02/L04/L05 plans, the wcag-auditor and component-api-reviewer agents, and implement-module rules 35 to 40.
+- **Next:** Emil re-hears the group description with NVDA (each box should now read it). Then mark L05 done, and commit both repos on request.
+
+## 2026-10-20 — L05 done
+
+- **Re-heard (Emil, NVDA):** each box in WithDescription reads the group's description ("News, check box, ikke markeret, Choose what we write to you about."). Recorded in the contract and scope decisions.
+- **Acceptance:** every L05 criterion is met. Deviations: scope-decisions § L05, 1 to 7. Review: 14/14 accepted.
+- **Verified:** `pnpm check`; `pnpm test`: tokens 32, react 415/415; build-storybook; Firefox and WebKit.
+- **Next:** commit on `feature/checkbox-switch-L05`, then a PR. L06 (Dialog) is next.

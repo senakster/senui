@@ -19,7 +19,7 @@ export const a11y = defineA11yContract<FormFieldProps>()({
     ],
     hiddenFromAT: ['the required marker (*)', 'the error icon'],
     notes:
-      'Sets the control\'s `aria-invalid` (absent when valid, never "false") from `error`, or from a native constraint error after a submit attempt, and its `required` from `required`. aria-errormessage is not used (L04 decision 2).',
+      'Sets the control\'s `aria-invalid` ("true" or "false", never absent: ADR-0013) from `error`, or from a native constraint error after a submit attempt, and its `required` from `required`. aria-errormessage is not used (L04 decision 2).',
   },
   keyboard: [],
   focus: { tabStop: 'none' },
