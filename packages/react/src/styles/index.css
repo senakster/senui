@@ -4,3 +4,6 @@
 @import '../components/Button/Button.css';
 @import '../components/FormField/FormField.css';
 @import '../components/TextInput/TextInput.css';
+@import '../components/Checkbox/Checkbox.css';
+@import '../components/CheckboxGroup/CheckboxGroup.css';
+@import '../components/Switch/Switch.css';

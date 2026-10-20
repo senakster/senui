@@ -44,7 +44,7 @@ describe('FormField with native constraint validation', () => {
     await userEvent.tab();
     // The browser now counts it as user-invalid; senui waits for a submit attempt.
     expect(name.matches(':user-invalid')).toBe(true);
-    expect(name).not.toHaveAttribute('aria-invalid');
+    expect(name).toHaveAttribute('aria-invalid', 'false');
   });
 
   test('a validity check on an untouched form is not a submit attempt', () => {
@@ -54,7 +54,7 @@ describe('FormField with native constraint validation', () => {
     act(() => {
       (name.form as HTMLFormElement).checkValidity();
     });
-    expect(name).not.toHaveAttribute('aria-invalid');
+    expect(name).toHaveAttribute('aria-invalid', 'false');
   });
 
   test('on submit, the first invalid field takes focus and is described by its error', async () => {
@@ -80,7 +80,7 @@ describe('FormField with native constraint validation', () => {
     expect(email).toHaveAccessibleDescription(email.validationMessage);
 
     await userEvent.type(email, '@example.com');
-    expect(email).not.toHaveAttribute('aria-invalid');
+    expect(email).toHaveAttribute('aria-invalid', 'false');
     expect(email).not.toHaveAttribute('aria-describedby');
   });
 
@@ -88,8 +88,8 @@ describe('FormField with native constraint validation', () => {
     const { getByRole } = render(<NativeForm />);
     await userEvent.click(getByRole('button', { name: 'Send' }));
     await userEvent.click(getByRole('button', { name: 'Clear' }));
-    expect(getByRole('textbox', { name: 'Name' })).not.toHaveAttribute('aria-invalid');
-    expect(getByRole('textbox', { name: 'Email' })).not.toHaveAttribute('aria-invalid');
+    expect(getByRole('textbox', { name: 'Name' })).toHaveAttribute('aria-invalid', 'false');
+    expect(getByRole('textbox', { name: 'Email' })).toHaveAttribute('aria-invalid', 'false');
   });
 
   test('the error prop wins over a native error', async () => {
@@ -180,7 +180,7 @@ describe('FormField review fixes', () => {
     await userEvent.click(getByRole('button', { name: 'Send' }));
     expect(email).toHaveAttribute('aria-invalid', 'true');
     await userEvent.click(getByRole('button', { name: 'Use my saved address' }));
-    await expect.poll(() => email.getAttribute('aria-invalid')).toBeNull();
+    await expect.poll(() => email.getAttribute('aria-invalid')).toBe('false');
     expect(email).not.toHaveAttribute('aria-describedby');
   });
 

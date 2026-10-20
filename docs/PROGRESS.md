@@ -11,9 +11,9 @@ Status legend — plan: `plan-ready` · `not-planned` (plan not written yet upst
 | L02 | Component API conventions         | L02-component-api-conventions | plan-ready  | done           | 2026-10-16   |
 | L03 | Button                            | L03-button                    | plan-ready  | done           | 2026-10-18   |
 | L04 | FormField + TextInput             | L04-formfield-and-textinput   | plan-ready  | done           | 2026-10-19   |
-| L05 | Checkbox / Switch                 | —                             | not-planned | not-started    | 2026-10-15   |
-| L06 | Dialog                            | —                             | not-planned | not-started    | 2026-10-15   |
-| L07 | EmptyState                        | —                             | not-planned | not-started    | 2026-10-15   |
+| L05 | Checkbox / Switch                 | L05-checkbox-and-switch       | plan-ready  | done           | 2026-10-20   |
+| L06 | Dialog                            | L06-dialog                    | plan-ready  | not-started    | 2026-10-19   |
+| L07 | EmptyState                        | L07-empty-state               | plan-ready  | not-started    | 2026-10-19   |
 | L08 | Test & a11y gate                  | —                             | not-planned | not-started    | 2026-10-15   |
 | L09 | Docs & machine-readable manifest  | —                             | not-planned | not-started    | 2026-10-15   |
 | L10 | Release, versioning & deprecation | —                             | not-planned | not-started    | 2026-10-15   |
@@ -21,7 +21,22 @@ Status legend — plan: `plan-ready` · `not-planned` (plan not written yet upst
 
 ## Changelog
 
-- **2026-10-19** — L04 done. Every acceptance criterion is met, with the plan's `:user-invalid` styling and context wiring replaced by ADR-0011. Emil re-checked read-only in forced colours. TextInput keeps native `value` / `onChange`; CONVENTIONS rules 5 and 11 now say a wrapped native control keeps its native callbacks. `pnpm check`; `pnpm test` (tokens 32, react 265); build-storybook. Waiting on a commit and PR.
+- **2026-10-20** — L05 done. Every acceptance criterion is met. Emil's keyboard, NVDA and forced-colours runs are recorded (Narrator's run found the defect behind ADR-0013 and wasn't repeated). Those runs led to three changes:
+  - ADR-0013: form controls always render `aria-invalid`, because Chromium otherwise announces native invalidity on page load. This also fixes L04's TextInput.
+  - The group's error and description now describe each box, because NVDA never reads a fieldset's description. Re-heard by Emil.
+  - The Narrator Enter-click finding was not a defect.
+
+  The review's 14 findings were all accepted and applied: the group-rule host, form reset, controlled-only `indeterminate`, hover tokens, size clamps, warnings, tests and contracts. `pnpm check`; `pnpm test` (tokens 32, react 415); build-storybook; Firefox and WebKit. Lessons fed back to the planner (field report, plans, agents, skill).
+
+- **2026-10-19** — L05 in progress. Plans re-synced: L05 to L07 are now `plan-ready`. Claude wrote Checkbox, CheckboxGroup and Switch for Emil's review:
+  - All three are native checkboxes with own labels.
+  - The indeterminate state is the DOM property.
+  - The group is a fieldset with `required="<message>"`.
+  - Switch uses `role="switch"`, and its thumb jumps instead of sliding under reduced motion.
+
+  FormField's wiring now lives in shared internal hooks (API unchanged). ADR-0012 amends ADR-0011: binary controls own their label. `pnpm check` passes. `pnpm test`: react 390/393, with only the contract gate (manual runs) failing. Browser tests also pass in Firefox and WebKit.
+
+- **2026-10-19** — L04 done, merged as PR #3. Every acceptance criterion is met, with the plan's `:user-invalid` styling and context wiring replaced by ADR-0011. Emil re-checked read-only in forced colours. TextInput keeps native `value` / `onChange`; CONVENTIONS rules 5 and 11 now say a wrapped native control keeps its native callbacks. `pnpm check`; `pnpm test` (tokens 32, react 265); build-storybook.
 - **2026-10-19** — L04 reviewed: 17 decisions from the three reviewers. Emil accepted 16, rejected none and escalated one. Every fix is applied, including:
   - submit focus reaches a field whose only error is the `error` prop;
   - a native error clears when code sets a valid value;

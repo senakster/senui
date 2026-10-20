@@ -7,39 +7,33 @@ Single source of truth for **where the implementation is right now**. Overwritte
 | Field         | Value                                                                             |
 | ------------- | --------------------------------------------------------------------------------- |
 | Target app    | repo root (pnpm workspace: `packages/tokens`, `packages/react`, `apps/docs`)      |
-| Active module | L05 — Checkbox / Switch (next; no plan yet). L04 done 2026-10-19                  |
-| Sub-step      | L04 done and uncommitted; waiting on a commit, PR and merge                       |
-| Last verified | 2026-10-19: `pnpm check`; `pnpm test` (tokens 32, react 265/265); build-storybook |
-| Updated       | 2026-10-19                                                                        |
+| Active module | L06 — Dialog (next; plan-ready). L05 done 2026-10-20                              |
+| Sub-step      | L05 committed on `feature/checkbox-switch-L05`; waiting on a PR and merge         |
+| Last verified | 2026-10-20: `pnpm check`; `pnpm test` (tokens 32, react 415/415); build-storybook |
+| Updated       | 2026-10-20                                                                        |
 
-## What is uncommitted
+## State
 
-Everything since PR #2. The work is on `feature/button-review-L03`, which is already merged, so it
-needs a new branch:
-
-- L04: `components/FormField/`, `components/TextInput/`, `internal/testing/stories.ts`, the entry
-  exports and CSS imports, `useNameCheck`, and the changeset `add-formfield-textinput.md`.
-- An L03 defect fix: Button stories now pass their args through, and a test checks every story with
-  controls (scope-decisions § L03, "Defects found later").
-- ADR-0011 and its index row, CLAUDE.md's locked-decisions row, and the CONVENTIONS changes (rules
-  3, 5 and 11, and the stories rule).
-- `vitest.config.ts`: the `SENUI_BROWSERS` switch (scope-decisions § L00).
-- Implementation log, PROGRESS and scope decisions.
+- L05 is done and committed on `feature/checkbox-switch-L05` (not pushed). It also carries
+  ADR-0012 and ADR-0013 and the TextInput change ADR-0013 implies.
+- The planner repo has the L03–L05 lessons committed on `feedback/library-l03-l05` (not pushed): a
+  field report, revised L02/L04/L05 plans, the wcag-auditor and component-api-reviewer agents, and
+  implement-module rules 35–40. Once that reaches the plugin, `catalogue-status` here will report
+  L02, L04 and L05 as `updated-upstream`: re-sync then (copy the plans and rewrite
+  `.catalogue-sync.json`, as on 2026-10-19).
 
 ## In-flight notes
 
-- **L05 has no plan** (`not-planned` in PROGRESS). Already decided for it: Checkbox and Switch take
-  `field?: FormFieldBinding` and call `useFormFieldControl` (ADR-0011). Checkbox passes native
-  `checked` / `onChange` through (CONVENTIONS rule 5, L04 deviation 7); Switch decides when it gets
-  there.
-- Cross-browser runs: `SENUI_BROWSERS=chromium,firefox,webkit` with the browser project. Firefox and
-  WebKit are installed on this machine; CI stays Chromium-only until L08 decides the gate's engines.
-- The `react@19.3.1` exclusion in `pnpm-workspace.yaml` can go once that release has aged past
-  pnpm's minimum release age (published 2026-10-14).
-- Still open from L03: hover/active stories (pseudo-states addon, needs an ADR); the squash-only
-  repository setting (`.github/rulesets/README.md`).
+- L06 (Dialog) plan is synced. The planner's ADR-0015 (dialog scroll lock) was written with it;
+  check it with `catalogue-decisions` before starting.
+- Cross-browser: `SENUI_BROWSERS=chromium,firefox,webkit` with the browser project. Firefox and
+  WebKit are installed on this machine; CI stays Chromium-only until L08.
+- Untested readers: JAWS, VoiceOver and TalkBack (L05 contracts make no claims for them).
+- `react@19.3.1` exclusion in `pnpm-workspace.yaml` can go once that release has aged.
+- Still open from L03: hover/active stories (pseudo-states addon); the squash-only repository
+  setting.
 
 ## Next action
 
-Commit on a new branch, open a PR, and squash-merge when `verify` is green. Then run
-`/modular-web:implement-module`. L05 needs a plan before it can start: write or sync one upstream.
+Push `feature/checkbox-switch-L05` and open a PR (squash-merge when `verify` is green), and decide
+on the planner branch. Then run `/modular-web:implement-module` to start L06 (Dialog).

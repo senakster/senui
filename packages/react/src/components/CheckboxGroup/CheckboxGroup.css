@@ -1,0 +1,71 @@
+@layer senui.components {
+  /* Public surface (semver): the `.senui-checkbox-group` class and the three
+     `--senui-checkbox-group-*` tokens below. The part classes (`__legend`, `__description`,
+     `__options`, `__error…`) are internal. The checkboxes style themselves (Checkbox.css). */
+  :where(.senui-checkbox-group) {
+    --senui-checkbox-group-gap: var(--senui-space-2);
+    --senui-checkbox-group-legend-font-size: var(--senui-font-size-md);
+    --senui-checkbox-group-hint-font-size: var(--senui-font-size-sm);
+
+    min-inline-size: 0;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    font-family: var(--senui-font-family-sans);
+    line-height: var(--senui-font-line-height-normal);
+  }
+
+  :where(.senui-checkbox-group__legend) {
+    padding: 0;
+    color: var(--senui-color-fg-default);
+    font-size: var(--senui-checkbox-group-legend-font-size);
+    font-weight: var(--senui-font-weight-medium);
+  }
+
+  :where(.senui-checkbox-group__required) {
+    margin-inline-start: var(--senui-space-1);
+    color: var(--senui-color-fg-danger);
+  }
+
+  :where(.senui-checkbox-group__description) {
+    color: var(--senui-color-fg-muted);
+    font-size: var(--senui-checkbox-group-hint-font-size);
+  }
+
+  :where(.senui-checkbox-group__options) {
+    display: grid;
+    gap: var(--senui-checkbox-group-gap);
+    margin-block-start: var(--senui-checkbox-group-gap);
+  }
+
+  :where(.senui-checkbox-group__error) {
+    display: flex;
+    gap: var(--senui-space-1);
+    align-items: baseline;
+    margin-block-start: var(--senui-checkbox-group-gap);
+    color: var(--senui-color-fg-danger);
+    font-size: var(--senui-checkbox-group-hint-font-size);
+  }
+
+  :where(.senui-checkbox-group__error-icon) {
+    flex: none;
+  }
+
+  :where(.senui-checkbox-group__error-icon-disc) {
+    fill: currentColor;
+  }
+
+  :where(.senui-checkbox-group__error-icon-mark) {
+    stroke: var(--senui-color-bg-default);
+  }
+
+  @media (forced-colors: active) {
+    :where(.senui-checkbox-group__error-icon-disc) {
+      fill: CanvasText;
+    }
+
+    :where(.senui-checkbox-group__error-icon-mark) {
+      stroke: Canvas;
+    }
+  }
+}

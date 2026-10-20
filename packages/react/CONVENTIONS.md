@@ -135,11 +135,15 @@ Stateful components accept both a controlled triplet (`value` / `defaultValue` /
 or `checked` / `defaultChecked` / `onCheckedChange`) and use
 [`useControllableState`](src/internal/useControllableState.ts) for it.
 
-This is for state the component owns. A component that wraps a native form control (TextInput's
-`<input>`) passes that control's own `value` / `defaultValue` / `onChange` through, because the
-element already holds the state and form libraries expect the native event. It adds no
-`on<Prop>Change` of its own (L04, Emil 2026-10-19). Adding one later is a minor; removing it would
-be a major.
+One exception: a **text-entry** control (TextInput) passes its native `value` / `defaultValue` /
+`onChange` through and adds no `onValueChange`, because the element already holds the text and form
+libraries expect the native event (L04, Emil 2026-10-19). Adding one later is a minor; removing it
+would be a major.
+
+Binary controls (Checkbox, Switch) follow the rule: `checked` / `defaultChecked` /
+`onCheckedChange` through `useControllableState`, because a mixed state and select-all logic need a
+value-first callback (L05 decisions 6 and 7). They still pass the native `onChange` through, so
+form libraries that read the event keep working.
 
 ```tsx
 const [checked, setChecked] = useControllableState({
@@ -190,6 +194,12 @@ const [checked, setChecked] = useControllableState({
   }
   ```
 
+- Every state a component styles (hover, active, pressed, checked) reads a component token, never
+  a semantic token directly, so a consumer's override holds in that state too
+  (`--senui-checkbox-checked-bg-hover`, defaulting to `--senui-color-bg-accent-hover`).
+- Internal calculation variables use a `--_senui-<component>-*` name. They aren't tokens or public
+  surface, and setting one from outside does nothing. A token the component exposes for size is
+  clamped so it can't take a control below the 24 px target (`max(var(--senui-size-target-min), …)`).
 - Focus is drawn as an outline with an offset, never a `box-shadow` (ADR-0005):
 
   ```css
@@ -295,7 +305,7 @@ server-render test per component is part of L08's gate.
 ## 11. Prop names and defaults
 
 - Change callbacks for state a component owns are `on<Prop>Change(value)`: the new value first, no
-  event. A wrapped native control keeps its native `onChange(event)` instead (rule 5).
+  event. A text-entry control keeps its native `onChange(event)` instead (rule 5's exception).
 - Booleans have no `is` prefix (`disabled`, `loading`) and default to `false`.
 - Sizes are `size?: 'sm' | 'md' | 'lg'`, defaulting to `'md'`. Each size meets the 24×24 target
   minimum (WCAG 2.5.8).

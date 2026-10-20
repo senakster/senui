@@ -1,12 +1,13 @@
-import { forwardRef, useEffect, useId, useRef, useState, type ReactNode } from 'react';
+import { forwardRef, useEffect, useRef, type ReactNode } from 'react';
 import { DEV, warnOnce } from '../../internal/dev.js';
-import { mergeIds } from '../../internal/ids.js';
+import { FieldError } from '../../internal/FieldError.js';
 import type { NativeProps } from '../../internal/native-props.js';
 import { useComposedRefs } from '../../internal/refs.js';
-import { createBinding, type FormFieldBinding } from './useFormFieldControl.js';
+import { useFieldWiring } from '../../internal/useFieldWiring.js';
+import { createBinding, type FormFieldBinding } from '../../internal/useFormFieldControl.js';
 
-export { focusFirstInvalid } from './focusFirstInvalid.js';
-export type { FormFieldBinding } from './useFormFieldControl.js';
+export { focusFirstInvalid } from '../../internal/focusFirstInvalid.js';
+export type { FormFieldBinding } from '../../internal/useFormFieldControl.js';
 
 /** Something to show: `undefined`, `null` and booleans render nothing, so they can't label a field. */
 type Label = Exclude<ReactNode, null | undefined | boolean>;
@@ -73,33 +74,21 @@ export const FormField = forwardRef<HTMLDivElement, FormFieldProps>(function For
   { label, description, error, required = false, announce, id, children, className, ...rest },
   forwardedRef,
 ) {
-  const generatedId = useId();
-  const controlId = id ?? `${generatedId}-control`;
+  const {
+    controlId,
+    descriptionId,
+    errorId,
+    nativeErrorId,
+    hasDescription,
+    hasError,
+    nativeMessage,
+    showNative,
+    wiring,
+  } = useFieldWiring({ id, description, error, required });
   const root = useRef<HTMLDivElement | null>(null);
   const ref = useComposedRefs(forwardedRef, root);
   useBindingCheck(root, controlId);
-  const descriptionId = `${generatedId}-description`;
-  const errorId = `${generatedId}-error`;
-  const nativeErrorId = `${generatedId}-native-error`;
-  const [nativeMessage, setNativeMessage] = useState<string | null>(null);
-
-  const hasDescription = hasContent(description);
-  const hasError = hasContent(error);
-  // The `error` prop wins; a native message shows only without one.
-  const showNative = !hasError && nativeMessage !== null;
-
-  const field = createBinding({
-    id: controlId,
-    describedBy: mergeIds(
-      hasDescription && descriptionId,
-      hasError && errorId,
-      showNative && nativeErrorId,
-    ),
-    invalid: hasError || showNative,
-    required,
-    nativeInvalid: nativeMessage !== null,
-    reportNative: setNativeMessage,
-  });
+  const field = createBinding(wiring);
 
   // Root ownership (CONVENTIONS rule 2): the consumer's attributes first, then FormField's.
   return (
@@ -125,13 +114,13 @@ export const FormField = forwardRef<HTMLDivElement, FormFieldProps>(function For
       {/* Always rendered, empty while valid, so it can be a live region that already exists when
           a message arrives (L04: error message node). */}
       <div className="senui-form-field__error" id={errorId} aria-live={announce}>
-        {hasError && <ErrorMessage>{error}</ErrorMessage>}
+        {hasError && <FieldError block="senui-form-field">{error}</FieldError>}
       </div>
       {/* Native messages are never live: a failed submit would queue every field's message at
           once. They are read in context when focus moves to the field (L04 decision 3). */}
       {showNative && (
         <div className="senui-form-field__error" id={nativeErrorId}>
-          <ErrorMessage>{nativeMessage}</ErrorMessage>
+          <FieldError block="senui-form-field">{nativeMessage}</FieldError>
         </div>
       )}
     </div>
@@ -139,11 +128,6 @@ export const FormField = forwardRef<HTMLDivElement, FormFieldProps>(function For
 });
 
 FormField.displayName = 'FormField';
-
-/** Booleans render nothing, so `true` (cast past the type) is no message either. */
-function hasContent(node: ReactNode): boolean {
-  return node !== undefined && node !== null && typeof node !== 'boolean' && node !== '';
-}
 
 /**
  * Development only: the binding must reach exactly one control. The type can't see what the render
@@ -168,35 +152,4 @@ function useBindingCheck(root: { readonly current: HTMLDivElement | null }, cont
       );
     }
   });
-}
-
-/** The icon, then the message in one element, so a message with markup stays one line of text. */
-function ErrorMessage({ children }: { children: ReactNode }) {
-  return (
-    <>
-      <ErrorIcon />
-      <span className="senui-form-field__error-text">{children}</span>
-    </>
-  );
-}
-
-/** Marks the message as an error by shape, not colour alone (WCAG 1.4.1). Decorative: the text says it. */
-function ErrorIcon() {
-  return (
-    <svg
-      className="senui-form-field__error-icon"
-      aria-hidden="true"
-      viewBox="0 0 16 16"
-      width="1em"
-      height="1em"
-    >
-      <circle className="senui-form-field__error-icon-disc" cx="8" cy="8" r="7" />
-      <path
-        className="senui-form-field__error-icon-mark"
-        d="M8 4.5v4M8 11.25v.5"
-        strokeWidth="1.75"
-        strokeLinecap="round"
-      />
-    </svg>
-  );
 }

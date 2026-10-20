@@ -48,14 +48,14 @@ describe('FormField', () => {
       expect(ids(input, 'aria-describedby')).toEqual([description.id]);
     });
 
-    test('aria-invalid is absent when valid, never "false"', () => {
+    test('aria-invalid is "false" when valid, never absent (ADR-0013)', () => {
       const { rerender } = render(<Field />);
       const input = screen.getByRole('textbox');
-      expect(input).not.toHaveAttribute('aria-invalid');
+      expect(input).toHaveAttribute('aria-invalid', 'false');
       rerender(<Field error="Enter an email address." />);
       expect(input).toHaveAttribute('aria-invalid', 'true');
       rerender(<Field error="" />);
-      expect(input).not.toHaveAttribute('aria-invalid');
+      expect(input).toHaveAttribute('aria-invalid', 'false');
     });
 
     test("the control's own aria-describedby is merged, not replaced (CONVENTIONS rule 10)", () => {
@@ -105,7 +105,7 @@ describe('FormField', () => {
 
 test('`true` cast past the type is no error: nothing is marked invalid', () => {
   render(<Field error={true as unknown as string} />);
-  expect(screen.getByRole('textbox')).not.toHaveAttribute('aria-invalid');
+  expect(screen.getByRole('textbox')).toHaveAttribute('aria-invalid', 'false');
   expect(screen.getByRole('textbox')).not.toHaveAttribute('aria-describedby');
 });
 

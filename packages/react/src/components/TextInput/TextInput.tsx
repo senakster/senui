@@ -2,7 +2,7 @@ import { forwardRef } from 'react';
 import type { NativeProps } from '../../internal/native-props.js';
 import { useComposedRefs } from '../../internal/refs.js';
 import { useNameCheck } from '../../internal/useNameCheck.js';
-import { useFormFieldControl, type FormFieldBinding } from '../FormField/useFormFieldControl.js';
+import { useFormFieldControl, type FormFieldBinding } from '../../internal/useFormFieldControl.js';
 
 /** Single-line text types. `number` is not one: it is a spin button, with its own role and keys. */
 export type TextInputType = 'text' | 'email' | 'password' | 'search' | 'tel' | 'url';

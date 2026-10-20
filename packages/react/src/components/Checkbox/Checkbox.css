@@ -1,0 +1,228 @@
+@layer senui.components {
+  /* Public surface (semver): the `.senui-checkbox` class (on the row; the input is internal), the
+     `data-indeterminate` attribute on the input, and the ten `--senui-checkbox-*` tokens below.
+     The part classes (`__control`, `__label`, `__description`, `__error…`) and the
+     `--_senui-checkbox-*` variables are internal.
+
+     The input is the control (L05 decision 3): `appearance: none`, at least the 24 px target and
+     never smaller than the box, so its hit area meets 2.5.8 even with no visible label. The
+     visible box is `::before`, the check or dash glyph is `::after`, masked and painted in
+     `currentColor`. */
+  :where(.senui-checkbox) {
+    --senui-checkbox-box: var(--senui-space-4);
+    --senui-checkbox-radius: var(--senui-radius-sm);
+    --senui-checkbox-border-color: var(--senui-color-border-strong);
+    --senui-checkbox-border-color-hover: var(--senui-color-fg-default);
+    --senui-checkbox-bg: var(--senui-color-bg-default);
+    --senui-checkbox-checked-bg: var(--senui-color-bg-accent);
+    --senui-checkbox-checked-bg-hover: var(--senui-color-bg-accent-hover);
+    --senui-checkbox-glyph: var(--senui-color-fg-on-accent);
+    --senui-checkbox-gap: var(--senui-space-1);
+    --senui-checkbox-hint-font-size: var(--senui-font-size-sm);
+
+    display: grid;
+    grid-template-columns: auto 1fr;
+    column-gap: var(--senui-space-2);
+    /* The first line of a wrapping label sits beside the box, not its middle line. */
+    align-items: start;
+    font-family: var(--senui-font-family-sans);
+    font-size: var(--senui-font-size-md);
+    line-height: var(--senui-font-line-height-normal);
+  }
+
+  :where(.senui-checkbox__control) {
+    /* The input's size: the target, or the box if a consumer makes it larger (L05 review). */
+    --_senui-checkbox-input: max(var(--senui-size-target-min), var(--senui-checkbox-box));
+
+    appearance: none;
+    display: grid;
+    place-items: center;
+    box-sizing: border-box;
+    inline-size: var(--_senui-checkbox-input);
+    block-size: var(--_senui-checkbox-input);
+    margin: 0;
+    padding: 0;
+    border: 0;
+    background: none;
+    color: var(--senui-checkbox-glyph);
+    cursor: pointer;
+  }
+
+  :where(.senui-checkbox__control)::before,
+  :where(.senui-checkbox__control)::after {
+    content: '';
+    grid-area: 1 / 1;
+    box-sizing: border-box;
+    inline-size: var(--senui-checkbox-box);
+    block-size: var(--senui-checkbox-box);
+  }
+
+  /* The box. Unchecked, its border is the only boundary, so it uses border.strong (3:1 against
+     every surface; L05 decision 16). */
+  :where(.senui-checkbox__control)::before {
+    border: var(--senui-border-width-default) solid var(--senui-checkbox-border-color);
+    border-radius: var(--senui-checkbox-radius);
+    background-color: var(--senui-checkbox-bg);
+    transition-property: background-color, border-color;
+    transition-duration: var(--senui-motion-duration-fast);
+    transition-timing-function: var(--senui-motion-easing-standard);
+  }
+
+  /* The glyph: shape, not colour, tells checked from unchecked (WCAG 1.4.1). */
+  :where(.senui-checkbox__control)::after {
+    visibility: hidden;
+    background-color: currentColor;
+    mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M3.5 8.5l3 3 6-7' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E")
+      center / contain no-repeat;
+  }
+
+  :where(.senui-checkbox__control:checked)::before,
+  :where(.senui-checkbox__control:is(:indeterminate, [data-indeterminate]))::before {
+    border-color: var(--senui-checkbox-checked-bg);
+    background-color: var(--senui-checkbox-checked-bg);
+  }
+
+  :where(.senui-checkbox__control:checked)::after {
+    visibility: visible;
+  }
+
+  /* Indeterminate wins over checked, as the browser shows it. `data-indeterminate` draws the dash
+     before hydration, when the DOM property isn't set yet. */
+  :where(.senui-checkbox__control:is(:indeterminate, [data-indeterminate]))::after {
+    visibility: visible;
+    mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M4 8h8' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E");
+  }
+
+  @media (hover: hover) {
+    :where(.senui-checkbox__control:hover:not(:disabled))::before {
+      border-color: var(--senui-checkbox-border-color-hover);
+    }
+
+    :where(.senui-checkbox__control:hover:not(:disabled):is(:checked, :indeterminate))::before {
+      border-color: var(--senui-checkbox-checked-bg-hover);
+      background-color: var(--senui-checkbox-checked-bg-hover);
+    }
+  }
+
+  /* ADR-0005: an offset outline, never a box-shadow. It rings the box, not the 24 px input or the
+     row (L05 decision 14): the negative part of the offset pulls it in to the box's edge. */
+  :where(.senui-checkbox__control:focus-visible) {
+    outline: var(--senui-focus-ring-width) solid var(--senui-color-focus-ring);
+    outline-offset: calc(
+      (var(--senui-checkbox-box) - var(--_senui-checkbox-input)) / 2 +
+        var(--senui-focus-ring-offset)
+    );
+    border-radius: var(--senui-checkbox-radius);
+  }
+
+  /* Invalid: the signal assistive technology gets (CONVENTIONS rule 6, ADR-0011), never
+     :user-invalid. A thicker danger border, so it isn't colour alone; the message says why. */
+  :where(.senui-checkbox__control[aria-invalid='true'])::before {
+    border-width: var(--senui-border-width-strong);
+    border-color: var(--senui-color-border-danger);
+  }
+
+  :where(.senui-checkbox__control:disabled) {
+    color: var(--senui-color-fg-disabled);
+    cursor: not-allowed;
+  }
+
+  :where(.senui-checkbox__control:disabled)::before {
+    border-color: var(--senui-color-border-disabled);
+    background-color: var(--senui-color-bg-disabled);
+  }
+
+  :where(.senui-checkbox__label) {
+    color: var(--senui-color-fg-default);
+    cursor: pointer;
+  }
+
+  :where(.senui-checkbox__control:disabled + .senui-checkbox__label) {
+    color: var(--senui-color-fg-disabled);
+    cursor: not-allowed;
+  }
+
+  :where(.senui-checkbox__required) {
+    margin-inline-start: var(--senui-space-1);
+    color: var(--senui-color-fg-danger);
+  }
+
+  /* Description and error sit under the label, in its column. */
+  :where(.senui-checkbox__description, .senui-checkbox__error) {
+    grid-column: 2;
+    margin-block-start: var(--senui-checkbox-gap);
+    font-size: var(--senui-checkbox-hint-font-size);
+  }
+
+  :where(.senui-checkbox__description) {
+    color: var(--senui-color-fg-muted);
+  }
+
+  :where(.senui-checkbox__error) {
+    display: flex;
+    gap: var(--senui-space-1);
+    align-items: baseline;
+    color: var(--senui-color-fg-danger);
+  }
+
+  :where(.senui-checkbox__error-icon) {
+    flex: none;
+  }
+
+  :where(.senui-checkbox__error-icon-disc) {
+    fill: currentColor;
+  }
+
+  :where(.senui-checkbox__error-icon-mark) {
+    stroke: var(--senui-color-bg-default);
+  }
+
+  /* Forced colours: the control opts out so its system colours are the ones drawn. A forced
+     background would paint the glyph Canvas on Canvas. */
+  @media (forced-colors: active) {
+    :where(.senui-checkbox__control) {
+      forced-color-adjust: none;
+      color: HighlightText;
+    }
+
+    :where(.senui-checkbox__control)::before {
+      border-color: CanvasText;
+      background-color: Canvas;
+    }
+
+    :where(.senui-checkbox__control:is(:checked, :indeterminate, [data-indeterminate]))::before {
+      border-color: Highlight;
+      background-color: Highlight;
+    }
+
+    :where(.senui-checkbox__control:focus-visible) {
+      outline-color: CanvasText;
+    }
+
+    :where(.senui-checkbox__control:disabled) {
+      color: Canvas;
+    }
+
+    :where(.senui-checkbox__control:disabled)::before,
+    :where(
+      .senui-checkbox__control:disabled:is(:checked, :indeterminate, [data-indeterminate])
+    )::before {
+      border-color: GrayText;
+      background-color: Canvas;
+    }
+
+    :where(
+      .senui-checkbox__control:disabled:is(:checked, :indeterminate, [data-indeterminate])
+    )::before {
+      background-color: GrayText;
+    }
+
+    :where(.senui-checkbox__error-icon-disc) {
+      fill: CanvasText;
+    }
+
+    :where(.senui-checkbox__error-icon-mark) {
+      stroke: Canvas;
+    }
+  }
+}

@@ -10,3 +10,9 @@ export type {
   TextInputSize,
   TextInputType,
 } from './components/TextInput/TextInput.js';
+export { Checkbox } from './components/Checkbox/Checkbox.js';
+export type { CheckboxProps } from './components/Checkbox/Checkbox.js';
+export { CheckboxGroup } from './components/CheckboxGroup/CheckboxGroup.js';
+export type { CheckboxGroupProps } from './components/CheckboxGroup/CheckboxGroup.js';
+export { Switch } from './components/Switch/Switch.js';
+export type { SwitchProps } from './components/Switch/Switch.js';

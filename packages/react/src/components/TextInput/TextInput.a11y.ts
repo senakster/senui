@@ -9,7 +9,7 @@ export const a11y = defineA11yContract<TextInputProps>()({
     states: [
       {
         attribute: 'aria-invalid',
-        when: 'Its FormField has an error, a submit attempt found a native constraint error (until the value is valid), or, standalone, the consumer passes it. Absent when valid.',
+        when: 'Its FormField has an error, a submit attempt found a native constraint error (until the value is valid), or, standalone, the consumer passes it. "false" otherwise, never absent, so a native invalid value isn\'t announced before a submit attempt (ADR-0013).',
       },
       { attribute: 'required', when: 'Its FormField is `required`, or standalone when passed' },
       { attribute: 'disabled', when: 'Disabled; it then leaves the tab order' },

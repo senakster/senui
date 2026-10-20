@@ -413,8 +413,10 @@ accepted all 16, rejected 0, escalated 0, so there are no `OVERRIDES.md` rows. A
    and 11 now say so: a wrapped native control keeps its own `value` / `onChange`, and
    `on<Prop>Change(value)` is for state a component owns. Reasons: form libraries
    (`register()`, `handleChange`) expect the native event; one way to do it; adding a callback
-   later is a minor, removing one a major. **L05:** Checkbox passes native `checked` / `onChange`
-   through; Switch decides when it gets there.
+   later is a minor, removing one a major. ~~**L05:** Checkbox passes native `checked` / `onChange`
+   through; Switch decides when it gets there.~~ **Corrected 2026-10-19 (L05):** Emil chose the
+   L05 plan's `checked` / `onCheckedChange` through `useControllableState` for Checkbox and Switch,
+   with native `onChange` still passed through; rule 5's exception covers text-entry controls only.
 8. **Stories are colocated** and **axe is `axe-core` via the internal helper**, as L03 deviations 3 and 6.
 9. **TextInput's stories type their meta against the `aria-label` branch.** Storybook's arg types
    collapse the three-way name union to `never`.
@@ -473,3 +475,62 @@ Applied:
 - **L05** — Checkbox and Switch take `field?: FormFieldBinding` the same way and call
   `useFormFieldControl`. `FieldElement` is `HTMLInputElement`, which already fits.
 - **L08** — the FormField and TextInput `ForcedColors` stories carry `parameters.forcedColors`.
+
+## L05 — Checkbox / Switch
+
+Plan synced 2026-10-19 (the planner added L05 to L07 in `89ae68b`, after ADR-0011).
+
+| Deliverable / criterion                                    | Decision                                                                                   | Reason                                                                                                                                                      | Re-include when                                                                                                        |
+| ---------------------------------------------------------- | ------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------- |
+| Checkbox, CheckboxGroup, Switch, wiring hook               | in, Claude writes and Emil reviews                                                         | Emil, 2026-10-19, as in L03 and L04                                                                                                                         | n/a                                                                                                                    |
+| Label ownership (plan #4)                                  | in: own `label`, `description`, `error`                                                    | Emil chose the plan over ADR-0011's L05 note: a checkbox's label sits after the control. ADR-0012 amends ADR-0011                                           | n/a                                                                                                                    |
+| `checked` / `onCheckedChange` (plan #6, #7)                | in, through `useControllableState`; native `onChange` passes through                       | Emil: the component owns checked state (and the select-all pattern needs `onCheckedChange`). CONVENTIONS rule 5's amendment narrowed to text-entry controls | n/a                                                                                                                    |
+| Screen-reader runs (plan: NVDA, JAWS, VoiceOver, TalkBack) | Narrator and NVDA (Windows)                                                                | Emil's setup; NVDA is free and is the reader the plan's announcement claims cite                                                                            | Someone with JAWS, macOS/iOS VoiceOver or TalkBack runs them; until then the contracts claim nothing for those readers |
+| Open question 1, thumb under reduced motion                | resolved: `--senui-motion-reduce` scales the duration, never the distance                  | Emil. The thumb's position is the state; the same pattern as Button's spinner (L03 deviation 9)                                                             | L11 refines motion                                                                                                     |
+| `className` / `style`                                      | on the wrapper (`.senui-checkbox`, `.senui-switch`); native props and the ref on the input | Emil: consumers lay out the row                                                                                                                             | n/a                                                                                                                    |
+| Group `required`                                           | the prop is the message: `required="Choose at least one topic."`                           | Emil: the library ships no English text, and the type forces a message                                                                                      | n/a                                                                                                                    |
+| Group children                                             | context, matched by each Checkbox's `value`; a dev warning for a child without one         | Emil: plain children read better for a list of options; the type can't see context (as with FormField)                                                      | n/a                                                                                                                    |
+
+### Deviations from the plan
+
+1. **No `:user-invalid` styling** (plan: group style `:has(:user-invalid, [aria-invalid="true"])`, states "user-invalid and prop-driven"). ADR-0011 wins: invalid is styled from `[aria-invalid="true"]` only, and native validity reaches it through the `invalid` event.
+2. **No `em` units** (plan #15: visual box in `em`). ADR-0009's unit allow-list excludes `em`; sizes come from tokens.
+3. **`--senui-*` tokens and classes**, colocated stories, the `axe-core` helper, and Vitest browser mode for the plan's Playwright criteria (as L03 deviations 2, 3 and 6).
+4. **The wiring extraction reuses L04's pieces.** `useFormFieldControl` and `focusFirstInvalid` move to `internal/`, next to the new `internal/useFieldWiring.ts` (ids, description and error state), which FormField and the new controls share.
+5. **CheckboxGroup lives in its own directory**, not `Checkbox/` as the plan lists: the layout checks need one component, one contract and one entry export per `<Name>/` directory.
+6. **The group's error describes every checkbox, not the fieldset** (plan decision 13; open question 2, resolved). Emil's NVDA run (Chrome, 2026-10-20) read the legend on entering the group ("Topics, gruppering") but never the fieldset's description, so the error was never heard, only "invalid entry". The plan's fallback (the first box only) would miss entry by Shift+Tab, which lands on the last box. Emil chose every box: each reads "invalid entry" and the message, whichever takes focus. The fieldset keeps only its description. The double reading decision 13 warned about needs the error on the fieldset _and_ the boxes, which is no longer the case. Re-heard by Emil with NVDA, 2026-10-20: each box now reads the message.
+7. **Form controls always render `aria-invalid`** (ADR-0013): found in the same runs, it replaces the "absent when valid" criterion.
+
+### Review (2026-10-20)
+
+The `review-component` workflow ran `component-api-reviewer`, `wcag-auditor` and `modern-web-curator`
+read-only over Checkbox, CheckboxGroup, Switch and the shared wiring: 18 findings, 14 distinct.
+Emil accepted all 14, rejected 0 and escalated 0, so there are no `OVERRIDES.md` rows. Applied:
+
+- **The group's "choose at least one" host is the first enabled option, re-evaluated after every
+  render** (all three reviewers). A disabled first option, or options mounted after the group,
+  meant the rule never blocked a submit.
+- **Form reset keeps state in step**: CheckboxGroup (and uncontrolled Checkbox and Switch) listen
+  for their form's `reset` for their whole life and return to the default (`internal/useFormReset`).
+  Before, a reset unchecked the DOM but not the state, and a required group let an empty submit
+  through.
+- **The group's description describes every box too**, with the error; the fieldset keeps only a
+  consumer's own `aria-describedby`. Re-heard by Emil with NVDA: each box reads it.
+- **`indeterminate` is controlled-only in the type**: a union requires `checked` and
+  `onCheckedChange` with it; type tests lock it.
+- **Hover component tokens** (`--senui-checkbox-checked-bg-hover`, `-border-color-hover`,
+  `--senui-switch-on-bg-hover`, `-track-border-color-hover`), so overrides hold on hover. New
+  public tokens, in this minor.
+- **Size tokens are clamped to the 24 px target**: Checkbox's input is `max(target, box)`; the
+  Switch track can't be shorter than the target. Browser tests override each token.
+- **Internal calc variables are `--_senui-*`** (Switch); CONVENTIONS rule 6 now states both rules.
+- **Controls align to a wrapping label's first line** (`align-items: start`); Switch LongLabel story.
+- **Development warnings**: a Checkbox in a group with `checked`, `defaultChecked` or `required`;
+  an empty group `required` message.
+- **Tests**: type tests for every `never` prop; a browser test and a RequiredSubmit story (`play`)
+  for a standalone required Checkbox.
+- **Contracts**: Checkbox gains 1.3.1 and 3.3.1; Switch lists its always-`"false"` `aria-invalid`;
+  CheckboxGroup's text describes the per-box wiring.
+
+Probes: putting the host back on the first box, narrowing the effect's dependencies, removing the
+group's reset and removing the Switch clamp each failed its new test; all restored.
