@@ -53,7 +53,7 @@ OVERRIDES.md            every reviewer suggestion that was rejected or changed, 
 ```
 
 Generated, don't edit by hand: `packages/*/dist/`, `packages/tokens/src/generated/` (gitignored),
-and `packages/react/src/internal/wcag.ts` (`pnpm sync:wcag`).
+and `packages/react/src/internal/a11y/wcag.ts` (`pnpm sync:wcag`).
 
 ## How work is organised
 

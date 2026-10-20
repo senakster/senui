@@ -53,7 +53,7 @@ Reference: [`src/internal/conventions.test-d.tsx`](src/internal/conventions.test
 
 ## 2. Escape hatches: `className` and native attributes, nothing else
 
-Props are built on [`NativeProps<'button'>`](src/internal/native-props.ts): the element's native
+Props are built on [`NativeProps<'button'>`](src/internal/dom/native-props.ts): the element's native
 attributes without `color` (it reads as a re-skinning prop), `children` (each component declares its
 own) and `role` (the element and role are fixed by the contract, ADR-0006). `style` passes through but
 is not documented. There is no `sx`, `css` or similar prop. To change how a component looks,
@@ -100,7 +100,7 @@ its icon as the `icon` prop, has no children, and requires exactly one of `aria-
 
 The type can't see that children are text (`<Button><CloseIcon /></Button>` compiles), or that a
 string is non-empty (`<Button>{''}</Button>` compiles). Every component that needs
-a name composes [`useNameCheck`](src/internal/useNameCheck.ts) into its ref, which warns in
+a name composes [`useNameCheck`](src/internal/a11y/useNameCheck.ts) into its ref, which warns in
 development about an empty `aria-label` and about an element with no name at all:
 
 ```tsx
@@ -126,14 +126,14 @@ Every component forwards its ref to the element it renders, with `forwardRef`, a
 `displayName` to its public name. Revisit when the peer range drops React 18.
 
 **Enforced by:** a ref test in each component's `*.test.tsx`;
-[`a11y-contracts.test.ts`](src/internal/a11y-contracts.test.ts) checks every component's
+[`a11y-contracts.test.ts`](src/internal/a11y/a11y-contracts.test.ts) checks every component's
 `displayName`.
 
 ## 5. Controlled and uncontrolled, through one hook
 
 Stateful components accept both a controlled triplet (`value` / `defaultValue` / `onValueChange`,
 or `checked` / `defaultChecked` / `onCheckedChange`) and use
-[`useControllableState`](src/internal/useControllableState.ts) for it.
+[`useControllableState`](src/internal/state/useControllableState.ts) for it.
 
 One exception: a **text-entry** control (TextInput) passes its native `value` / `defaultValue` /
 `onChange` through and adds no `onValueChange`, because the element already holds the text and form
@@ -161,7 +161,7 @@ const [checked, setChecked] = useControllableState({
   intentionally read-only.
 - Switching from controlled to uncontrolled continues from the last controlled value.
 
-**Enforced by:** [`useControllableState.test.ts`](src/internal/useControllableState.test.ts).
+**Enforced by:** [`useControllableState.test.ts`](src/internal/state/useControllableState.test.ts).
 
 ## 6. The CSS contract
 
@@ -232,7 +232,7 @@ const [checked, setChecked] = useControllableState({
 export const a11y = defineA11yContract<ButtonProps>()({ component: 'Button', … });
 ```
 
-The type is [`A11yContract`](src/internal/a11y-contract.ts): semantics (element, role, name source,
+The type is [`A11yContract`](src/internal/a11y/a11y-contract.ts): semantics (element, role, name source,
 states, relationships, hidden parts), keyboard, focus, announcements, required props, consumer
 responsibilities, adaptation (ADR-0008), WCAG claims, test runs and known issues. It feeds the
 Storybook a11y block and, from L09, `components.json` and `llms.txt`, so every claim is published as
@@ -252,8 +252,8 @@ fact.
   `RESPONSIBILITIES.keepFocusRing`; one named by its content also lists
   `RESPONSIBILITIES.labelInName` (WCAG 2.5.3).
 
-**Enforced by:** the type and [`a11y-contract.test-d.ts`](src/internal/a11y-contract.test-d.ts);
-[`a11y-contracts.test.ts`](src/internal/a11y-contracts.test.ts), which loads every contract and
+**Enforced by:** the type and [`a11y-contract.test-d.ts`](src/internal/a11y/a11y-contract.test-d.ts);
+[`a11y-contracts.test.ts`](src/internal/a11y/a11y-contracts.test.ts), which loads every contract and
 checks the name, dates, evidence, baseline and responsibilities; and
 [`scripts/check-a11y-contracts.mjs`](../../scripts/check-a11y-contracts.mjs) in `pnpm check`, which
 fails a component without a contract and warns when a component's source changed after its last
@@ -264,7 +264,7 @@ manual run.
 Nothing public is removed or renamed in a minor (see [Public surface](#public-surface)). In the minor
 before its removal:
 
-- **A prop:** call [`deprecate()`](src/internal/deprecate.ts) when the old prop is passed. It warns
+- **A prop:** call [`deprecate()`](src/internal/dev/deprecate.ts) when the old prop is passed. It warns
   once, in development only.
 
   ```ts
@@ -279,7 +279,7 @@ before its removal:
 
 Pair each with a changeset that says the same thing.
 
-**Enforced by:** [`deprecate.test.ts`](src/internal/deprecate.test.ts), and changesets reviewed per
+**Enforced by:** [`deprecate.test.ts`](src/internal/dev/deprecate.test.ts), and changesets reviewed per
 release (L10).
 
 ## 9. One element per component
@@ -297,9 +297,9 @@ Ids come from `useId`, never from counters or `Math.random()`.
 
 - A consumer's `id` wins over the generated one.
 - A consumer's `aria-describedby` / `aria-labelledby` is merged with the ids the component generates,
-  never replaced and never replacing them: [`mergeIds()`](src/internal/ids.ts).
+  never replaced and never replacing them: [`mergeIds()`](src/internal/dom/ids.ts).
 
-**Enforced by:** [`ids.test.ts`](src/internal/ids.test.ts) and `component-api-reviewer` for now. A
+**Enforced by:** [`ids.test.ts`](src/internal/dom/ids.test.ts) and `component-api-reviewer` for now. A
 server-render test per component is part of L08's gate.
 
 ## 11. Prop names and defaults

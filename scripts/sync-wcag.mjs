@@ -1,4 +1,4 @@
-// Regenerates packages/react/src/internal/wcag.ts from W3C's machine-readable WCAG 2.2 data.
+// Regenerates packages/react/src/internal/a11y/wcag.ts from W3C's machine-readable WCAG 2.2 data.
 // Run by hand, never in `pnpm check`: the criteria change only with a new WCAG version, and the
 // check must stay offline. Review the diff before committing it.
 //
@@ -13,7 +13,7 @@ import * as prettier from 'prettier';
 
 const SOURCE = 'https://www.w3.org/WAI/WCAG22/wcag.json';
 const VERSION = '2.2';
-const OUT = 'packages/react/src/internal/wcag.ts';
+const OUT = 'packages/react/src/internal/a11y/wcag.ts';
 
 const fileArg = process.argv.indexOf('--file');
 const data =

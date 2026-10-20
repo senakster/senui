@@ -1,4 +1,4 @@
-import { defineA11yContract, RESPONSIBILITIES } from '../../internal/a11y-contract.js';
+import { defineA11yContract, RESPONSIBILITIES } from '../../internal/a11y/a11y-contract.js';
 import type { ButtonProps } from './Button.js';
 
 // The first Narrator run (2026-10-17) heard "button, disabled" with no name while loading: the

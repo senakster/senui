@@ -1,5 +1,5 @@
 import { useId, useState, type ReactNode } from 'react';
-import { mergeIds } from './ids.js';
+import { mergeIds } from '../dom/ids.js';
 import type { FieldWiring } from './useFormFieldControl.js';
 
 /** Booleans render nothing, so `true` (cast past a type) is no message either. */

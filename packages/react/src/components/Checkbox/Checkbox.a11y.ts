@@ -1,4 +1,4 @@
-import { defineA11yContract, RESPONSIBILITIES } from '../../internal/a11y-contract.js';
+import { defineA11yContract, RESPONSIBILITIES } from '../../internal/a11y/a11y-contract.js';
 import type { CheckboxProps } from './Checkbox.js';
 
 export const a11y = defineA11yContract<CheckboxProps>()({

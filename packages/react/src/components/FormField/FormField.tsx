@@ -1,13 +1,13 @@
 import { forwardRef, useEffect, useRef, type ReactNode } from 'react';
-import { DEV, warnOnce } from '../../internal/dev.js';
-import { FieldError } from '../../internal/FieldError.js';
-import type { NativeProps } from '../../internal/native-props.js';
-import { useComposedRefs } from '../../internal/refs.js';
-import { useFieldWiring } from '../../internal/useFieldWiring.js';
-import { createBinding, type FormFieldBinding } from '../../internal/useFormFieldControl.js';
+import { DEV, warnOnce } from '../../internal/dev/dev.js';
+import { FieldError } from '../../internal/field/FieldError.js';
+import type { NativeProps } from '../../internal/dom/native-props.js';
+import { useComposedRefs } from '../../internal/dom/refs.js';
+import { useFieldWiring } from '../../internal/field/useFieldWiring.js';
+import { createBinding, type FormFieldBinding } from '../../internal/field/useFormFieldControl.js';
 
-export { focusFirstInvalid } from '../../internal/focusFirstInvalid.js';
-export type { FormFieldBinding } from '../../internal/useFormFieldControl.js';
+export { focusFirstInvalid } from '../../internal/field/focusFirstInvalid.js';
+export type { FormFieldBinding } from '../../internal/field/useFormFieldControl.js';
 
 /** Something to show: `undefined`, `null` and booleans render nothing, so they can't label a field. */
 type Label = Exclude<ReactNode, null | undefined | boolean>;

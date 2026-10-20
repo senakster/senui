@@ -7,7 +7,7 @@ import {
   type Dispatch,
   type SetStateAction,
 } from 'react';
-import { warnOnce } from './dev.js';
+import { warnOnce } from '../dev/dev.js';
 
 export interface UseControllableStateOptions<T> {
   /**

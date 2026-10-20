@@ -11,21 +11,22 @@ import { contractErrors } from './a11y-contract-check.js';
 
 // Every component's contract and component module. Vite resolves the globs at build time, so a new
 // component is picked up without registering it anywhere.
-const contracts = import.meta.glob<A11yContract>('../components/*/*.a11y.ts', {
+const contracts = import.meta.glob<A11yContract>('../../components/*/*.a11y.ts', {
   eager: true,
   import: 'a11y',
 });
 const modules = import.meta.glob<Record<string, unknown>>(
   [
-    '../components/*/*.tsx',
-    '!../components/*/*.stories.tsx',
-    '!../components/*/*.test.tsx',
-    '!../components/*/*.test-d.tsx',
+    '../../components/*/*.tsx',
+    '!../../components/*/*.stories.tsx',
+    '!../../components/*/*.test.tsx',
+    '!../../components/*/*.test-d.tsx',
   ],
   { eager: true },
 );
 
-const dirOf = (path: string) => path.split('/')[2] ?? '';
+// The directory after `components/`, wherever this file sits relative to it.
+const dirOf = (path: string) => /\/components\/([^/]+)\//.exec(path)?.[1] ?? '';
 const today = new Date().toISOString().slice(0, 10);
 
 describe('every component', () => {

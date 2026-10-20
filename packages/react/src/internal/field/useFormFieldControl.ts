@@ -7,7 +7,7 @@ import {
   type RefCallback,
   type SyntheticEvent,
 } from 'react';
-import { mergeIds } from './ids.js';
+import { mergeIds } from '../dom/ids.js';
 import { focusFirstInvalidOnSubmit } from './focusFirstInvalid.js';
 
 declare const sealed: unique symbol;
