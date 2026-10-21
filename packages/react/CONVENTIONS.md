@@ -215,11 +215,15 @@ const [checked, setChecked] = useControllableState({
 
 **Enforced by:**
 
-- Stylelint (ADR-0007, ADR-0009): raw colours, units outside an allow-list, easings, font, line-height,
-  letter-spacing, z-index and shadow values, primitive references, ids, and selectors more specific
-  than `0,1,0`.
+- Stylelint (ADR-0007, ADR-0009, ADR-0015): raw colours, units outside an allow-list, easings, font,
+  line-height, letter-spacing, z-index and shadow values, primitive references, ids, and selectors
+  more specific than `0,1,0`. The one raw length allowed is `rem` in a size media query (a
+  breakpoint can't be a token); say why in a comment.
 - [`scripts/check-component-css.mjs`](../../scripts/check-component-css.mjs): every stylesheet under
-  `src/` (other than `layers.css` and the entry) is entirely inside `@layer senui.components`.
+  `src/` (other than `layers.css` and the entry) is entirely inside `@layer senui.components`. The
+  only thing allowed before that block is a plain `@import` of another component's stylesheet it
+  builds on (AlertDialog imports Dialog's), never with `layer()`, which would nest the imported
+  rules in a sub-layer that loses to every other component.
 - ESLint: primitive references in TS/TSX strings.
 - State selectors, forced colours and the motion factor are held by `component-api-reviewer` and
   `wcag-auditor`.
@@ -354,3 +358,6 @@ Consumers load the tokens, then the components, either all at once or per compon
 per-component file only joins `senui.components`, so load it after `tokens.css`; loaded first, it
 would create that layer ahead of the others and lose to them. A consumer who uses `@layer` themselves
 puts `senui` first in their own order.
+
+A component that builds on another imports that one's stylesheet itself, so its per-component file
+works alone: `styles/AlertDialog.css` brings `Dialog.css` with it.

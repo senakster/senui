@@ -40,7 +40,17 @@ export default {
     ],
     // ADR-0009: an allow-list, so a unit CSS adds later is rejected until someone decides on it.
     // These are layout units, not design values; lengths and durations come from tokens.
-    'unit-allowed-list': ['%', 'fr', 'ch', 'deg', 'turn'],
+    // ADR-0015: rem is also allowed, but only in size media features, the one place a token can't
+    // reach (no var() in media queries, no @custom-media yet). Three built-in rules together: the
+    // allow-list admits rem, declarations reject it, and media features take it only for sizes.
+    'unit-allowed-list': ['%', 'fr', 'ch', 'deg', 'turn', 'rem'],
+    'declaration-property-unit-disallowed-list': { '/.*/': ['rem'] },
+    'media-feature-name-unit-allowed-list': {
+      '/^(min-|max-)?(width|height)$/': ['rem'],
+      // Every other feature takes no rem (a lookahead, because the rule only checks the features it
+      // lists). The empty list adds nothing: the allow-list above still decides every other unit.
+      '/^(?!(min-|max-)?(width|height)$)/': ['dpi', 'dppx', 'x'],
+    },
     'declaration-property-value-disallowed-list': {
       '/.*/': [/--senui-primitive-/, /--senui-color-[a-z]+-\d+/],
       '/^(transition|animation)$/': [EASING_KEYWORD],

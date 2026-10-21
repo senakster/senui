@@ -1,0 +1,216 @@
+@layer senui.components {
+  /* Public surface (semver): the `.senui-dialog` class (AlertDialog carries it too), the
+     `data-size` values (`sm`, `md`, `lg`, `fullscreen`), the `data-state` values (`closed`, `open`,
+     `closing`), the eleven `--senui-dialog-*` tokens below, and ADR-0014's scroll-lock rule at the
+     end of this file. The part classes (`.senui-dialog__header`, `__title`, `__close`, `__body`,
+     `__description`, `__footer`, `__cancel`) are internal and may change in any release. So are the measured
+     `--_senui-dialog-header-size` / `--_senui-dialog-footer-size`.
+
+     The dialog itself is the scroll container, with a sticky header and footer (L06 decision 16):
+     with focus on the dialog, the arrow keys and Page Down scroll it. */
+  :where(.senui-dialog) {
+    --senui-dialog-bg: var(--senui-color-bg-raised);
+    --senui-dialog-fg: var(--senui-color-fg-default);
+    --senui-dialog-description-color: var(--senui-color-fg-muted);
+    --senui-dialog-border-color: var(--senui-color-border-default);
+    --senui-dialog-radius: var(--senui-radius-lg);
+    --senui-dialog-shadow: var(--senui-elevation-2);
+    --senui-dialog-padding: var(--senui-space-6);
+    --senui-dialog-gap: var(--senui-space-4);
+    --senui-dialog-inline-size: var(--senui-size-dialog-md);
+    --senui-dialog-viewport-gap: var(--senui-space-4);
+    --senui-dialog-backdrop: var(--senui-color-bg-backdrop);
+
+    box-sizing: border-box;
+    inline-size: var(--senui-dialog-inline-size);
+    /* A modal dialog is fixed, so `100%` is the viewport, including a mobile browser's moving
+       toolbar. Percentages, because ADR-0009 doesn't allow viewport units. */
+    max-inline-size: calc(100% - 2 * var(--senui-dialog-viewport-gap));
+    max-block-size: calc(100% - 2 * var(--senui-dialog-viewport-gap));
+    margin: auto;
+    padding: 0;
+    overflow: auto;
+    /* Internal: the focus ring is drawn over the border, so it needs the width (below). */
+    --_senui-dialog-border-width: var(--senui-border-width-default);
+
+    border: var(--_senui-dialog-border-width) solid var(--senui-dialog-border-color);
+    border-radius: var(--senui-dialog-radius);
+    background-color: var(--senui-dialog-bg);
+    color: var(--senui-dialog-fg);
+    box-shadow: var(--senui-dialog-shadow);
+    font-family: var(--senui-font-family-sans);
+    font-size: var(--senui-font-size-md);
+    line-height: var(--senui-font-line-height-normal);
+    /* A focused control scrolled into view never ends up under the sticky header or footer
+       (WCAG 2.4.11). ModalDialog measures them. */
+    scroll-padding-block: var(--_senui-dialog-header-size, 0) var(--_senui-dialog-footer-size, 0);
+
+    /* Enter and exit. Opacity always fades; distance and scale are multiplied by
+       --senui-motion-reduce, so reduced motion keeps only the fade (ADR-0005). The exit runs on
+       `data-state="closing"`, before close(), so it needs no `overlay` support (L06). */
+    opacity: 1;
+    translate: 0 0;
+    scale: 1;
+    transition-property: opacity, translate, scale;
+    transition-duration: var(--senui-motion-duration-moderate);
+    transition-timing-function: var(--senui-motion-easing-enter);
+  }
+
+  @starting-style {
+    :where(.senui-dialog)[open] {
+      opacity: 0;
+      translate: 0 calc(var(--senui-motion-distance-md) * var(--senui-motion-reduce));
+      scale: calc(1 - (1 - var(--senui-motion-scale-enter)) * var(--senui-motion-reduce));
+    }
+  }
+
+  :where(.senui-dialog)[data-state='closing'] {
+    opacity: 0;
+    translate: 0 calc(var(--senui-motion-distance-md) * var(--senui-motion-reduce));
+    scale: calc(1 - (1 - var(--senui-motion-scale-enter)) * var(--senui-motion-reduce));
+    transition-duration: var(--senui-motion-duration-fast);
+    transition-timing-function: var(--senui-motion-easing-exit);
+  }
+
+  :where(.senui-dialog)::backdrop {
+    background-color: var(--senui-dialog-backdrop);
+    opacity: 1;
+    transition-property: opacity;
+    transition-duration: var(--senui-motion-duration-moderate);
+    transition-timing-function: var(--senui-motion-easing-standard);
+  }
+
+  @starting-style {
+    :where(.senui-dialog[open])::backdrop {
+      opacity: 0;
+    }
+  }
+
+  :where(.senui-dialog[data-state='closing'])::backdrop {
+    opacity: 0;
+    transition-duration: var(--senui-motion-duration-fast);
+  }
+
+  /* Sizes only change the token, so a consumer's override of it holds at every size. */
+  :where(.senui-dialog)[data-size='sm'] {
+    --senui-dialog-inline-size: var(--senui-size-dialog-sm);
+  }
+
+  :where(.senui-dialog)[data-size='lg'] {
+    --senui-dialog-inline-size: var(--senui-size-dialog-lg);
+  }
+
+  /* Fullscreen sets its geometry directly, not through the public tokens, so a theme that resizes
+     or rounds dialogs (--senui-dialog-inline-size, -viewport-gap, -radius) doesn't un-fullscreen
+     it (review). Override these properties on your own class to change fullscreen itself. */
+  :where(.senui-dialog)[data-size='fullscreen'] {
+    /* The edge is the viewport's, so there is nothing outside to draw the ring on: a transparent
+       border as wide as the ring holds it instead (see the focus ring below). */
+    --_senui-dialog-border-width: var(--senui-focus-ring-width);
+
+    inline-size: 100%;
+    max-inline-size: 100%;
+    block-size: 100%;
+    max-block-size: 100%;
+    border-color: transparent;
+    border-radius: 0;
+  }
+
+  /* The ring on keyboard focus only (L06 decision 10), starting at the padding edge and drawn
+     outward: over the border, and past it when the ring is wider. Never inside the padding box,
+     where the sticky header and footer paint over it (Emil, Chrome, 2026-10-21). In fullscreen the
+     border is as wide as the ring, so the ring stays on screen. */
+  :where(.senui-dialog):focus-visible {
+    outline: var(--senui-focus-ring-width) solid var(--senui-color-focus-ring);
+    outline-offset: calc(-1 * var(--_senui-dialog-border-width));
+  }
+
+  :where(.senui-dialog__header) {
+    position: sticky;
+    inset-block-start: 0;
+    display: flex;
+    align-items: flex-start;
+    gap: var(--senui-dialog-gap);
+    padding: var(--senui-dialog-padding) var(--senui-dialog-padding) 0;
+    background-color: var(--senui-dialog-bg);
+  }
+
+  :where(.senui-dialog__title) {
+    flex: 1;
+    margin: 0;
+    font-size: var(--senui-font-size-lg);
+    font-weight: var(--senui-font-weight-bold);
+    line-height: var(--senui-font-line-height-tight);
+    overflow-wrap: anywhere;
+  }
+
+  :where(.senui-dialog__close) {
+    flex: none;
+    margin-inline-start: auto;
+  }
+
+  :where(.senui-dialog__body) {
+    display: grid;
+    gap: var(--senui-dialog-gap);
+    padding: var(--senui-dialog-padding);
+    overflow-wrap: anywhere;
+  }
+
+  :where(.senui-dialog__description) {
+    color: var(--senui-dialog-description-color);
+  }
+
+  :where(.senui-dialog__footer) {
+    position: sticky;
+    inset-block-end: 0;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: var(--senui-space-3);
+    padding: var(--senui-dialog-gap) var(--senui-dialog-padding) var(--senui-dialog-padding);
+    border-block-start: var(--senui-border-width-default) solid var(--senui-dialog-border-color);
+    background-color: var(--senui-dialog-bg);
+  }
+
+  /* On a short viewport (a phone in landscape, or 400% zoom), sticky parts would cover most of the
+     dialog: let them scroll with the content (L06 decision 16, WCAG 2.4.11). No token can drive a
+     media query, so this one value is raw (ADR-0015). */
+  @media (max-height: 30rem) {
+    :where(.senui-dialog__header, .senui-dialog__footer) {
+      position: static;
+    }
+
+    /* Nothing sticks, so nothing to keep focus clear of (review). */
+    :where(.senui-dialog) {
+      scroll-padding-block: 0;
+    }
+  }
+
+  @media (forced-colors: active) {
+    /* Shadows are removed, so the border is the dialog's only edge. */
+    :where(.senui-dialog) {
+      border-color: CanvasText;
+    }
+
+    :where(.senui-dialog):focus-visible {
+      outline-color: Highlight;
+    }
+  }
+
+  /* ADR-0014: the page doesn't scroll behind one of senui's modal dialogs. Containment always;
+     the root lock is scoped to senui's own dialogs, with zero specificity, so one unlayered rule
+     turns it off: `html { overflow: auto }`. Set `html { scrollbar-gutter: stable }` yourself to
+     stop the page shifting by a scrollbar's width on open. */
+  :where(.senui-dialog):modal {
+    overscroll-behavior: contain;
+  }
+
+  :where(.senui-dialog)::backdrop {
+    overflow: hidden;
+    overscroll-behavior: contain;
+  }
+
+  :where(html:has(.senui-dialog:modal)) {
+    overflow: hidden;
+  }
+}

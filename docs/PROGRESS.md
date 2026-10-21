@@ -12,7 +12,7 @@ Status legend — plan: `plan-ready` · `not-planned` (plan not written yet upst
 | L03 | Button                            | L03-button                    | plan-ready  | done           | 2026-10-18   |
 | L04 | FormField + TextInput             | L04-formfield-and-textinput   | plan-ready  | done           | 2026-10-19   |
 | L05 | Checkbox / Switch                 | L05-checkbox-and-switch       | plan-ready  | done           | 2026-10-20   |
-| L06 | Dialog                            | L06-dialog                    | plan-ready  | not-started    | 2026-10-19   |
+| L06 | Dialog                            | L06-dialog                    | plan-ready  | done           | 2026-10-21   |
 | L07 | EmptyState                        | L07-empty-state               | plan-ready  | not-started    | 2026-10-19   |
 | L08 | Test & a11y gate                  | —                             | not-planned | not-started    | 2026-10-15   |
 | L09 | Docs & machine-readable manifest  | —                             | not-planned | not-started    | 2026-10-15   |
@@ -20,6 +20,20 @@ Status legend — plan: `plan-ready` · `not-planned` (plan not written yet upst
 | L11 | Motion                            | —                             | not-planned | not-started    | 2026-10-15   |
 
 ## Changelog
+
+- **2026-10-21** — L06 done. Every acceptance criterion is met. Dialog and AlertDialog passed Emil's keyboard, NVDA 2026.2 (Speech Viewer, exact speech recorded) and forced-colours runs, in Chrome. Review: 10/10 accepted. Deviations: scope-decisions § L06, 1 to 11. ADR-0014 (scroll lock) and ADR-0015 (`rem` in media queries). `pnpm check`; `pnpm test`: tokens 32, react 552; browser tests in three engines; build-storybook.
+
+- **2026-10-21** — L06 reviewed: 10 distinct findings from the three reviewers, all accepted by Emil (none rejected or escalated). The browser's forced close is now reported (`'forced'`), controlled use needs `onOpenChange`, and AlertDialog's `action` must be an element. `hideCloseButton` needs another way out. Fullscreen ignores theme tokens, short viewports drop the scroll padding, and the missing type tests, stories and contract rows are added. Also this round: the focus ring moved onto the border (scope deviation 11), and Dialog gained `cancelLabel`. Keyboard, NVDA and forced-colours runs are recorded. `pnpm test` 552/552; browser 165/165 in three engines.
+
+- **2026-10-20** — L06: Emil took all four recommendations. ADR-0015 lets `rem` into size media queries (amends ADR-0009), and no Stylelint disables remain. `AlertDialog.css` imports `Dialog.css`, so the per-component file works alone. A pointer-press fallback returns focus to a Safari click-opened trigger. Claude's own API choices are kept. Dialog browser tests 138/138 in three engines; react 526/528 (contract gate only).
+
+- **2026-10-20** — L06 in progress. Claude wrote Dialog and AlertDialog for Emil's review (Emil's choice, as in L03 to L05):
+  - Both are a native `<dialog>` opened with `showModal()`. Every close request is reported through `onOpenChange(open, { reason })`, so a controlled owner can refuse. A form close carries the submit button's value.
+  - The exit animation runs on `data-state="closing"`. Focus return has a `finalFocus` fallback.
+  - ADR-0014 adopts the planner's scroll-lock ADR: containment always, plus a scoped root lock.
+  - New tokens: `color.bg.backdrop` and `size.dialog.*`.
+
+  API calls by Emil: no trigger prop, a `footer` slot, AlertDialog's `action` slot, and a `'cancel'` reason. `internal/` is regrouped by concern in its own commit. The browser tests found a real bug (the sticky-header padding was measured while the dialog was scaled), and two dead tests that probing exposed. `pnpm check` passes. `pnpm test`: tokens 32, react 522/524. Only the contract gate fails (no manual runs yet). The dialog browser tests pass in Chromium, Firefox and WebKit (126). Storybook builds. Next: Emil's review, manual runs, then the reviewers.
 
 - **2026-10-20** — L05 done. Every acceptance criterion is met. Emil's keyboard, NVDA and forced-colours runs are recorded (Narrator's run found the defect behind ADR-0013 and wasn't repeated). Those runs led to three changes:
   - ADR-0013: form controls always render `aria-invalid`, because Chromium otherwise announces native invalidity on page load. This also fixes L04's TextInput.
