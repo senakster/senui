@@ -7,16 +7,16 @@ import {
   type ChangeEvent,
   type ReactNode,
 } from 'react';
-import { DEV, warnOnce } from '../../internal/dev.js';
-import { FieldError } from '../../internal/FieldError.js';
-import { mergeIds } from '../../internal/ids.js';
-import type { NativeProps } from '../../internal/native-props.js';
-import { useComposedRefs } from '../../internal/refs.js';
-import { useControllableState } from '../../internal/useControllableState.js';
-import { useFieldWiring } from '../../internal/useFieldWiring.js';
-import { createBinding, useFormFieldControl } from '../../internal/useFormFieldControl.js';
-import { useFormReset } from '../../internal/useFormReset.js';
-import { useNameCheck } from '../../internal/useNameCheck.js';
+import { DEV, warnOnce } from '../../internal/dev/dev.js';
+import { FieldError } from '../../internal/field/FieldError.js';
+import { mergeIds } from '../../internal/dom/ids.js';
+import type { NativeProps } from '../../internal/dom/native-props.js';
+import { useComposedRefs } from '../../internal/dom/refs.js';
+import { useControllableState } from '../../internal/state/useControllableState.js';
+import { useFieldWiring } from '../../internal/field/useFieldWiring.js';
+import { createBinding, useFormFieldControl } from '../../internal/field/useFormFieldControl.js';
+import { useFormReset } from '../../internal/field/useFormReset.js';
+import { useNameCheck } from '../../internal/a11y/useNameCheck.js';
 import { CheckboxGroupContext } from '../CheckboxGroup/context.js';
 
 /** Something to show: `undefined`, `null` and booleans render nothing, so they can't name a control. */

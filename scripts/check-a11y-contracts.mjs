@@ -1,5 +1,5 @@
 // L02 decision 7: every component ships a typed a11y contract. This checks presence and form; the
-// contract's content is checked by packages/react/src/internal/a11y-contracts.test.ts. Fails if:
+// contract's content is checked by packages/react/src/internal/a11y/a11y-contracts.test.ts. Fails if:
 // - a component directory has no <Name>.a11y.ts exporting `a11y = defineA11yContract<…>()(…)`;
 // - the package entry exports anything other than a component or an allow-listed public type file.
 // Warns (doesn't fail) when a component's source changed after its last manual a11y run.

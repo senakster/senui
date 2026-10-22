@@ -5,7 +5,7 @@ import { afterEach, describe, expect, test, vi } from 'vitest';
 // dev.ts keeps a module-level "already warned" set, so each test gets fresh modules.
 async function load() {
   vi.resetModules();
-  const { useComposedRefs } = await import('./refs.js');
+  const { useComposedRefs } = await import('../dom/refs.js');
   const { useNameCheck } = await import('./useNameCheck.js');
   const Example = forwardRef<HTMLButtonElement, ComponentPropsWithoutRef<'button'>>(
     function Example(props, forwardedRef) {

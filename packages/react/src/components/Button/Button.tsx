@@ -1,7 +1,7 @@
 import { forwardRef, type MouseEvent, type ReactElement, type ReactNode } from 'react';
-import type { NativeProps } from '../../internal/native-props.js';
-import { useComposedRefs } from '../../internal/refs.js';
-import { useNameCheck } from '../../internal/useNameCheck.js';
+import type { NativeProps } from '../../internal/dom/native-props.js';
+import { useComposedRefs } from '../../internal/dom/refs.js';
+import { useNameCheck } from '../../internal/a11y/useNameCheck.js';
 
 export type ButtonVariant = 'primary' | 'secondary' | 'ghost' | 'danger';
 export type ButtonSize = 'sm' | 'md' | 'lg';

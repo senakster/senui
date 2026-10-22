@@ -368,3 +368,80 @@ Entry format: date — module · Did · Verified · Scope decisions · Plan adju
 - **Acceptance:** every L05 criterion is met. Deviations: scope-decisions § L05, 1 to 7. Review: 14/14 accepted.
 - **Verified:** `pnpm check`; `pnpm test`: tokens 32, react 415/415; build-storybook; Firefox and WebKit.
 - **Next:** commit on `feature/checkbox-switch-L05`, then a PR. L06 (Dialog) is next.
+
+## 2026-10-20 — L06: Dialog and AlertDialog written for review
+
+- **Housekeeping:** L05 was already merged (PR #4). Branched `feature/dialog-L06` from main. Re-synced L02, L04 and L05 (`updated-upstream`: the L03 to L05 lessons coming back), and `catalogue-status` now reports all current.
+- **Open question 1:** support data re-checked on webstatus.dev with nothing changed. `closedby` and overscroll containment still have no Safari entry, and `overlay` is Chromium-only.
+- **Scope (Emil):** Claude writes, Emil reviews. Vitest browser mode instead of `apps/docs/e2e`. Claude drafts the new tokens. ADR-0015 adopted as senui ADR-0014. Public API: no trigger prop, a `footer` slot, an `action` slot, and a `'cancel'` reason. All in scope-decisions § L06.
+- **Tidy (Emil, mid-session):** `internal/` grouped by concern, committed on its own (`4b25c64`), with typecheck and unit tests run on the staged tree alone.
+- **Written:** `internal/dialog/` (`useModalDialog`, `ModalDialog`), Dialog, AlertDialog, CSS, contracts, type, unit and browser tests, stories, custom Playwright commands, tokens, and a changeset.
+- **Browser runs found:**
+  - a product bug: the sticky-header padding was measured while the dialog was scaled;
+  - a product bug: the "first focusable" lookup used `checkVisibility()`, which is false before `showModal()`;
+  - a spurious finalFocus warning on unmount;
+  - three test bugs: computed styles mid-transition, Playwright's hover scrolling the page, and a 120 ms exit falling between two polls;
+  - two dead tests, found by probing (the exit wait, and the Esc veto).
+
+  Cross-engine runs found WebKit's no-focus-on-click (a known issue in both contracts) and a 2 to 3 px focus-scroll shortfall.
+
+- **Verified:** `pnpm check` (warnings only: the import-only false positive); `pnpm test`: tokens 32, react 522/524, with only the contract gate failing (no keyboard or screen-reader runs); dialog browser tests in Chromium, Firefox and WebKit, 126/126; build-storybook; the invariant greps.
+- **Next:** Emil reviews the code and the API calls Claude made on its own (scope-decisions § L06, "Public API"). Then Emil's keyboard, NVDA and forced-colours runs, then the reviewers.
+
+## 2026-10-20 — L06: Emil's four answers applied
+
+- **Emil took every recommendation.** No `OVERRIDES.md` rows.
+- **1. ADR-0015 amends ADR-0009:** `rem` is allowed in size media features only. Stylelint 17's `unit-allowed-list` can't scope a unit to media queries, so three built-in rules do it together (allow-list, `declaration-property-unit-disallowed-list`, `media-feature-name-unit-allowed-list` with a catch-all). Probed: `rem` in a declaration, a custom property, a `calc()` or a non-size feature is rejected, and size features pass. The Dialog.css disable is gone.
+- **2. `AlertDialog.css` imports `Dialog.css`** (plain, not `layer()`: a `layer()` import would nest the rules in a sub-layer). `check-component-css.mjs` allows that one form; four bad forms were probed and rejected. A new `AlertDialog.browser.test.tsx` loads the file alone and checks the width and the layer tree; probes with `layer()` and with no import both fail it. The "load both" wording is gone from the contract, the JSDoc and the changeset.
+- **3. Safari focus return:** a once-per-document `pointerdown` listener remembers the pressed control, used when focus is on `<body>` or on the parent dialog at open and the press is under a second old. `restoreFocus` now focuses a connected trigger even after WebKit's native return lands on the outer dialog. New mouse-path tests pass in all three engines; without the fallback they fail in WebKit. The known issue now covers only a dialog mounted after the click, or opened more than a second later.
+- **4. Claude's own API choices:** kept as written (scope-decisions § L06, "Public API").
+- **Verified:** `pnpm check` (the import-only warnings only); `pnpm test`: tokens 32, react 526/528 (the contract gate only); Dialog and AlertDialog browser tests in Chromium, Firefox and WebKit, 138/138.
+- **Next:** Emil's keyboard, NVDA and forced-colours runs on Dialog and AlertDialog (record them in both contracts), then the `review-component` workflow and triage.
+
+## 2026-10-21 — L06: focus ring moved onto the border
+
+- **Found by Emil** (Chrome, 100 %, keyboard-opened): the sticky header painted over the inner pixel of the dialog's inset focus ring. Headless runs in all three engines (100, 125 and 150 % zoom) didn't reproduce it.
+- **Fix:** the ring starts at the padding edge (`outline-offset` of minus the border width), so nothing inside the dialog can cover it. In fullscreen, a transparent border as wide as the ring holds it. This is scope deviation 11. A new browser test pins the geometry, and a probe with the old value fails it.
+- **Verified:** `pnpm check`; Dialog and AlertDialog browser tests in three engines, 144/144; unit tests, with only the contract gate failing.
+- **Next:** Emil re-checks the ring in Chrome, then the keyboard, NVDA and forced-colours runs.
+
+## 2026-10-21 — L06: footer Cancel aligned with AlertDialog
+
+- **Found by Emil:** a Cancel in Dialog's `footer` didn't close the dialog, while AlertDialog's did.
+- **Decision (Emil):** an optional `cancelLabel` on Dialog. The Cancel button now lives in `ModalDialog`, so Dialog and AlertDialog render the same one: first in the footer, secondary, closing with reason `'cancel'`. Footer actions still close themselves through `open`. AlertDialog's internal part class `__cancel` became Dialog's `.senui-dialog__cancel`.
+- **Verified:** typecheck; unit 66/66 for Dialog and AlertDialog (a probe that removes Cancel's close fails both Cancel tests); browser 144/144 in three engines.
+
+## 2026-10-21 — L06: keyboard and NVDA runs recorded
+
+- **Emil:** the focus ring is fine in Chrome. Keyboard and NVDA pass on Dialog and AlertDialog: the title, description, content and action buttons are read.
+- **Recorded in both contracts:**
+  - a keyboard run (Chrome) and an NVDA run (Chrome, NVDA version not recorded), both 2026-10-21;
+  - keyboard evidence on 2.1.1, 2.1.2, 2.4.3 and 2.4.7, and screen-reader evidence on 4.1.2 and 1.3.1;
+  - the on-open announcement as heard (exact wording not recorded).
+
+  Not reported, so still marked "expected": the announcement on close. Chrome version and OS are taken from the L05 runs on the same machine.
+
+- **Verified:** `pnpm check`; `pnpm test`: tokens 32, react 533/533. The contract gate passes.
+- **Next:** forced-colours checks of both ForcedColors stories, then the `review-component` workflow (Emil's opt-in) and triage.
+
+## 2026-10-21 — L06: forced colours recorded
+
+- **Emil:** both ForcedColors stories pass in Chrome with forced colours emulated: the dialog border and the keyboard focus ring are visible.
+- **Recorded:** a forced-colours run in both contracts, and as evidence on 1.4.11.
+- **Acceptance:** every L06 criterion is now met except "Pair mode: review workflow run, findings triaged, overrides logged".
+- **Next:** the `review-component` workflow for Dialog and AlertDialog (Emil's opt-in), then triage.
+
+## 2026-10-21 — L06 review: triaged and applied
+
+- **Reviewers:** the `review-component` workflow (API, accessibility, platform) over Dialog, AlertDialog and `internal/dialog/`. 14 findings, 10 distinct. All three reviewers found the same major issue, the unreported forced close.
+- **Triage with Emil (two batches):** accepted 10, rejected 0, escalated 0. No `OVERRIDES.md` rows. Details in scope-decisions § L06, "Review (2026-10-21)".
+- **Probes:** each fix's test fails against the old code (the forced report, the fullscreen tokens, the short-viewport padding). The double-Esc test can't prove a forced close in headless Chromium and is recorded as a consistency check.
+- **Emil's Speech Viewer output** for AlertDialog, recorded word for word. A CDP probe confirms Chromium exposes `alertdialog`; NVDA in Danish says "dialog".
+- **Verified:** `pnpm check`; `pnpm test`: tokens 32, react 552/552; Dialog and AlertDialog browser tests in three engines, 165/165; build-storybook.
+- **Next:** Emil's NVDA version, and a Speech Viewer reading of Dialog's close (focus back to the trigger). Then mark L06 done and commit on request.
+
+## 2026-10-21 — L06 done
+
+- **Emil:** NVDA 2026.2 (2026.2.0.57764). Dialog Speech Viewer reading: on open "Edit profile", then "overskrift niveau 2 Edit profile", "knap Close" and the body; on close "Open dialog knap" (focus back on the trigger). Recorded word for word in Dialog's contract, and the NVDA version in both.
+- **Acceptance:** every L06 criterion is met. Deviations: scope-decisions § L06, 1 to 11. Review: 10/10 accepted, no overrides. Not heard: the `finalFocus` announcement (browser-tested only).
+- **Next:** commit on `feature/dialog-L06` and open a PR when Emil asks. L07 (EmptyState) is next.

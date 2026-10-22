@@ -1,0 +1,15 @@
+/* AlertDialog is a Dialog: its layout, motion, tokens and scroll lock are Dialog's. Imported here so
+   `@senakster/react/styles/AlertDialog.css` works alone. A plain import, not `layer()`, so Dialog's
+   rules stay in senui.components itself (scripts/check-component-css.mjs). */
+@import '../Dialog/Dialog.css';
+
+@layer senui.components {
+  /* Public surface (semver): the `.senui-alert-dialog` class. AlertDialog also carries
+     `.senui-dialog`. Its Cancel is Dialog's (`.senui-dialog__cancel`).
+
+     In an alert the description is the message itself, not secondary help, so it reads at full
+     strength. */
+  :where(.senui-alert-dialog) {
+    --senui-dialog-description-color: var(--senui-color-fg-default);
+  }
+}

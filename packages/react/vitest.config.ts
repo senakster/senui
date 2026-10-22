@@ -1,6 +1,7 @@
 import react from '@vitejs/plugin-react';
 import { playwright } from '@vitest/browser-playwright';
 import { defineConfig } from 'vitest/config';
+import { clickBackdrop, emulateReducedMotion, wheelOverBackdrop } from './vitest.commands.js';
 
 declare const process: { env: { SENUI_BROWSERS?: string } };
 
@@ -53,6 +54,8 @@ export default defineConfig({
             provider: playwright(),
             headless: true,
             instances: browsers.map((browser) => ({ browser })),
+            // L06: Playwright actions the browser context lacks (backdrop pointer, reduced motion).
+            commands: { clickBackdrop, emulateReducedMotion, wheelOverBackdrop },
           },
         },
       },

@@ -3,7 +3,7 @@
   "profile": "library",
   "progress": "docs/PROGRESS.md",
   "pluginVersion": "0.3.0",
-  "syncedAt": "2026-10-19",
+  "syncedAt": "2026-10-20",
   "files": {
     "library_catalogue/L00-workspace-and-harness.md": {
       "target": ".catalogue/library_catalogue/L00-workspace-and-harness.md",
@@ -15,7 +15,7 @@
     },
     "library_catalogue/L02-component-api-conventions.md": {
       "target": ".catalogue/library_catalogue/L02-component-api-conventions.md",
-      "sha256": "892533cd495b72713d5f7f4c208fe8947492e1379ec6b35c30db13f50877eafe"
+      "sha256": "73c980e8ce3289999495d99402513db8086d6ec0b85daffc97f1b7f81fa6370f"
     },
     "library_catalogue/L03-button.md": {
       "target": ".catalogue/library_catalogue/L03-button.md",
@@ -23,11 +23,11 @@
     },
     "library_catalogue/L04-formfield-and-textinput.md": {
       "target": ".catalogue/library_catalogue/L04-formfield-and-textinput.md",
-      "sha256": "315e1cac22db6daaf759c2a53efbf0deabd6b7c63a66204ca267055f2a4bb925"
+      "sha256": "022db0e908c7b61392496dc107fad86bffaa90f6ab7a76cdd91f4b2103a7e14d"
     },
     "library_catalogue/L05-checkbox-and-switch.md": {
       "target": ".catalogue/library_catalogue/L05-checkbox-and-switch.md",
-      "sha256": "2605056e513d46104bd5fd46466ff29ec90109ea1ff0bff688e36a5f4b82595f"
+      "sha256": "c9e874f3e3406dd98b245ac7464b1aaeecb12c58669b1c75ce569998499f9ba2"
     },
     "library_catalogue/L06-dialog.md": {
       "target": ".catalogue/library_catalogue/L06-dialog.md",

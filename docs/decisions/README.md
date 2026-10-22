@@ -16,11 +16,13 @@ ADR that supersedes it. Every ADR names what was rejected and what the choice co
 | [0006](0006-no-polymorphic-components.md)          | No polymorphic components (`as` / `asChild`)                                                                     | Accepted                         |
 | [0007](0007-stylelint-token-guard.md)              | Stylelint guards component CSS against raw values                                                                | Accepted (amended by 0009)       |
 | [0008](0008-a11y-contract-adaptation.md)           | The a11y contract gains an `adaptation` section                                                                  | Accepted                         |
-| [0009](0009-stylelint-unit-allow-list.md)          | Stylelint: a unit allow-list, and selector specificity as a check                                                | Accepted                         |
+| [0009](0009-stylelint-unit-allow-list.md)          | Stylelint: a unit allow-list, and selector specificity as a check                                                | Accepted (amended by 0015)       |
 | [0010](0010-tokens-declared-on-themed-subtrees.md) | Tokens are declared on every themed subtree                                                                      | Accepted                         |
 | [0011](0011-form-control-validity-and-binding.md)  | Form controls: validity reaches `aria-invalid`, and controls bind through a sealed binding                       | Accepted (amended by 0012, 0013) |
 | [0012](0012-binary-controls-own-their-label.md)    | Binary controls own their label; text-entry controls bind to FormField                                           | Accepted                         |
 | [0013](0013-aria-invalid-always-explicit.md)       | Form controls always render `aria-invalid`, `"true"` or `"false"`                                                | Accepted                         |
+| [0014](0014-dialog-scroll-lock.md)                 | Dialog scroll lock: containment, plus a scoped root lock on by default                                           | Accepted                         |
+| [0015](0015-rem-in-media-queries.md)               | `rem` is allowed in size media queries                                                                           | Accepted                         |
 
 ## Template
 

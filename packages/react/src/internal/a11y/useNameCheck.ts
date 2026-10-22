@@ -1,5 +1,5 @@
 import { useCallback, type RefCallback } from 'react';
-import { DEV, warnOnce } from './dev.js';
+import { DEV, warnOnce } from '../dev/dev.js';
 
 /**
  * A development check for the accessible-name cases the type can't catch (CONVENTIONS rule 3): an

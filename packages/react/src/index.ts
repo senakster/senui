@@ -16,3 +16,15 @@ export { CheckboxGroup } from './components/CheckboxGroup/CheckboxGroup.js';
 export type { CheckboxGroupProps } from './components/CheckboxGroup/CheckboxGroup.js';
 export { Switch } from './components/Switch/Switch.js';
 export type { SwitchProps } from './components/Switch/Switch.js';
+export { Dialog } from './components/Dialog/Dialog.js';
+export type {
+  DialogCloseReason,
+  DialogDismiss,
+  DialogHeadingLevel,
+  DialogName,
+  DialogOpenChangeDetails,
+  DialogProps,
+  DialogSize,
+} from './components/Dialog/Dialog.js';
+export { AlertDialog } from './components/AlertDialog/AlertDialog.js';
+export type { AlertDialogProps, AlertDialogSize } from './components/AlertDialog/AlertDialog.js';

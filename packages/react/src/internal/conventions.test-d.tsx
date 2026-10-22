@@ -9,7 +9,7 @@ import {
 } from 'react';
 import { describe, expectTypeOf, test } from 'vitest';
 import type { DistributiveOmit } from '../types.js';
-import type { NativeProps } from './native-props.js';
+import type { NativeProps } from './dom/native-props.js';
 
 // Rule 1: variants are closed unions. No `string` fallback, no free colour.
 type Variant = 'primary' | 'secondary' | 'danger';

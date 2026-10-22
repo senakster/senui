@@ -1,12 +1,12 @@
 import { forwardRef, useCallback, useEffect, useMemo, useRef, type ReactNode } from 'react';
-import { DEV, warnOnce } from '../../internal/dev.js';
-import { FieldError } from '../../internal/FieldError.js';
-import { mergeIds } from '../../internal/ids.js';
-import type { NativeProps } from '../../internal/native-props.js';
-import { useComposedRefs } from '../../internal/refs.js';
-import { useControllableState } from '../../internal/useControllableState.js';
-import { hasContent, useFieldWiring } from '../../internal/useFieldWiring.js';
-import { useFormReset } from '../../internal/useFormReset.js';
+import { DEV, warnOnce } from '../../internal/dev/dev.js';
+import { FieldError } from '../../internal/field/FieldError.js';
+import { mergeIds } from '../../internal/dom/ids.js';
+import type { NativeProps } from '../../internal/dom/native-props.js';
+import { useComposedRefs } from '../../internal/dom/refs.js';
+import { useControllableState } from '../../internal/state/useControllableState.js';
+import { hasContent, useFieldWiring } from '../../internal/field/useFieldWiring.js';
+import { useFormReset } from '../../internal/field/useFormReset.js';
 import { CheckboxGroupContext, type CheckboxGroupState } from './context.js';
 
 /** Something to show: `undefined`, `null` and booleans render nothing, so they can't name a group. */

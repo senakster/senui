@@ -47,10 +47,25 @@ function cssFiles(dir) {
 }
 
 const open = '@layer senui.components {';
+// A component stylesheet may start by importing another component's stylesheet it depends on
+// (L06: AlertDialog needs Dialog), so the per-component export works alone. Plain `@import`, never
+// `layer(…)`: the imported sheet already declares `senui.components`, and `layer()` would nest it
+// in a sub-layer that loses to every other component's rules. The imported sheet is itself checked.
+const componentImport = /^@import\s+['"]\.\.\/([^/'"]+)\/([^/'"]+)\.css['"];\s*/;
 for (const file of cssFiles(SRC)) {
   if (file === ENTRY || file === LAYERS) continue;
-  const css = stripComments(readFileSync(file, 'utf8'));
+  let css = stripComments(readFileSync(file, 'utf8'));
   const name = relative(SRC, file);
+  for (let match = componentImport.exec(css); match; match = componentImport.exec(css)) {
+    const [statement, dir, base] = match;
+    const own = relative(join(SRC, 'components'), file).split(/[\\/]/)[0];
+    if (dir !== base || !componentDirs.includes(dir) || dir === own) {
+      errors.push(
+        `${name}: \`${statement.trim()}\` must import another component's <Name>/<Name>.css`,
+      );
+    }
+    css = css.slice(statement.length);
+  }
   if (!css.startsWith(open)) {
     errors.push(`${name}: must start with \`${open}\` and keep every rule inside it`);
     continue;

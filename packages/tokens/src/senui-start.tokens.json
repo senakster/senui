@@ -192,6 +192,14 @@
             "components": [0, 0, 0],
             "alpha": 0.5
           }
+        },
+        "70": {
+          "$type": "color",
+          "$value": {
+            "colorSpace": "srgb",
+            "components": [0, 0, 0],
+            "alpha": 0.7
+          }
         }
       }
     }
@@ -249,6 +257,17 @@
         "$extensions": {
           "senui": {
             "dark": "{primitive.color.neutral.925}",
+            "surface": true
+          }
+        }
+      },
+      "backdrop": {
+        "$type": "color",
+        "$description": "The scrim behind a modal (the dialog's ::backdrop). Translucent, so the page stays visible but recedes. Darker in dark mode, where the page is already dark. Never a text background.",
+        "$value": "{primitive.color.black.50}",
+        "$extensions": {
+          "senui": {
+            "dark": "{primitive.color.black.70}",
             "surface": true
           }
         }
@@ -957,6 +976,28 @@
       "lg": {
         "$value": {
           "value": 2.5,
+          "unit": "rem"
+        }
+      }
+    },
+    "dialog": {
+      "$type": "dimension",
+      "$description": "Maximum inline size of a modal dialog per size. In rem, so a dialog grows with the user's font size; it never exceeds the viewport (the component clamps it).",
+      "sm": {
+        "$value": {
+          "value": 24,
+          "unit": "rem"
+        }
+      },
+      "md": {
+        "$value": {
+          "value": 32,
+          "unit": "rem"
+        }
+      },
+      "lg": {
+        "$value": {
+          "value": 48,
           "unit": "rem"
         }
       }

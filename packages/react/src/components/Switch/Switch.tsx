@@ -1,11 +1,11 @@
 import { forwardRef, useRef, type ChangeEvent, type ReactNode } from 'react';
-import { mergeIds } from '../../internal/ids.js';
-import type { NativeProps } from '../../internal/native-props.js';
-import { useComposedRefs } from '../../internal/refs.js';
-import { useControllableState } from '../../internal/useControllableState.js';
-import { useFieldWiring } from '../../internal/useFieldWiring.js';
-import { useFormReset } from '../../internal/useFormReset.js';
-import { useNameCheck } from '../../internal/useNameCheck.js';
+import { mergeIds } from '../../internal/dom/ids.js';
+import type { NativeProps } from '../../internal/dom/native-props.js';
+import { useComposedRefs } from '../../internal/dom/refs.js';
+import { useControllableState } from '../../internal/state/useControllableState.js';
+import { useFieldWiring } from '../../internal/field/useFieldWiring.js';
+import { useFormReset } from '../../internal/field/useFormReset.js';
+import { useNameCheck } from '../../internal/a11y/useNameCheck.js';
 import type { CheckboxName } from '../Checkbox/Checkbox.js';
 
 export type SwitchProps = Omit<

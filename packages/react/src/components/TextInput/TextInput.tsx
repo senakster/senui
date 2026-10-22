@@ -1,8 +1,11 @@
 import { forwardRef } from 'react';
-import type { NativeProps } from '../../internal/native-props.js';
-import { useComposedRefs } from '../../internal/refs.js';
-import { useNameCheck } from '../../internal/useNameCheck.js';
-import { useFormFieldControl, type FormFieldBinding } from '../../internal/useFormFieldControl.js';
+import type { NativeProps } from '../../internal/dom/native-props.js';
+import { useComposedRefs } from '../../internal/dom/refs.js';
+import { useNameCheck } from '../../internal/a11y/useNameCheck.js';
+import {
+  useFormFieldControl,
+  type FormFieldBinding,
+} from '../../internal/field/useFormFieldControl.js';
 
 /** Single-line text types. `number` is not one: it is a spin button, with its own role and keys. */
 export type TextInputType = 'text' | 'email' | 'password' | 'search' | 'tel' | 'url';
