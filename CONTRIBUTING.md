@@ -11,7 +11,7 @@ provides it).
 
 ```sh
 pnpm install
-pnpm --filter @senakster/react exec playwright install chromium   # once per machine, for browser tests
+pnpm --filter @senakster/senui exec playwright install chromium   # once per machine, for browser tests
 pnpm build                                                        # lint and the docs app read built output
 ```
 
@@ -80,7 +80,7 @@ materially changed gets a row in [`OVERRIDES.md`](OVERRIDES.md), with the reason
 
 Component CSS uses tokens only. Stylelint rejects raw colours, units outside `%`, `fr`, `ch`, `deg`
 and `turn`, raw font and z-index values, and selectors more specific than `0,1,0` outside
-`:where()`. If a value has no token, add one to `@senakster/tokens` rather than disabling the rule.
+`:where()`. If a value has no token, add one to `@senakster/senui-tokens` rather than disabling the rule.
 
 ## Decisions
 

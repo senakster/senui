@@ -445,3 +445,10 @@ Entry format: date — module · Did · Verified · Scope decisions · Plan adju
 - **Emil:** NVDA 2026.2 (2026.2.0.57764). Dialog Speech Viewer reading: on open "Edit profile", then "overskrift niveau 2 Edit profile", "knap Close" and the body; on close "Open dialog knap" (focus back on the trigger). Recorded word for word in Dialog's contract, and the NVDA version in both.
 - **Acceptance:** every L06 criterion is met. Deviations: scope-decisions § L06, 1 to 11. Review: 10/10 accepted, no overrides. Not heard: the `finalFocus` announcement (browser-tested only).
 - **Next:** commit on `feature/dialog-L06` and open a PR when Emil asks. L07 (EmptyState) is next.
+
+## 2026-10-26 — Package names, and npm publishing deferred to L10
+
+- **Publishing (Emil):** keep the module order. Publish after L07 to L10; L10 (not yet planned upstream) builds the release pipeline first. Gaps found while checking are in the checkpoint: no npm login on this machine, no LICENSE in the packages, no `repository`/`homepage`/`bugs`.
+- **Renamed (Emil):** `@senakster/react` → `@senakster/senui`, `@senakster/tokens` → `@senakster/senui-tokens`, in every live file: manifests, imports, the CSS import, CI, CLAUDE.md, CONVENTIONS, READMEs and the pending changesets. History files keep the old names. The lockfile was regenerated with `pnpm install`.
+- **Verified:** `pnpm check`; `pnpm test`: tokens 32, react 552; build-storybook.
+- **Next:** L07 (EmptyState).

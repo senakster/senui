@@ -6,8 +6,8 @@ import { clickBackdrop, emulateReducedMotion, wheelOverBackdrop } from './vitest
 declare const process: { env: { SENUI_BROWSERS?: string } };
 
 // The browser project runs in Chromium (what CI installs). For a cross-browser run, install the
-// others once (`pnpm --filter @senakster/react exec playwright install firefox webkit`), then:
-//   SENUI_BROWSERS=chromium,firefox,webkit pnpm --filter @senakster/react exec vitest run --project browser
+// others once (`pnpm --filter @senakster/senui exec playwright install firefox webkit`), then:
+//   SENUI_BROWSERS=chromium,firefox,webkit pnpm --filter @senakster/senui exec vitest run --project browser
 const BROWSERS = ['chromium', 'firefox', 'webkit'] as const;
 const browsers = (process.env.SENUI_BROWSERS ?? 'chromium')
   .split(',')

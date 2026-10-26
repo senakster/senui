@@ -3,7 +3,7 @@ import { render, screen } from '@testing-library/react';
 import { useRef, useState, type CSSProperties, type ReactNode } from 'react';
 import { afterEach, describe, expect, test, vi } from 'vitest';
 import { commands, page, userEvent } from 'vitest/browser';
-import '@senakster/tokens/tokens.css';
+import '@senakster/senui-tokens/tokens.css';
 import '../../styles/index.css';
 import { expectNoAxeViolations } from '../../internal/testing/axe.js';
 import { AlertDialog } from '../AlertDialog/AlertDialog.js';

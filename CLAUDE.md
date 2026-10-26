@@ -2,7 +2,7 @@
 
 A public, standalone React + TypeScript component library: design tokens, a small set of
 thoroughly finished components, and documentation that engineers and AI agents can use without
-help. Published as `@senakster/tokens` and `@senakster/react` (pnpm workspace).
+help. Published as `@senakster/senui-tokens` and `@senakster/senui` (pnpm workspace).
 
 ## Where things live
 
@@ -62,7 +62,7 @@ These are the contract. Change one only via an ADR.
 
 ## Naming
 
-- npm scope: `@senakster` (packages `@senakster/tokens`, `@senakster/react`)
+- npm scope: `@senakster` (packages `@senakster/senui-tokens`, `@senakster/senui`)
 - CSS class and token prefix: `senui` (`.senui-button`, `--senui-color-fg-danger`, `@layer senui.components`)
 
 ## Working mode: pair
@@ -102,7 +102,7 @@ must be something Emil can defend.
 resolves), and format:check. `pnpm test` must pass too: Vitest in `packages/tokens` and
 `packages/react`, including type tests (`*.test-d.tsx`, type-checked, never executed), the
 runtime check of every a11y contract, and `*.browser.test.tsx` in Chromium (run
-`pnpm --filter @senakster/react exec playwright install chromium` once per machine). CI (`.github/workflows/ci.yml`) also runs
+`pnpm --filter @senakster/senui exec playwright install chromium` once per machine). CI (`.github/workflows/ci.yml`) also runs
 `pnpm --filter docs build-storybook`. `pnpm build` runs tsdown with publint, which fails on a broken
 `exports` map. Component conventions are in `packages/react/CONVENTIONS.md`.
 

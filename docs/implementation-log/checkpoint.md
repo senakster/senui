@@ -8,9 +8,9 @@ Single source of truth for **where the implementation is right now**. Overwritte
 | ------------- | ----------------------------------------------------------------------------------------- |
 | Target app    | repo root (pnpm workspace: `packages/tokens`, `packages/react`, `apps/docs`)              |
 | Active module | L07 — EmptyState (next; plan-ready). L06 done 2026-10-21                                  |
-| Sub-step      | L06 complete and uncommitted on `feature/dialog-L06`; waiting on a commit and PR          |
+| Sub-step      | L06 merged (PR #5, `a51b509`); L07 not started                                            |
 | Last verified | 2026-10-21: `pnpm check`; `pnpm test` 552/552; 3-engine dialog tests 165; build-storybook |
-| Updated       | 2026-10-21                                                                                |
+| Updated       | 2026-10-26                                                                                |
 
 ## Brief
 
@@ -31,7 +31,7 @@ uncommitted.
 **Invariant checks (run 2026-10-20, all hold):** in `components/{Dialog,AlertDialog}` and
 `internal/dialog`, no rendered `open` attribute, no portal, `aria-hidden` or `inert`, no
 `command`/`commandfor`, and no `closedby`. No unscoped `html:has(dialog`. Runtime dependencies are
-`@senakster/tokens` only. No Stylelint disables in component CSS (ADR-0015).
+`@senakster/senui-tokens` only. No Stylelint disables in component CSS (ADR-0015).
 
 **Emil's answers (2026-10-20):** all four recommendations taken: ADR-0015 (`rem` in size media queries), `AlertDialog.css` imports `Dialog.css`, the Safari pointer fallback, and Claude's API choices kept. See scope-decisions § L06.
 
@@ -39,6 +39,7 @@ uncommitted.
 
 ## In-flight notes
 
+- **npm publishing (Emil, 2026-10-26): keep the module order.** Publish only after L07, L08, L09 and L10; L10 (release, not yet planned upstream) sets up the pipeline first. The packages are now `@senakster/senui` and `@senakster/senui-tokens` (renamed 2026-10-26, scope-decisions § L00). Found while checking the old names: they were free on npm and the `@senakster` org exists; this machine has no npm login; the packages ship without a LICENSE (`files: ["dist"]`, licence at the repo root) and without `repository`/`homepage`/`bugs`; four pending changesets, all minor (0.0.0 to 0.1.0).
 - Cross-browser: `SENUI_BROWSERS=chromium,firefox,webkit`. CI stays Chromium-only until L08.
 - `check-a11y-contracts` warns about Button, FormField and TextInput after the regroup: only their import
   paths changed (L02 cross-module note).
@@ -48,4 +49,4 @@ uncommitted.
 
 ## Next action
 
-Commit L06 on `feature/dialog-L06` and open a PR (squash-merge when `verify` is green). Then run `/modular-web:implement-module` to start L07 (EmptyState).
+Run `/modular-web:implement-module` to start L07 (EmptyState) on a new branch from `main`. Commit this checkpoint note with it. npm publishing waits for L10 (see the in-flight notes).

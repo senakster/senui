@@ -1,5 +1,5 @@
 ---
-'@senakster/react': minor
+'@senakster/senui': minor
 ---
 
 Add `Checkbox`, `CheckboxGroup` and `Switch`, all native `<input type="checkbox">` underneath.
@@ -8,7 +8,7 @@ Add `Checkbox`, `CheckboxGroup` and `Switch`, all native `<input type="checkbox"
 - `CheckboxGroup` is a `<fieldset>` with a required `legend`, one `value` array (`value` / `defaultValue` / `onValueChange`), one error, and `required="<message>"`, which blocks submit until an option is checked.
 - `Switch` is an on/off setting with `role="switch"`; it takes no `indeterminate`, `required` or `error`.
 
-Styles: `@senakster/react/styles.css`, or the per-component `Checkbox.css`, `CheckboxGroup.css` and `Switch.css`.
+Styles: `@senakster/senui/styles.css`, or the per-component `Checkbox.css`, `CheckboxGroup.css` and `Switch.css`.
 
 FormField now shares its wiring with these controls internally; its API is unchanged.
 

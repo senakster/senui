@@ -1,7 +1,7 @@
 import { render, screen } from '@testing-library/react';
 import { describe, expect, test } from 'vitest';
 import { page } from 'vitest/browser';
-import '@senakster/tokens/tokens.css';
+import '@senakster/senui-tokens/tokens.css';
 // Only AlertDialog's own stylesheet, as a consumer of `styles/AlertDialog.css` loads it. Each
 // browser test file runs in its own frame, so nothing else from the package is loaded here.
 import './AlertDialog.css';

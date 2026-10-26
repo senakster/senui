@@ -325,17 +325,17 @@ Everything below is public API under semver. Removing or renaming any of it is a
 preceded by a deprecation release (rule 8). Narrowing a prop's type (removing a union member, making
 an optional prop required) is also a major.
 
-| Surface                 | Example                                          | Where it is defined     |
-| ----------------------- | ------------------------------------------------ | ----------------------- |
-| Component exports       | `Button`                                         | `src/index.ts`          |
-| Prop types              | `ButtonProps`, its union members                 | the component's `.tsx`  |
-| Public utility types    | `DistributiveOmit`                               | `src/types.ts`          |
-| Class names             | `.senui-button`                                  | the component's `.css`  |
-| Component tokens        | `--senui-button-bg`                              | the component's `.css`  |
-| Data-attribute values   | `[data-variant="danger"]`, `[data-size="sm"]`    | the component's `.tsx`  |
-| Cascade layer names     | `senui.tokens`, `senui.base`, `senui.components` | `src/styles/layers.css` |
-| Package export subpaths | `.`, `./styles.css`, `./styles/<Name>.css`       | `package.json`          |
-| Semantic tokens         | `--senui-color-fg-danger`                        | `@senakster/tokens`     |
+| Surface                 | Example                                          | Where it is defined       |
+| ----------------------- | ------------------------------------------------ | ------------------------- |
+| Component exports       | `Button`                                         | `src/index.ts`            |
+| Prop types              | `ButtonProps`, its union members                 | the component's `.tsx`    |
+| Public utility types    | `DistributiveOmit`                               | `src/types.ts`            |
+| Class names             | `.senui-button`                                  | the component's `.css`    |
+| Component tokens        | `--senui-button-bg`                              | the component's `.css`    |
+| Data-attribute values   | `[data-variant="danger"]`, `[data-size="sm"]`    | the component's `.tsx`    |
+| Cascade layer names     | `senui.tokens`, `senui.base`, `senui.components` | `src/styles/layers.css`   |
+| Package export subpaths | `.`, `./styles.css`, `./styles/<Name>.css`       | `package.json`            |
+| Semantic tokens         | `--senui-color-fg-danger`                        | `@senakster/senui-tokens` |
 
 Adding to any of these is a minor.
 
@@ -348,10 +348,10 @@ listing its public classes, data-attribute values and component tokens.
 Consumers load the tokens, then the components, either all at once or per component:
 
 ```css
-@import '@senakster/tokens/tokens.css';
-@import '@senakster/react/styles.css'; /* every component */
+@import '@senakster/senui-tokens/tokens.css';
+@import '@senakster/senui/styles.css'; /* every component */
 /* or */
-@import '@senakster/react/styles/Button.css'; /* one component */
+@import '@senakster/senui/styles/Button.css'; /* one component */
 ```
 
 `tokens.css` and `styles.css` both declare the layer order, so those two load in either order. A

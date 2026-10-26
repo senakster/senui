@@ -1,5 +1,5 @@
 /* AlertDialog is a Dialog: its layout, motion, tokens and scroll lock are Dialog's. Imported here so
-   `@senakster/react/styles/AlertDialog.css` works alone. A plain import, not `layer()`, so Dialog's
+   `@senakster/senui/styles/AlertDialog.css` works alone. A plain import, not `layer()`, so Dialog's
    rules stay in senui.components itself (scripts/check-component-css.mjs). */
 @import '../Dialog/Dialog.css';
 
