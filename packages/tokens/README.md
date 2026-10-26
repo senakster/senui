@@ -1,13 +1,13 @@
-# @senakster/tokens
+# @senakster/senui-tokens
 
 Design tokens for senui: CSS custom properties in `@layer senui.tokens`, plus a typed JS map.
 
 ```css
-@import '@senakster/tokens/tokens.css';
+@import '@senakster/senui-tokens/tokens.css';
 ```
 
 ```ts
-import { tokens } from '@senakster/tokens';
+import { tokens } from '@senakster/senui-tokens';
 tokens['color.fg.default'].cssVar; // '--senui-color-fg-default'
 ```
 

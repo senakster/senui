@@ -9,7 +9,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@senakster/tokens": "workspace:*"
+    "@senakster/senui-tokens": "workspace:*"
   },
   "devDependencies": {
     "@storybook/addon-docs": "10.6.2",

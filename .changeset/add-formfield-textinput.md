@@ -1,5 +1,5 @@
 ---
-'@senakster/react': minor
+'@senakster/senui': minor
 ---
 
 Add `FormField` and `TextInput`. `FormField` renders a label, an optional description and an error message, and wires them to the control it renders through a function child: `<FormField label="Email" error={error}>{(field) => <TextInput field={field} type="email" />}</FormField>`. The control gets the label's name, `aria-describedby` (description, then error while there is one), `aria-invalid` (absent when valid) and `required`. Native constraint errors show in the field after a submit attempt, and the first invalid field takes focus; `announce="polite"` makes the error a live region for on-change validation.
@@ -8,4 +8,4 @@ Add `FormField` and `TextInput`. `FormField` renders a label, an optional descri
 
 Add `focusFirstInvalid(form)`, which focuses the first invalid control after your own validation sets errors.
 
-Styles: `@senakster/react/styles.css`, or `@senakster/react/styles/FormField.css` and `@senakster/react/styles/TextInput.css`.
+Styles: `@senakster/senui/styles.css`, or `@senakster/senui/styles/FormField.css` and `@senakster/senui/styles/TextInput.css`.

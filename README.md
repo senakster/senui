@@ -9,33 +9,33 @@ machine-readable accessibility contract.
 
 ## Packages
 
-| Package                                 | What it is                                                        |
-| --------------------------------------- | ----------------------------------------------------------------- |
-| [`@senakster/tokens`](packages/tokens/) | Design tokens as CSS custom properties, plus a typed JS map       |
-| [`@senakster/react`](packages/react/)   | React components, styled by plain CSS stylesheets on those tokens |
+| Package                                       | What it is                                                        |
+| --------------------------------------------- | ----------------------------------------------------------------- |
+| [`@senakster/senui-tokens`](packages/tokens/) | Design tokens as CSS custom properties, plus a typed JS map       |
+| [`@senakster/senui`](packages/react/)         | React components, styled by plain CSS stylesheets on those tokens |
 
 ## Quick start
 
 ```sh
-pnpm add @senakster/react @senakster/tokens
+pnpm add @senakster/senui @senakster/senui-tokens
 ```
 
 Load the CSS once, tokens first:
 
 ```css
-@import '@senakster/tokens/tokens.css';
-@import '@senakster/react/styles.css';
+@import '@senakster/senui-tokens/tokens.css';
+@import '@senakster/senui/styles.css';
 ```
 
 Then use the components:
 
 ```tsx
-import { Button } from '@senakster/react';
+import { Button } from '@senakster/senui';
 
 <Button onClick={save}>Save</Button>;
 ```
 
-See the [`@senakster/react` README](packages/react/README.md) for loading one component's CSS at a
+See the [`@senakster/senui` README](packages/react/README.md) for loading one component's CSS at a
 time, theming and overriding styles.
 
 ## What you can rely on

@@ -3,7 +3,7 @@ import { render } from '@testing-library/react';
 import { useEffect, useState, type CSSProperties, type ReactNode } from 'react';
 import { describe, expect, test, vi } from 'vitest';
 import { userEvent } from 'vitest/browser';
-import '@senakster/tokens/tokens.css';
+import '@senakster/senui-tokens/tokens.css';
 import '../../styles/index.css';
 import { expectNoAxeViolations } from '../../internal/testing/axe.js';
 import { Button } from '../Button/Button.js';

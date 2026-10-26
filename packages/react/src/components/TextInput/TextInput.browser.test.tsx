@@ -2,7 +2,7 @@ import { composeStories } from '@storybook/react-vite';
 import { render } from '@testing-library/react';
 import { describe, expect, test } from 'vitest';
 import { userEvent } from 'vitest/browser';
-import '@senakster/tokens/tokens.css';
+import '@senakster/senui-tokens/tokens.css';
 import '../../styles/index.css';
 import { expectNoAxeViolations } from '../../internal/testing/axe.js';
 import { TextInput } from './TextInput.js';

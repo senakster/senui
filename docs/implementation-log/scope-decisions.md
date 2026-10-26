@@ -101,6 +101,17 @@ This file is **parsed** into the decision index, so its shape matters:
 - **L10** — neither package has a `license` field or `repository` yet; both are needed before
   the first publish.
 
+### Package names (Emil, 2026-10-26)
+
+The packages are renamed before the first publish: **`@senakster/senui`** (components, was
+`@senakster/react`) and **`@senakster/senui-tokens`** (tokens, was `@senakster/tokens`). The names
+say which library they belong to, and the tokens stay a separate package, so a non-React consumer
+can use them alone. Rejected: one combined package; and renaming only the components. Nothing had
+been published, so no deprecation was owed.
+
+The directories stay `packages/react` and `packages/tokens`. The implementation log, this file and
+the PROGRESS changelog keep the old names where they record history.
+
 ## L01 — Design tokens
 
 | Deliverable / criterion                                               | Decision | Reason                                                                                             | Re-include when                                   |

@@ -1,4 +1,4 @@
-# @senakster/react
+# @senakster/senui
 
 senui's React components: native elements, plain CSS on design tokens, and an accessibility
 contract for each component.
@@ -8,7 +8,7 @@ contract for each component.
 ## Install
 
 ```sh
-pnpm add @senakster/react @senakster/tokens
+pnpm add @senakster/senui @senakster/senui-tokens
 ```
 
 `react` and `react-dom` 18.3 or 19 are peer dependencies.
@@ -19,15 +19,15 @@ Components ship as JavaScript plus plain stylesheets. Nothing is injected at run
 CSS yourself, once, tokens first:
 
 ```css
-@import '@senakster/tokens/tokens.css';
-@import '@senakster/react/styles.css'; /* every component */
+@import '@senakster/senui-tokens/tokens.css';
+@import '@senakster/senui/styles.css'; /* every component */
 ```
 
 Or only the components you use:
 
 ```css
-@import '@senakster/tokens/tokens.css';
-@import '@senakster/react/styles/Button.css';
+@import '@senakster/senui-tokens/tokens.css';
+@import '@senakster/senui/styles/Button.css';
 ```
 
 Load `tokens.css` before any per-component file. It declares the layer order
@@ -43,7 +43,7 @@ If your app uses `@layer` itself, put `senui` first in your own order so your la
 ## Use
 
 ```tsx
-import { Button } from '@senakster/react';
+import { Button } from '@senakster/senui';
 
 <Button onClick={save}>Save</Button>
 <Button variant="danger" size="sm" onClick={remove}>Delete</Button>
@@ -98,7 +98,7 @@ entirely:
 }
 ```
 
-The [`@senakster/tokens` README](../tokens/README.md) covers every token and override.
+The [`@senakster/senui-tokens` README](../tokens/README.md) covers every token and override.
 
 ## Accessibility
 
@@ -120,7 +120,7 @@ are a union, use `DistributiveOmit` instead of `Omit`, which would drop type-lev
 such as the icon-only label:
 
 ```tsx
-import { Button, type ButtonProps, type DistributiveOmit } from '@senakster/react';
+import { Button, type ButtonProps, type DistributiveOmit } from '@senakster/senui';
 
 type DangerButtonProps = DistributiveOmit<ButtonProps, 'variant'>;
 const DangerButton = (props: DangerButtonProps) => <Button {...props} variant="danger" />;

@@ -1,4 +1,4 @@
-import { tokens, type Token } from '@senakster/tokens';
+import { tokens, type Token } from '@senakster/senui-tokens';
 import './token-tables.css';
 
 const all = Object.entries<Token>(tokens);
