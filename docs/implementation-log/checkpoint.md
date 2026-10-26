@@ -39,6 +39,7 @@ uncommitted.
 
 ## In-flight notes
 
+- **Storybook on GitHub Pages (Emil, 2026-10-26): comes with L09**, not before. Plan: on a push to `main`, the CI `verify` job uploads the Storybook it already builds as a Pages artifact, and a `deploy-storybook` job (`needs: verify`) publishes it, so only a green `main` deploys. The site would be `https://senakster.github.io/senui/`. Claude enables Pages with `gh api -X POST repos/senakster/senui/pages -f build_type=workflow` once the workflow is merged (Emil's OK, 2026-10-26).
 - **npm publishing (Emil, 2026-10-26): keep the module order.** Publish only after L07, L08, L09 and L10; L10 (release, not yet planned upstream) sets up the pipeline first. The packages are now `@senakster/senui` and `@senakster/senui-tokens` (renamed 2026-10-26, scope-decisions § L00). Found while checking the old names: they were free on npm and the `@senakster` org exists; this machine has no npm login; the packages ship without a LICENSE (`files: ["dist"]`, licence at the repo root) and without `repository`/`homepage`/`bugs`; four pending changesets, all minor (0.0.0 to 0.1.0).
 - Cross-browser: `SENUI_BROWSERS=chromium,firefox,webkit`. CI stays Chromium-only until L08.
 - `check-a11y-contracts` warns about Button, FormField and TextInput after the regroup: only their import
