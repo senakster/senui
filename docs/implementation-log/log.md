@@ -615,3 +615,17 @@ Entry format: date — module · Did · Verified · Scope decisions · Plan adju
 - **Next, with Emil's OK:** commit PR 4 and open it. After it merges, watch `main`'s "Gate (all
   engines)" run, which includes the new `react-18` job. Then record the PR gate job's duration as its
   budget, and mark L08 done.
+
+## 2026-10-27 — L08 done
+
+- **PR 4 merged as #11.** On `main`:
+  - "Gate (all engines)" passed: 3,918 tests in 33 min 46 s.
+  - `react-18` passed: 886 of 886 on React 18.3.1, version asserted.
+  - CI passed.
+- **Budget (Emil):** the PR gate step is held to 10 min, from 8 min 41 s on #11. `ci.yml` puts a
+  15-minute timeout on the step, not the job, because the whole job takes 13 min 20 s on `main`.
+- **The Docker warning** in every container step ("Error loading config file:
+  /root/.docker/config.json") is the runner's own `docker exec` on the host, which reads the job's
+  `HOME: /root`. It is harmless, has been there since PR 3, and was left as it is.
+- **Next:** L09 has no plan yet. Plan it in the planner, then sync it here. The TextInput Home/End
+  row stays open (L04, cross-module notes).

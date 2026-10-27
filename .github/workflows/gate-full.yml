@@ -6,6 +6,8 @@ name: Gate (all engines)
 on:
   push:
     branches: [main]
+    # Docs-only changes can't change a result (see ci.yml); the nightly run still covers main.
+    paths-ignore: ['docs/**', '**/*.md']
   schedule:
     - cron: '17 3 * * *'
   workflow_dispatch:

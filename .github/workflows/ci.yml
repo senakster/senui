@@ -1,9 +1,13 @@
 name: CI
 
+# Docs-only changes (everything under docs/, and any .md file) can't change a test result. On a pull
+# request, `verify` must still report (it is a required check), so it runs and skips its heavy steps;
+# on main they skip the workflow, since the pull request already checked their formatting.
 on:
   pull_request:
   push:
     branches: [main]
+    paths-ignore: ['docs/**', '**/*.md']
 
 permissions:
   contents: read
@@ -26,18 +30,42 @@ jobs:
       SENUI_GATE_CONTAINER: '1'
     steps:
       - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      # `code` is false only when every changed file is docs. Anything else, or a push, runs it all.
+      - id: changes
+        if: github.event_name == 'pull_request'
+        env:
+          BASE: ${{ github.event.pull_request.base.sha }}
+        run: |
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
+          files=$(git diff --name-only "$BASE" HEAD)
+          echo "$files"
+          if [ -n "$files" ] && ! echo "$files" | grep -qvE '^docs/|\.md$'; then
+            echo "code=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "code=true" >> "$GITHUB_OUTPUT"
+          fi
       - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v5
         with:
           node-version-file: .node-version
           cache: pnpm
       - run: pnpm install --frozen-lockfile
-      - run: pnpm check
-      - run: pnpm test
-      - run: pnpm --filter docs build-storybook
+      - if: steps.changes.outputs.code == 'false'
+        run: pnpm format:check
+      - if: steps.changes.outputs.code != 'false'
+        run: pnpm check
+      - if: steps.changes.outputs.code != 'false'
+        run: pnpm test
+      - if: steps.changes.outputs.code != 'false'
+        run: pnpm --filter docs build-storybook
       # L08: the a11y gate over the built Storybook, in Chromium. main and nightly run all three
-      # engines (gate-full.yml).
-      - run: pnpm --filter docs exec playwright test
+      # engines (gate-full.yml). Budget (Emil, 2026-10-27): 10 min, from 8 min 41 s on the PR that
+      # finished L08. A step over 10 min is reviewed; the timeout only stops a hang.
+      - if: steps.changes.outputs.code != 'false'
+        run: pnpm --filter docs exec playwright test
+        timeout-minutes: 15
       - if: failure()
         uses: actions/upload-artifact@v4
         with:

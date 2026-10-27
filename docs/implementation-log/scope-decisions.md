@@ -100,6 +100,17 @@ This file is **parsed** into the decision index, so its shape matters:
   into `dist` by the tsdown config and exposed through `exports` (ADR-0001, ADR-0003).
 - **L10** — neither package has a `license` field or `repository` yet; both are needed before
   the first publish.
+- **Harness change, 2026-10-27 (with L08's close, Emil): docs-only changes skip the expensive CI.**
+  - **The problem:** `main`'s ruleset requires `verify` and has no bypass, so `[skip ci]` would
+    leave such a PR unmergeable.
+  - **Pull requests:** `ci.yml`'s `verify` lists the changed files. When every one is under
+    `docs/` or ends in `.md`, it runs only `pnpm format:check` and skips the check, tests, Storybook
+    build and gate, and still reports.
+  - **Pushes to `main`:** `ci.yml` and `gate-full.yml` ignore the same paths; the nightly gate
+    still covers `main`.
+  - **Probed** locally with seven file lists. A workflow file, `apps/docs/`, or a mix with code
+    runs everything, and an empty diff runs everything too. The docs-only path itself is unproven
+    in CI until the first docs-only PR.
 
 ### Package names (Emil, 2026-10-26)
 
@@ -1080,3 +1091,23 @@ Each failed for its own reason, and everything was restored:
   asserted.
 - `pnpm test:gate`: 1,378 passed, 122 skipped (Chromium, with the walk's frame wait).
 - The pinned image: the four failing stories in three engines.
+
+### Done (2026-10-27)
+
+PR 4 merged as #11.
+
+- **On `main`:** the "Gate (all engines)" run passed: 3,918 tests in Chromium, Firefox and WebKit,
+  33 min 46 s. The `react-18` job ran in CI for the first time and passed: 886 of 886 on React
+  18.3.1, with the version asserted in every project. CI passed.
+- **PR gate budget (Emil, 2026-10-27):**
+  - **The baseline:** PR #11's `verify` job took 10 min 35 s, of which the gate step took 8 min 41 s.
+  - **The budget:** the gate step is held to 10 minutes. A PR whose gate step goes over is reviewed.
+  - **Deviation:** the option Emil chose put `timeout-minutes: 15` on the job. It is on the step
+    instead, because on `main` the whole job took 13 min 20 s (both workflows share the runner pool),
+    which a job-level 15 would barely clear. The step timeout only stops a hang.
+- **Acceptance criteria:** all met, with three narrowings in the earlier PRs' deviations:
+  - truncation of a non-input isn't implemented (PR 2, deviation 7);
+  - screenshots run only in the pinned container (PR 3);
+  - the 18.3 job covers runtime, not types (PR 4, deviation 3).
+- **Open, not L08's:** TextInput's Home/End row on macOS (see L04, cross-module notes).
+- **CI for docs-only changes:** a fast path (see L00, cross-module notes); this record's own PR ran in full, because it edits the workflows.
