@@ -185,11 +185,12 @@ export const Matrix: Story = {
 };
 
 /**
- * Matrix, for forced colours: `parameters.forcedColors: 'active'` tells L08's gate to screenshot it
+ * Matrix, for forced colours: the `forced-colors` tag tells L08's gate to screenshot it
  * with forced colours emulated. By hand: DevTools → Rendering → forced-colors: active. The box, the
  * check and the dash must stay visible in every state.
  */
 export const ForcedColors: Story = {
   ...Matrix,
-  parameters: { controls: { disable: true }, forcedColors: 'active' },
+  tags: ['forced-colors'],
+  parameters: { controls: { disable: true } },
 };

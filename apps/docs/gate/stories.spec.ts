@@ -29,4 +29,22 @@ test.describe('gate bookkeeping', () => {
     }
     expect(missing).toEqual([]);
   });
+
+  // Decision 4, `forcedColors` rows: a component that keeps states visible by border or system
+  // colour has a story the forced-colours screenshots cover.
+  test('every border or system-colour component has a forced-colors story', async () => {
+    const components = [...new Set(stories.map((story) => story.component))];
+    const missing: string[] = [];
+    for (const component of components) {
+      const own = stories.filter((story) => story.component === component);
+      const first = own[0];
+      if (!first) continue;
+      const { forcedColors } = (await contractFor(first)).adaptation;
+      if (forcedColors === 'no-states') continue;
+      if (!own.some((story) => story.tags.includes('forced-colors'))) {
+        missing.push(`${component} (${forcedColors})`);
+      }
+    }
+    expect(missing).toEqual([]);
+  });
 });

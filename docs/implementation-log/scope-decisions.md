@@ -907,3 +907,53 @@ Each failed for its own reason, and everything was restored:
 - **Probe stories:** a button inside `aria-hidden`, an unnamed button, a button covered by a fixed overlay (both viewports), and a clipped ring each fail the tab walk.
 - **Batch B:** a 2 px pair of 16 px targets under `spacing-exception` fails, and the same pair 40 px apart passes. A raw button in EmptyState's actions fails `not-a-target`. An `!important` ring "still shows" under both resets that should remove it.
 - **The batch-B ring probe first passed:** the reset check treated opaque black, `rgb(0, 0, 0)`, as transparent (a string test for `" 0)"`). Fixed to read alpha through the canvas, then re-probed.
+
+### PR 3 (2026-10-27): forced colours, the pinned container, three engines on main
+
+- **Story tags:** the nine stories that carried `parameters.forcedColors: 'active'` (one per component)
+  now carry the tag `forced-colors`, which Storybook's `index.json` exposes; comments updated.
+  Component-folder edits, one line each, under Emil's authorisation.
+- **`gate/forced-colors.spec.ts`:** a screenshot of each tagged story in light and dark (Chromium,
+  forced colours emulated), and decision 6b's ring and boundary checks under forced colours on every
+  story. **`gate/walk.ts`** holds the tab walk both specs share.
+- **Bookkeeping:** a component whose `forcedColors` is `border` or `system-colour` must have a
+  `forced-colors` story.
+- **Workflows:** `ci.yml`'s `verify` job runs in `mcr.microsoft.com/playwright:v1.64.0-noble` (no
+  browser install step); `gate-full.yml` runs the gate in Chromium, Firefox and WebKit on a push to
+  `main`, nightly and on demand; `update-snapshots.yml` regenerates the baselines with the gate's own
+  command and uploads them, on demand or when a pull request gets the `update-snapshots` label.
+- **Config:** `snapshotPathTemplate` without a platform; `updateSnapshots: 'none'` in CI.
+
+#### Deviations from the plan
+
+1. **The screenshot is of the whole page**, not `#storybook-root`: a modal dialog is in the top
+   layer, outside the root's box.
+2. **The forced-colours ring check runs on every story**, not only the tagged ones: it measures, so
+   it needs no baseline, and it costs one page per story.
+3. **The update workflow also runs on a labelled pull request.** A `workflow_dispatch` workflow can
+   only be started once it is on `main`, so the first baselines (and any update made on a branch)
+   come from labelling the pull request; a pull request's workflows come from its own branch.
+4. **The first baselines were generated locally, in the pinned image:** `mcr.microsoft.com/playwright:v1.64.0-noble`
+   under Docker (Emil started Docker Desktop). The working tree was copied in without
+   `node_modules`, because those are Windows builds. Inside it ran the lockfile install, the build,
+   the Storybook build and the update workflow's own command. CI's first run compares against them,
+   which tests reproduction across machines. The `update-snapshots` workflow stays the normal path
+   for later updates.
+5. **The container runs as root**, so `HOME=/root` (Firefox needs it) and `--ipc=host` (Chromium in
+   Docker), as Playwright documents.
+
+#### Probes
+
+- **Forced colours only:** a ring removed only under `forced-colors: active` (Button, built CSS)
+  fails the forced-colours ring check on every Button story and on Dialog's story whose only
+  controls are Buttons, while the normal tab walk passes.
+- **Bookkeeping:** removing Switch's `forced-colors` tag fails the bookkeeping test.
+- **Reproduction:** in a fresh container, all 18 screenshots match the baselines with
+  `updateSnapshots: 'none'`.
+- **A hidden state is a diff:** with a checked checkbox drawn as unchecked in forced colours (its
+  `::before` box and `::after` tick, in the built CSS), both Checkbox screenshots fail, 282 and
+  317 px. A first probe recoloured the control element itself, which its `::before` covers, so
+  nothing changed visibly and it passed: a wrong probe, found by looking at the baseline.
+- **Light against dark (decision 7's day-one probe):** all nine pairs differ, as distinct
+  high-contrast palettes (black on white with dark-red disabled and navy pressed; white on black with
+  green disabled and cyan pressed). Both are kept.

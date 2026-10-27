@@ -1,0 +1,42 @@
+name: Update gate screenshots
+
+# L08 decision 7: regenerates the forced-colours baselines in the same pinned container the gate
+# compares them in, with the gate's own command, and uploads them as an artifact. A person reviews
+# and commits them; nothing here pushes to a branch.
+#
+# Run it from the Actions tab, or add the `update-snapshots` label to a pull request (a pull
+# request's workflows come from its own branch, so this also works before the file is on main).
+on:
+  workflow_dispatch:
+  pull_request:
+    types: [labeled]
+
+permissions:
+  contents: read
+
+jobs:
+  update:
+    if: github.event_name == 'workflow_dispatch' || github.event.label.name == 'update-snapshots'
+    runs-on: ubuntu-latest
+    container:
+      image: mcr.microsoft.com/playwright:v1.64.0-noble
+      options: --ipc=host
+    env:
+      HOME: /root
+      SENUI_GATE_CONTAINER: '1'
+    steps:
+      - uses: actions/checkout@v5
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v5
+        with:
+          node-version-file: .node-version
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm build
+      - run: pnpm --filter docs build-storybook
+      - run: pnpm --filter docs exec playwright test gate/forced-colors.spec.ts --update-snapshots=all
+      - uses: actions/upload-artifact@v4
+        with:
+          name: gate-screenshots
+          path: apps/docs/gate/__screenshots__/
+          retention-days: 7
