@@ -21,6 +21,20 @@ Status legend — plan: `plan-ready` · `not-planned` (plan not written yet upst
 
 ## Changelog
 
+- **2026-10-27** — L08, PR 2 of 4.
+  - **New gate checks, all derived from each contract:**
+    - target size at 1280 and 320 px (`min-24`, `spacing-exception`, `not-a-target`);
+    - reflow at 320 px and WCAG's text-spacing overrides;
+    - motion, recorded from first paint and judged by the owning component's contract;
+    - RTL mirroring, statically (Stylelint rejects physical properties) and at runtime (boxes and pseudo-element offsets flip with `<html dir>`);
+    - a tab walk at two viewports: focus-visible, not hidden, named, not covered, a real ring at 3:1, and control boundaries at 3:1;
+    - the ring against two in-house consumer resets, plus the two resets the docs say remove it.
+  - **ADR-0017:** a new contract field, `adaptation.essentialMotion`, declared by Button for its spinner.
+  - **ADR-0018:** no `:dir()` in component CSS. The runtime RTL check found that Vite's default build rewrites it to a `:lang()` list, so Switch's thumb didn't mirror in production. Switch now moves the thumb with `margin-inline-start` (an L05 defect, fixed).
+  - **Probes:** every check fails on its probe, including the unused `spacing-exception` and `not-a-target` values. One probe found a bug in the reset check (opaque black read as transparent), fixed and re-probed.
+  - **Windows:** a story that fails only on an OS socket error loads once more.
+  - **Verified:** `pnpm check`; `pnpm test`: tokens 32, react 649; `pnpm test:gate` 1264 passed, 104 skipped.
+
 - **2026-10-27** — L08 in progress, PR 1 of 4.
   - **Planning:** the L08 plan was written with Emil in the planner, reviewed by `wcag-auditor` and `modern-web-curator` (21 findings, all adopted), and synced.
   - **Scope (Emil):** Claude edits component folders where the gate needs it, listing each edit; defects are fixed in L08; delivery is four PRs.

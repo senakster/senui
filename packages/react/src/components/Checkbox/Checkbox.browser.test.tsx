@@ -60,19 +60,18 @@ describe('hit area (WCAG 2.5.8, L05 decision 15)', () => {
 });
 
 describe('Switch thumb', () => {
-  // The thumb's horizontal offset: `translate` is "none" when off, "<x> 0px" when on. Read while it
-  // may still be transitioning, so the tests poll for the direction, not an exact distance.
-  const thumbX = (control: HTMLElement) => {
-    const translate = getComputedStyle(control, '::before').translate;
-    return translate === 'none' ? 0 : parseFloat(translate);
-  };
+  // The thumb moves by its start margin (ADR-0018: a logical property, no `:dir()`). Read physically:
+  // the left margin pushes it right, the right margin pushes it left. Read while it may still be
+  // transitioning, so the tests poll for the side, not an exact distance.
+  const margin = (control: HTMLElement, side: 'left' | 'right') =>
+    parseFloat(getComputedStyle(control, '::before').getPropertyValue(`margin-${side}`));
 
   test('moves to the end when on', async () => {
     const { getByRole } = render(<Switch label="Wi-Fi" />);
     const control = getByRole('switch');
-    expect(thumbX(control)).toBe(0);
+    expect(margin(control, 'left')).toBe(0);
     await userEvent.click(control);
-    await expect.poll(() => thumbX(control)).toBeGreaterThan(0);
+    await expect.poll(() => margin(control, 'left')).toBeGreaterThan(0);
   });
 
   test('moves to the start when on in right-to-left', async () => {
@@ -83,7 +82,8 @@ describe('Switch thumb', () => {
     );
     const control = getByRole('switch');
     await userEvent.click(control);
-    await expect.poll(() => thumbX(control)).toBeLessThan(0);
+    await expect.poll(() => margin(control, 'right')).toBeGreaterThan(0);
+    expect(margin(control, 'left')).toBe(0);
   });
 });
 

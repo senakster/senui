@@ -1,0 +1,54 @@
+/* L08 decision 6: a reset in the style of the common "normalize" stylesheets, written for the gate
+   (the project names no third-party products in fixtures). Loaded unlayered, as a consumer would.
+   It evens out browser defaults and doesn't target focus, so the focus ring must survive it. */
+*,
+::before,
+::after {
+  box-sizing: border-box;
+}
+
+html {
+  line-height: 1.15;
+  -webkit-text-size-adjust: 100%;
+  tab-size: 4;
+}
+
+body {
+  margin: 0;
+}
+
+button,
+input,
+optgroup,
+select,
+textarea {
+  font-family: inherit;
+  font-size: 100%;
+  line-height: 1.15;
+  margin: 0;
+}
+
+button,
+select {
+  text-transform: none;
+}
+
+button,
+[type='button'],
+[type='reset'],
+[type='submit'] {
+  -webkit-appearance: button;
+}
+
+::-moz-focus-inner {
+  border-style: none;
+  padding: 0;
+}
+
+legend {
+  padding: 0;
+}
+
+summary {
+  display: list-item;
+}

@@ -24,6 +24,8 @@ ADR that supersedes it. Every ADR names what was rejected and what the choice co
 | [0014](0014-dialog-scroll-lock.md)                 | Dialog scroll lock: containment, plus a scoped root lock on by default                                           | Accepted                         |
 | [0015](0015-rem-in-media-queries.md)               | `rem` is allowed in size media queries                                                                           | Accepted                         |
 | [0016](0016-rem-in-container-queries.md)           | `rem` is allowed in size container queries, and only there                                                       | Accepted                         |
+| [0017](0017-contract-essential-motion.md)          | Contracts declare essential motion                                                                               | Accepted                         |
+| [0018](0018-no-dir-pseudo-class.md)                | Component CSS mirrors with logical properties, never `:dir()`                                                    | Accepted                         |
 
 ## Template
 

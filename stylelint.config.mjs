@@ -11,6 +11,11 @@ const TOKEN_LIST = [new RegExp(`^${TOKEN}(\\s*,\\s*${TOKEN})*$`), ...KEYWORDS];
 const EASING_KEYWORD =
   /(?<![\w-])(ease|ease-in|ease-out|ease-in-out|linear|step-start|step-end)(?![\w-])/;
 
+// Four space-separated values (`margin: 0 1rem 0 2rem`): top, right, bottom, left. A token value
+// with commas or nested parentheses is one value, so split on whitespace outside parentheses.
+const FOUR_VALUES =
+  /^(?:[^\s()]+|[^\s()]*\([^()]*(?:\([^()]*\)[^()]*)*\))(?:\s+(?:[^\s()]+|[^\s()]*\([^()]*(?:\([^()]*\)[^()]*)*\))){3}$/;
+
 /** @type {import('stylelint').Config} */
 export default {
   rules: {
@@ -54,7 +59,23 @@ export default {
     'declaration-property-value-disallowed-list': {
       '/.*/': [/--senui-primitive-/, /--senui-color-[a-z]+-\d+/],
       '/^(transition|animation)$/': [EASING_KEYWORD],
+      // L08 decision 10: inline-direction values and four-value shorthands are physical, so they
+      // don't mirror in right-to-left text. Use `start`/`end` and the logical longhands.
+      'text-align': [/^(left|right)$/],
+      '/^(margin|padding|inset|scroll-margin|scroll-padding|border-radius)$/': [FOUR_VALUES],
     },
+    // ADR-0018: bundlers lower `:dir()` to a `:lang()` list (Vite's default build does), which a
+    // `dir="rtl"` page with another language never matches. Mirror with logical properties instead.
+    'selector-pseudo-class-disallowed-list': ['dir'],
+    // L08 decision 10: physical inline properties don't mirror in right-to-left text. Use the
+    // logical ones (`margin-inline-start`, `inset-inline-end`, `border-start-end-radius`…).
+    'property-disallowed-list': [
+      'float',
+      'clear',
+      /^(left|right)$/,
+      /^(margin|padding|border|inset|scroll-margin|scroll-padding)-(left|right)(-|$)/,
+      /^border-(top|bottom)-(left|right)-radius$/,
+    ],
     // Properties whose raw values use no unit or colour function, so the rules above can't see them.
     'declaration-property-value-allowed-list': {
       font: TOKEN_VALUE,

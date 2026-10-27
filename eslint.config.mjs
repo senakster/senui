@@ -34,6 +34,11 @@ export default defineConfig(
     languageOptions: { globals: globals.node },
   },
   {
+    // L08: the gate's in-page helpers run in the browser, not in Node.
+    files: ['apps/docs/gate/browser/**/*.js'],
+    languageOptions: { globals: globals.browser },
+  },
+  {
     files: ['**/*.{ts,tsx}'],
     extends: [jsxA11y.flatConfigs.strict, reactHooks.configs.flat.recommended],
     languageOptions: { globals: globals.browser },

@@ -207,9 +207,11 @@ const [checked, setChecked] = useControllableState({
   outline-offset: var(--senui-focus-ring-offset);
   ```
 
-  A consumer's unlayered reset (`:focus { outline: none }`) beats this. The ring stays overridable
-  (principle 3), so every focusable component lists `RESPONSIBILITIES.keepFocusRing` in its contract,
-  and L08's Playwright gate loads a typical reset and checks the ring survives it.
+  A consumer's unlayered reset that targets focus (`:focus { outline: none }`, `all: unset`) beats
+  this, by design: the ring stays overridable (principle 3), so every focusable component lists
+  `RESPONSIBILITIES.keepFocusRing` in its contract. L08's gate checks both halves: the ring survives
+  common resets that don't target focus (a normalize-style and a preflight-style reset), and the two
+  resets the responsibility names do remove it, so the warning stays true.
 
 - Movement is multiplied by `--senui-motion-reduce` (ADR-0005).
 
@@ -326,9 +328,22 @@ Storybook, styled by the package's **built** stylesheet (a `<meta name="senui-cs
 it). Run it with `pnpm test:gate`; CI runs it on every pull request. It reads the story list from
 Storybook's `index.json`, so a new story is checked without touching the gate.
 
-What it checks today, on every story: axe in light and dark with rendered contrast (an incomplete
-contrast result fails too), and the contract's `semantics` (element, role, a required name in the
-accessibility tree). More checks land through L08.
+What it checks, on every story, from the component's contract:
+
+- axe in light and dark with rendered contrast (an incomplete contrast result fails too);
+- `semantics`: the element, the role, and a required name in the accessibility tree;
+- `targetSize`: every target (its box merged with its labels) at 1280 and 320 px;
+- reflow at 320 px (the component never scrolls sideways or pushes the page past the viewport) and
+  WCAG's text-spacing overrides (no clipped, spilling or overlapping text);
+- `reducedMotion`: every animation from first paint, through the play function and a run of focus
+  moves; only `essentialMotion` (ADR-0017) may move under reduced motion, and a `no-motion`
+  component never moves (colour and opacity aren't motion);
+- `rtl: 'mirrors'`: boxes and pseudo-element offsets mirror when `<html dir>` flips (and Stylelint
+  rejects physical properties and `:dir()`, ADR-0018);
+- a tab walk at two viewports: keyboard focus, never inside `aria-hidden` or `inert`, named, not
+  covered (2.4.11), with a real ring (not transparent, not clipped, not painted over, 3:1) and
+  controls whose boundary is 3:1 (1.4.11);
+- the ring against a consumer's resets (see section 6, "The CSS contract").
 
 For story authors:
 

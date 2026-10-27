@@ -66,7 +66,7 @@
     block-size: var(--_senui-switch-thumb-size);
     border-radius: var(--senui-radius-full);
     background-color: var(--senui-switch-thumb);
-    transition-property: translate, background-color;
+    transition-property: margin-inline-start, background-color;
     transition-duration: calc(var(--senui-motion-duration-fast) * var(--senui-motion-reduce));
     transition-timing-function: var(--senui-motion-easing-standard);
   }
@@ -76,14 +76,11 @@
     background-color: var(--senui-switch-on-bg);
   }
 
+  /* On is at the inline end: the start margin is logical, so in right-to-left text on is on the
+     left with no `:dir()` rule, which bundlers rewrite to a `:lang()` list (ADR-0018). */
   :where(.senui-switch__control:checked)::before {
-    translate: var(--_senui-switch-travel) 0;
+    margin-inline-start: var(--_senui-switch-travel);
     background-color: var(--senui-switch-on-thumb);
-  }
-
-  /* Right to left, on is on the left. */
-  :where(.senui-switch__control:checked:dir(rtl))::before {
-    translate: calc(var(--_senui-switch-travel) * -1) 0;
   }
 
   @media (hover: hover) {
