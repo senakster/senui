@@ -319,7 +319,7 @@ on a thrown error or a console warning;
 markup in the browser and fails on any mismatch. The `ssr` project writes the markup to
 `.ssr-fixtures/`, stamped with the run's id, and runs in an earlier group, so run both together
 (`vitest run`, or `--project ssr --project browser`): the hydration test refuses markup from another
-run. The `main` and nightly runs repeat the unit, `ssr` and browser projects under React 18.3, the
+run. Every push to `main` repeats the unit, `ssr` and browser projects under React 18.3, the
 lowest version the peer range admits (`gate-full.yml`), and each project asserts the version it
 rendered with. That covers runtime only: the type tests still use React 19's types.
 

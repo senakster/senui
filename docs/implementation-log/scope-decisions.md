@@ -106,8 +106,7 @@ This file is **parsed** into the decision index, so its shape matters:
   - **Pull requests:** `ci.yml`'s `verify` lists the changed files. When every one is under
     `docs/` or ends in `.md`, it runs only `pnpm format:check` and skips the check, tests, Storybook
     build and gate, and still reports.
-  - **Pushes to `main`:** `ci.yml` and `gate-full.yml` ignore the same paths; the nightly gate
-    still covers `main`.
+  - **Pushes to `main`:** `ci.yml` and `gate-full.yml` ignore the same paths.
   - **Probed** locally with seven file lists. A workflow file, `apps/docs/`, or a mix with code
     runs everything, and an empty diff runs everything too. The docs-only path itself is unproven
     in CI until the first docs-only PR.
@@ -1111,3 +1110,4 @@ PR 4 merged as #11.
   - the 18.3 job covers runtime, not types (PR 4, deviation 3).
 - **Open, not L08's:** TextInput's Home/End row on macOS (see L04, cross-module notes).
 - **CI for docs-only changes:** a fast path (see L00, cross-module notes); this record's own PR ran in full, because it edits the workflows.
+- **No nightly run (Emil, 2026-10-27):** `gate-full.yml` loses its schedule, a deviation from decision 11. Every push to `main` still runs the three engines and React 18.3, and a run can be started by hand (`workflow_dispatch`). Re-include it when a dependency (a browser in the pinned image, a React patch) changes without a push to `main`.
