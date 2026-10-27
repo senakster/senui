@@ -29,3 +29,12 @@ jobs:
       - run: pnpm --filter @senakster/senui exec playwright install --with-deps chromium
       - run: pnpm test
       - run: pnpm --filter docs build-storybook
+      # L08: the a11y gate over the built Storybook, in Chromium (installed above, same Playwright
+      # version). It moves into the pinned Playwright container with the screenshot baselines.
+      - run: pnpm --filter docs exec playwright test
+      - if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: gate-results
+          path: apps/docs/test-results/
+          retention-days: 7

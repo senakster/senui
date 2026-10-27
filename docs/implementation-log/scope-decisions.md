@@ -112,6 +112,18 @@ been published, so no deprecation was owed.
 The directories stay `packages/react` and `packages/tokens`. The implementation log, this file and
 the PROGRESS changelog keep the old names where they record history.
 
+### Defects found later
+
+- **2026-10-27 (found in L08): dark-theme stories were never measured against a themed page.** The
+  Storybook preview set no page background, and the library styles none (only `[data-theme]`
+  subtrees, ADR-0005), so a dark-theme story sat on the browser's canvas. Axe, which can't see the
+  canvas, measured dark text against white (1.09:1) in 61 stories. The per-component browser tests
+  check contrast in light only. Fixed with `apps/docs/.storybook/preview.css`, which gives `body`
+  the theme's background and text tokens, as a consumer page would. Also from L08: the CI `verify`
+  job now runs the gate (`pnpm --filter docs exec playwright test`) and uploads its results on
+  failure, and `pnpm test:gate` runs it locally. It isn't part of `pnpm check`: it builds Storybook
+  and runs browsers (scope-decisions § L08).
+
 ## L01 — Design tokens
 
 | Deliverable / criterion                                               | Decision | Reason                                                                                             | Re-include when                                   |
@@ -749,3 +761,73 @@ was probed against the old code.
 - **L08:** the `ForcedColors` story carries `forcedColors: 'active'` (compact and stacked side by
   side). The browser tests set the viewport with `page.viewport()` because the runner's default
   414 px is below the 30rem breakpoint; a Playwright gate over Storybook will hit the same.
+
+## L08 — Test & a11y gate
+
+Plan written in the planner on 2026-10-27 with Emil (harness shape, CI engines, screenshot scope,
+reset check, React 18.3 job, `essentialMotion`), reviewed by `wcag-auditor` and
+`modern-web-curator` (21 findings, all adopted), and synced the same day; the re-sync also brought
+newer L02, L06 and PLAN copies (both modules done). No ADR contradicts the plan: ADR-0007/0009's
+built-in Stylelint rules fit decision 10, and L02's React 18.3 peer range is what decision 9a tests.
+
+Sizing at the start (step 2b): 113 stories over 9 components, 11 with play functions; 22 contract
+keys and no key-titled browser test; no browser test for Switch or CheckboxGroup; no physical CSS
+property in component CSS; runtime dependencies are the tokens package only.
+
+| Deliverable / criterion                       | Decision                                                                                                                                                                                                                                                               | Reason                                                                                                                                         | Re-include when                                |
+| --------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------- |
+| Gate harness and every check in the plan      | in, Claude builds and Emil reviews                                                                                                                                                                                                                                     | Harness work, not pair mode                                                                                                                    | —                                              |
+| Edits in component folders the gate needs     | in: Claude makes them, each listed here; a public-API change goes to Emil first                                                                                                                                                                                        | Emil, 2026-10-27. Key-titled browser tests (22 keys, new Switch tests), `forced-colors` tags, Button's `essentialMotion`, fixes the gate finds | —                                              |
+| Defects the gate finds in existing components | in: fixed in L08, recorded under the earlier module's section                                                                                                                                                                                                          | Emil, 2026-10-27                                                                                                                               | —                                              |
+| Delivery                                      | in: four PRs. 1) harness, CSS marker, render wait, axe, semantics; 2) target size, reflow, text spacing, motion and its ADR, RTL, tab walk, ring, resets; 3) forced-colours screenshots, container, CI workflows; 4) SSR, hydration, React 18.3, keyboard traceability | Emil, 2026-10-27: each green and reviewable alone; L08 is done after the fourth                                                                | —                                              |
+| Gate in `pnpm check`                          | out: the gate runs in CI and as `pnpm test:gate`; `check:components` gains the fast static checks (keyboard traceability)                                                                                                                                              | The gate builds Storybook and runs browsers: slow and needs browsers (skill, "Did this module change what done means")                         | The gate gets fast enough to run on every save |
+
+### PR 1 (2026-10-27): harness, CSS marker, render wait, axe, semantics
+
+- **Day-one probes settled:** Playwright's loader imports the contracts directly (their `.js`
+  suffixes resolve to `.ts`), so there is no `contracts.json`. The installed Storybook (10.6.2) emits
+  `storyRendered`, `storyErrored`, `storyThrewException`, `playFunctionThrewException` and
+  `storyMissing` on the preview channel, as planned. (The forced-colours palette probe belongs to
+  PR 3.)
+- **The CSS path, verified both ways:** the preview imports `@senakster/senui/styles.css`; in
+  development `viteFinal` aliases it to the source (Vite resolves it to
+  `packages/react/src/styles/index.css`), and production builds bundle `dist`. A rule added only to
+  `dist` reached the built Storybook; the `senui-css` marker is set in production only.
+
+#### Deviations from the plan
+
+1. **`@types/node` 24.9.2 is a second dev dependency** (decision 13 names only `@playwright/test`).
+   Types only, matched to `.node-version`: the gate's files use `node:fs`, `node:module` and
+   `process`.
+2. **The render wait also waits for every finite animation to finish.** Axe first reported a dialog
+   title as obscured: it ran during the enter animation (rule 42). Infinite animations (a spinner)
+   are left running; PR 2's motion checks record animations from first paint separately.
+3. **Axe reports incomplete contrast as `color-contrast:incomplete`**, its own id, so an exception
+   can excuse only what axe couldn't compute and never a contrast violation (a narrowing of
+   decision 12).
+4. **Semantics allows a story that renders no element of its component** (a scenario story such as
+   EmptyState's NoResults shows it after an interaction); each component's first story must render
+   it, so a contract naming the wrong element can't pass by matching nothing.
+5. **CI runs the gate on `ubuntu-latest` in Chromium** until PR 3 moves it into the pinned container.
+
+#### Component-folder edits (Emil's authorisation, 2026-10-27)
+
+- `Dialog.stories.tsx`: `gate-skip-axe` tags on Fullscreen and LongContent, with entries in
+  `apps/docs/gate/exceptions.json` expiring 2027-04-27. Axe 4.14 reports their sticky title as
+  partially obscured and names no obscuring element; once animations finish, the title is the
+  topmost element at every sampled point. Its colours are `fg.default` on `bg.raised`, a pair the L01
+  token build checks in both themes. Only `color-contrast:incomplete` is excused.
+
+#### Probes
+
+Each failed as intended, and everything was restored in the same command:
+
+- A low-contrast rule in `dist` only fails every EmptyState story with a description, in light and not dark.
+- A new probe story, unknown to the gate, is checked: a throwing play function and a `console.error` fail at render, and an image without `alt` fails axe.
+- Removing Switch's `role` from its contract fails all 10 Switch semantics tests.
+- An expired exception fails the bookkeeping test.
+- Stripping the `senui-css` marker fails a story before any check.
+
+#### Verified
+
+`pnpm check`; `pnpm test` (tokens 32, react 648); `pnpm test:gate` 351/351 (Chromium).

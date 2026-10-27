@@ -1,0 +1,19 @@
+{
+  "$comment": "L08 decision 12. A story skips one gate check only with a `gate-skip-<check>` tag AND an entry here: { story, check, rules (axe only: the rule ids it hides), reason (an ADR or issue), expires (YYYY-MM-DD) }. A tag without an entry, an entry without a tag, and an expired entry all fail the gate.",
+  "exceptions": [
+    {
+      "story": "components-dialog--fullscreen",
+      "check": "axe",
+      "rules": ["color-contrast:incomplete"],
+      "reason": "axe-core 4.14 reports the sticky title of a scrolling dialog as partially obscured, naming no obscuring element; the title is topmost at every sampled point once animations finish (L08 probe, 2026-10-27, scope-decisions § L08). Its colours are fg.default on bg.raised, a pair the L01 token build checks in both themes. Only incomplete contrast is hidden; a contrast violation still fails.",
+      "expires": "2027-04-27"
+    },
+    {
+      "story": "components-dialog--long-content",
+      "check": "axe",
+      "rules": ["color-contrast:incomplete"],
+      "reason": "Same as components-dialog--fullscreen: axe-core 4.14 can't compute the contrast of a sticky title in a scrolling dialog and names no obscuring element (L08 probe, 2026-10-27). fg.default on bg.raised is checked by the L01 token build. Only incomplete contrast is hidden.",
+      "expires": "2027-04-27"
+    }
+  ]
+}

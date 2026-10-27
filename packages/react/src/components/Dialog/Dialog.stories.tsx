@@ -108,7 +108,11 @@ export const Small: Story = { args: { defaultOpen: true, size: 'sm' } };
 export const Large: Story = { args: { defaultOpen: true, size: 'lg' } };
 
 /** Fills the viewport. Choose it from your own breakpoint (L06 decision 21). */
-export const Fullscreen: Story = { args: { defaultOpen: true, size: 'fullscreen' } };
+export const Fullscreen: Story = {
+  args: { defaultOpen: true, size: 'fullscreen' },
+  // L08 gate: axe can't compute the sticky title's contrast here (apps/docs/gate/exceptions.json).
+  tags: ['gate-skip-axe'],
+};
 
 /**
  * Long content: the dialog itself scrolls, under a sticky header and footer. With focus on the
@@ -116,6 +120,8 @@ export const Fullscreen: Story = { args: { defaultOpen: true, size: 'fullscreen'
  * away with the content.
  */
 export const LongContent: Story = {
+  // L08 gate: axe can't compute the sticky title's contrast here (apps/docs/gate/exceptions.json).
+  tags: ['gate-skip-axe'],
   args: {
     defaultOpen: true,
     title: 'Terms of service',

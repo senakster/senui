@@ -14,12 +14,27 @@ Status legend — plan: `plan-ready` · `not-planned` (plan not written yet upst
 | L05 | Checkbox / Switch                 | L05-checkbox-and-switch       | plan-ready  | done           | 2026-10-20   |
 | L06 | Dialog                            | L06-dialog                    | plan-ready  | done           | 2026-10-21   |
 | L07 | EmptyState                        | L07-empty-state               | plan-ready  | done           | 2026-10-27   |
-| L08 | Test & a11y gate                  | —                             | not-planned | not-started    | 2026-10-15   |
+| L08 | Test & a11y gate                  | L08-test-and-a11y-gate        | plan-ready  | in-progress    | 2026-10-27   |
 | L09 | Docs & machine-readable manifest  | —                             | not-planned | not-started    | 2026-10-15   |
 | L10 | Release, versioning & deprecation | —                             | not-planned | not-started    | 2026-10-15   |
 | L11 | Motion                            | —                             | not-planned | not-started    | 2026-10-15   |
 
 ## Changelog
+
+- **2026-10-27** — L08 in progress, PR 1 of 4.
+  - **Planning:** the L08 plan was written with Emil in the planner, reviewed by `wcag-auditor` and `modern-web-curator` (21 findings, all adopted), and synced.
+  - **Scope (Emil):** Claude edits component folders where the gate needs it, listing each edit; defects are fixed in L08; delivery is four PRs.
+  - **What PR 1 adds:**
+    - a Playwright gate over the **built** Storybook, styled by the package's **built** stylesheet; a marker proves the stylesheet, and development still loads the source CSS through an alias;
+    - every story from `index.json`, waited on through Storybook's channel and its finite animations;
+    - axe in light and dark with rendered contrast, where incomplete contrast fails too;
+    - the contracts' `semantics` checks;
+    - dated, expiring exceptions;
+    - a CI step and `pnpm test:gate`.
+  - **Defect found:** dark-theme stories had never been measured against a themed page (L00); fixed in the preview.
+  - **Exceptions:** two, for an axe limitation on a scrolling dialog's sticky title (incomplete contrast only).
+  - **Probes:** each new check fails on its probe.
+  - **Verified:** `pnpm check`; `pnpm test`: tokens 32, react 648; `pnpm test:gate` 351/351.
 
 - **2026-10-27** — L07 done. Every acceptance criterion is met. Emil's keyboard, NVDA 2026.3 and forced-colours runs are recorded word for word, including a re-check of Deleted last item after the review fix (the status is now read once). Review: 13/13 accepted. ADR-0016 also requires a container query's name to be declared in its own stylesheet, so a misspelled name fails `pnpm check` (Emil kept the `senui-` name rule). Deviations: scope-decisions § L07. `pnpm check`; `pnpm test`: tokens 32, react 648; build-storybook.
 

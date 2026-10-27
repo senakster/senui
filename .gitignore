@@ -13,3 +13,7 @@ packages/tokens/src/generated/
 # project's to publish; re-vendor with /modular-web:new-project (ADR-0014 upstream).
 .catalogue/
 .catalogue-decisions/
+
+# L08 gate (Playwright) output.
+apps/docs/test-results/
+apps/docs/playwright-report/

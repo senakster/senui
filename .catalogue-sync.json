@@ -3,7 +3,7 @@
   "profile": "library",
   "progress": "docs/PROGRESS.md",
   "pluginVersion": "0.3.0",
-  "syncedAt": "2026-10-20",
+  "syncedAt": "2026-10-27",
   "files": {
     "library_catalogue/L00-workspace-and-harness.md": {
       "target": ".catalogue/library_catalogue/L00-workspace-and-harness.md",
@@ -15,7 +15,7 @@
     },
     "library_catalogue/L02-component-api-conventions.md": {
       "target": ".catalogue/library_catalogue/L02-component-api-conventions.md",
-      "sha256": "73c980e8ce3289999495d99402513db8086d6ec0b85daffc97f1b7f81fa6370f"
+      "sha256": "25011d4a475338040f0508209bf73d7b0e76d90f4da4d468cc3142a472d00cef"
     },
     "library_catalogue/L03-button.md": {
       "target": ".catalogue/library_catalogue/L03-button.md",
@@ -31,15 +31,19 @@
     },
     "library_catalogue/L06-dialog.md": {
       "target": ".catalogue/library_catalogue/L06-dialog.md",
-      "sha256": "b2e5e00eaeaaca3e7273a7ab0a77c3165038bc4d3e16928f80868ff69cfe8acd"
+      "sha256": "450d61a7947127aa1b9eeda2ac9ad907bb11a5003c27e609c630da645c5fb9e6"
     },
     "library_catalogue/L07-empty-state.md": {
       "target": ".catalogue/library_catalogue/L07-empty-state.md",
       "sha256": "1e42cffeb76f22a1d98199a6afab446bb495c3d81479fcc4120701cebb02197c"
     },
+    "library_catalogue/L08-test-and-a11y-gate.md": {
+      "target": ".catalogue/library_catalogue/L08-test-and-a11y-gate.md",
+      "sha256": "a9e0fd63a0219a9c5deb8e701244930f9e31ebfb2b1cdec43b3d1bd45c192da9"
+    },
     "library_catalogue/PLAN.md": {
       "target": ".catalogue/library_catalogue/PLAN.md",
-      "sha256": "4da51e9779f0e97a82bff5b1c8d469e5cc8bcd7e477ec05995dafe68cd743eda"
+      "sha256": "278000764c3b44162233b931ec0123786a786fc58fbc9450ff2a570f4280eb2f"
     }
   }
 }

@@ -1,0 +1,41 @@
+import { defineConfig, devices } from '@playwright/test';
+
+// L08: the gate over the built static Storybook. `pnpm test:gate` builds the packages and the
+// Storybook first; this config only serves and checks what was built.
+//
+// Engines come from SENUI_GATE_BROWSERS (comma-separated chromium, firefox, webkit), Chromium by
+// default: PRs run Chromium, main and nightly run all three (L08 decision 11).
+const ENGINES = {
+  chromium: 'Desktop Chrome',
+  firefox: 'Desktop Firefox',
+  webkit: 'Desktop Safari',
+};
+type Engine = keyof typeof ENGINES;
+const engines = (process.env.SENUI_GATE_BROWSERS ?? 'chromium')
+  .split(',')
+  .map((name) => name.trim())
+  .filter((name): name is Engine => name in ENGINES);
+
+const PORT = 6107;
+
+export default defineConfig({
+  testDir: './gate',
+  fullyParallel: true,
+  forbidOnly: Boolean(process.env.CI),
+  reporter: process.env.CI ? [['list'], ['github']] : 'list',
+  use: {
+    baseURL: `http://127.0.0.1:${String(PORT)}`,
+    trace: 'retain-on-failure',
+  },
+  projects: engines.map((name) => ({
+    name,
+    // An explicit viewport, never the device default (L08 "Viewport").
+    use: { ...devices[ENGINES[name]], viewport: { width: 1280, height: 800 } },
+  })),
+  webServer: {
+    command: `pnpm exec vite preview --outDir storybook-static --port ${String(PORT)} --strictPort --host 127.0.0.1`,
+    url: `http://127.0.0.1:${String(PORT)}/iframe.html`,
+    // Never adopt a server that was already running: it may serve another build (rule 22).
+    reuseExistingServer: false,
+  },
+});

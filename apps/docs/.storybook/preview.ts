@@ -1,9 +1,10 @@
 import type { Preview } from '@storybook/react-vite';
-// Tokens load through the package's public export, as a consumer would load them. Component CSS
-// loads from source so edits show without a rebuild; scripts/check-dist-css.mjs guards the shipped
-// `@senakster/senui/styles.css` path instead.
+// Tokens and component styles load through the packages' public exports, as a consumer would load
+// them. In development, main.ts aliases the component stylesheet to its source so edits show
+// without a rebuild; production builds (and the L08 gate) get the package's built stylesheet.
 import '@senakster/senui-tokens/tokens.css';
-import '../../../packages/react/src/styles/index.css';
+import '@senakster/senui/styles.css';
+import './preview.css';
 
 const preview: Preview = {
   parameters: {
