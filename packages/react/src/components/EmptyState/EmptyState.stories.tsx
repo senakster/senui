@@ -396,15 +396,15 @@ export const InTableCell: Story = {
 
 /**
  * Compact and stacked side by side.
- * - `parameters.forcedColors: 'active'` tells L08's Playwright gate to screenshot this story with
+ * - the `forced-colors` tag tells L08's Playwright gate to screenshot this story with
  *   forced colours emulated, in light and dark schemes.
  * - By hand: DevTools → Rendering → "Emulate CSS media feature forced-colors: active". The text and
  *   illustration take the system colours.
  */
 export const ForcedColors: Story = {
+  tags: ['forced-colors'],
   parameters: {
     controls: { disable: true },
-    forcedColors: 'active',
     docs: {
       description: {
         story:

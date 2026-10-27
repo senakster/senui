@@ -21,6 +21,13 @@ Status legend — plan: `plan-ready` · `not-planned` (plan not written yet upst
 
 ## Changelog
 
+- **2026-10-27** — L08, PR 3 of 4: forced colours and the pinned container.
+  - The nine forced-colours stories carry a `forced-colors` tag instead of a parameter. The gate screenshots them in light and dark (Chromium, forced colours emulated), and runs the ring and boundary checks under forced colours on every story.
+  - A component that keeps states visible by border or system colour must have such a story.
+  - CI's `verify` job runs in the pinned `playwright:v1.64.0-noble` container, so no browser install. A new `gate-full.yml` runs all three engines on `main`, nightly and on demand. `update-snapshots.yml` regenerates the baselines, on demand or when a pull request is labelled `update-snapshots`.
+  - **Probes:** a ring lost only in forced colours fails, and a missing tag fails bookkeeping. The 18 baselines, generated in the pinned image under Docker, reproduce in a fresh container, and a checked checkbox drawn as unchecked fails both Checkbox screenshots. Light and dark differ, so both are kept.
+  - **Verified:** `pnpm check`; `pnpm test`: tokens 32, react 649; `pnpm test:gate` 1378 passed, 122 skipped (18 of them screenshots, which run only in the container).
+
 - **2026-10-27** — L08, PR 2 of 4.
   - **New gate checks, all derived from each contract:**
     - target size at 1280 and 320 px (`min-24`, `spacing-exception`, `not-a-target`);

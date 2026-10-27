@@ -159,16 +159,16 @@ export const Matrix: Story = {
 /**
  * Matrix, for forced colours. A page can't switch forced colours on itself, so:
  *
- * - `parameters.forcedColors: 'active'` tells L08's Playwright gate to screenshot this story with
+ * - the `forced-colors` tag tells L08's Playwright gate to screenshot this story with
  *   forced colours emulated, in light and dark schemes.
  * - By hand: DevTools → Rendering → "Emulate CSS media feature forced-colors: active", or a Windows
  *   contrast theme. Every state must stay distinguishable by border, text and the system colours.
  */
 export const ForcedColors: Story = {
   ...Matrix,
+  tags: ['forced-colors'],
   parameters: {
     controls: { disable: true },
-    forcedColors: 'active',
     docs: {
       description: {
         story:

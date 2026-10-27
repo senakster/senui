@@ -15,6 +15,15 @@ concurrency:
 jobs:
   verify:
     runs-on: ubuntu-latest
+    # L08: the pinned Playwright image (same version as the playwright dev dependencies) carries every
+    # browser and its OS libraries, so nothing is installed per run, and the forced-colours
+    # screenshot baselines are compared in the image they were generated in. Bump it with Playwright.
+    container:
+      image: mcr.microsoft.com/playwright:v1.64.0-noble
+      options: --ipc=host
+    env:
+      HOME: /root
+      SENUI_GATE_CONTAINER: '1'
     steps:
       - uses: actions/checkout@v5
       - uses: pnpm/action-setup@v4
@@ -24,13 +33,10 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - run: pnpm check
-      # The react package's browser test project (L03) runs in Chromium. The version comes from the
-      # pinned playwright dev dependency; --with-deps adds the OS libraries it needs.
-      - run: pnpm --filter @senakster/senui exec playwright install --with-deps chromium
       - run: pnpm test
       - run: pnpm --filter docs build-storybook
-      # L08: the a11y gate over the built Storybook, in Chromium (installed above, same Playwright
-      # version). It moves into the pinned Playwright container with the screenshot baselines.
+      # L08: the a11y gate over the built Storybook, in Chromium. main and nightly run all three
+      # engines (gate-full.yml).
       - run: pnpm --filter docs exec playwright test
       - if: failure()
         uses: actions/upload-artifact@v4

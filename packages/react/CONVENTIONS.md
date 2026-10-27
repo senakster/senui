@@ -343,7 +343,17 @@ What it checks, on every story, from the component's contract:
 - a tab walk at two viewports: keyboard focus, never inside `aria-hidden` or `inert`, named, not
   covered (2.4.11), with a real ring (not transparent, not clipped, not painted over, 3:1) and
   controls whose boundary is 3:1 (1.4.11);
-- the ring against a consumer's resets (see section 6, "The CSS contract").
+- the ring against a consumer's resets (see section 6, "The CSS contract");
+- forced colours (Chromium): the ring and boundary checks again with forced colours on, and a
+  screenshot, in light and dark, of every story tagged `forced-colors`. A component whose
+  `forcedColors` is `border` or `system-colour` needs at least one such story.
+
+Screenshot baselines are Linux pixels: they are generated and compared only in the pinned
+Playwright container CI uses, and the screenshot tests skip anywhere else. After a deliberate
+visual change, run the "Update gate screenshots" workflow (or label the pull request
+`update-snapshots`), review the images it uploads, and commit them to
+`apps/docs/gate/__screenshots__/`. When Playwright is upgraded, the container image in the three
+workflows changes with it, and the baselines are regenerated.
 
 For story authors:
 

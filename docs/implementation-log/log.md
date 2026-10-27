@@ -546,3 +546,30 @@ Entry format: date — module · Did · Verified · Scope decisions · Plan adju
 - **Windows:** `net::ERR_NO_BUFFER_SPACE`, then `net::ERR_ADDRESS_IN_USE`, on single stories in full local runs (local ports exhausted). A story whose only errors are those OS socket failures loads once more; any other error, or the same twice, fails (probed three ways). Four workers did not prevent it and were dropped.
 - **Verified:** `pnpm check`; `pnpm test`: tokens 32, react 649 (two Switch browser tests now read the thumb margin, not `translate`); `pnpm test:gate` 1264 passed, 104 skipped (RTL on non-mirroring components, full motion on motion-factor ones), 7.8 min locally.
 - **Next:** commit PR 2 and open it when Emil asks; then PR 3 (forced colours, container, workflows).
+
+## 2026-10-27 — L08 PR 3: forced colours, container, workflows
+
+- **Context:** PR #9 merged; its CI run took 8 min 37 s, with the gate at 7 min 14 s and the browser install at 16 s, from cached system packages. Branch `feature/a11y-gate-L08-3` from `main`.
+- **Built:**
+  - the nine stories move from `parameters.forcedColors` to a `forced-colors` tag (one script, the scratchpad's `migrate-tags.mjs`);
+  - `gate/forced-colors.spec.ts` (screenshots in the container, and the ring and boundary checks under forced colours on every story);
+  - `gate/walk.ts`, the shared tab walk;
+  - a bookkeeping test for the tag;
+  - `snapshotPathTemplate` and `updateSnapshots` in the config;
+  - `ci.yml` in the pinned container, plus the new `gate-full.yml` and `update-snapshots.yml`;
+  - CONVENTIONS.
+- **Docker** is installed here, but the daemon isn't running, so the baselines come from CI. A `workflow_dispatch` workflow can't run before it is on `main`, so `update-snapshots.yml` also runs on a pull request labelled `update-snapshots`.
+- **Probes:** a ring lost only in forced colours fails that check and not the normal tab walk; removing a `forced-colors` tag fails bookkeeping. Restored.
+- **Verified:** `pnpm check`; `pnpm test`: tokens 32, react 649; `pnpm test:gate` 1378 passed, 122 skipped.
+- **Next, with Emil's OK:**
+  1. Commit PR 3 and open it. Its first CI run fails on the missing baselines, which is expected: CI never writes them.
+  2. Label it `update-snapshots`, review the uploaded images, commit them, and check that CI passes.
+  3. Run the two owed probes: a hidden state must produce a diff, and the light and dark baselines must be compared.
+
+## 2026-10-27 — L08 PR 3: baselines generated in the pinned image
+
+- **Docker (Emil started Docker Desktop):** the working tree was copied into `mcr.microsoft.com/playwright:v1.64.0-noble` without `node_modules`, then installed with the lockfile and built. The 18 forced-colours baselines were generated there with the update workflow's own command and added to `apps/docs/gate/__screenshots__/`.
+- **Reproduction:** in a fresh container, all 18 match with `updateSnapshots: 'none'`.
+- **Light against dark:** all nine pairs differ (distinct palettes), so both are kept.
+- **Diff probe:** a checked checkbox drawn as unchecked fails both Checkbox screenshots (282 and 317 px). The first attempt changed the control element under its `::before` box and passed: a wrong probe, seen by looking at the baseline.
+- **Next:** commit PR 3 with the baselines and open it when Emil asks. CI's first run then compares the local-container baselines on GitHub's runner.

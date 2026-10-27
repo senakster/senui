@@ -4,13 +4,13 @@ Single source of truth for **where the implementation is right now**. Overwritte
 `implement-module` skill at the end of every run. For history, see `log.md`; for status, see
 `docs/PROGRESS.md`.
 
-| Field         | Value                                                                                    |
-| ------------- | ---------------------------------------------------------------------------------------- |
-| Target app    | repo root (pnpm workspace: `packages/tokens`, `packages/react`, `apps/docs`)             |
-| Active module | L08 — Test & a11y gate (in progress)                                                     |
-| Sub-step      | PR 1 merged (#8); PR 2 built and verified, uncommitted on `feature/a11y-gate-L08-2`      |
-| Last verified | 2026-10-27: `pnpm check`; `pnpm test` tokens 32, react 649; `pnpm test:gate` 1264 passed |
-| Updated       | 2026-10-27                                                                               |
+| Field         | Value                                                                                          |
+| ------------- | ---------------------------------------------------------------------------------------------- |
+| Target app    | repo root (pnpm workspace: `packages/tokens`, `packages/react`, `apps/docs`)                   |
+| Active module | L08 — Test & a11y gate (in progress)                                                           |
+| Sub-step      | PRs 1 and 2 merged (#8, #9); PR 3 built and verified, uncommitted on `feature/a11y-gate-L08-3` |
+| Last verified | 2026-10-27: `pnpm check`; `pnpm test` tokens 32, react 649; `pnpm test:gate` 1378 passed       |
+| Updated       | 2026-10-27                                                                                     |
 
 ## Brief
 
@@ -23,8 +23,8 @@ public-API change goes to Emil first.
 **Four PRs (Emil):**
 
 1. **Merged (#8):** harness, CSS marker, render wait, axe light/dark, semantics, exceptions, CI step, `pnpm test:gate`.
-2. **Built, uncommitted:** target size, reflow and text spacing, motion with `essentialMotion` (ADR-0017), RTL static and runtime, ADR-0018 (no `:dir()`; Switch's thumb fixed), tab walk with ring and boundary checks, resets (in-house fixtures), the socket-error reload, CONVENTIONS. Deviations: scope-decisions § L08, "PR 2".
-3. `forced-colors` tag migration (from the `forcedColors` parameter), Chromium screenshots light and dark, the pinned Playwright container for every gate job, `snapshotPathTemplate`, `gate-full.yml` (main and nightly, three engines), `update-snapshots.yml`. Probe whether the light and dark forced-colours baselines differ.
+2. **Merged (#9):** target size, reflow and text spacing, motion with `essentialMotion` (ADR-0017), RTL static and runtime, ADR-0018 (no `:dir()`; Switch's thumb fixed), tab walk with ring and boundary checks, resets (in-house fixtures), the socket-error reload, CONVENTIONS. Deviations: scope-decisions § L08, "PR 2".
+3. **Built, uncommitted (baselines still to come from CI):** `forced-colors` tag migration (from the `forcedColors` parameter), Chromium screenshots light and dark, the pinned Playwright container for every gate job, `snapshotPathTemplate`, `gate-full.yml` (main and nightly, three engines), `update-snapshots.yml`. Probe whether the light and dark forced-colours baselines differ.
 4. Vitest `ssr` project (Node markup fixtures) and hydration test, the React 18.3 job, `scripts/check-keyboard-trace.mjs` with key-titled browser tests for all 22 contract keys (new browser tests for Switch and CheckboxGroup).
 
 **Invariants (run 2026-10-27):** runtime dependencies are `@senakster/senui-tokens` only; the
@@ -47,5 +47,11 @@ rule); 22 contract keys, 0 key-titled tests (for PR 4).
 
 ## Next action
 
-Commit PR 2 on `feature/a11y-gate-L08-2` and open it when Emil asks. Then PR 3 (forced-colours
-screenshots, the pinned container, `gate-full.yml`, `update-snapshots.yml`).
+With Emil's OK:
+
+1. Commit PR 3 on `feature/a11y-gate-L08-3`, with the 18 baselines generated in the pinned image under Docker, and open it. CI's first run is the cross-machine reproduction check.
+2. If CI's runner renders differently, regenerate with the `update-snapshots` label and record why.
+
+The owed probes are done: the baselines reproduce, a hidden state is a diff, and light and dark differ.
+
+Then PR 4: the `ssr` project and hydration test, the React 18.3 job, and keyboard traceability.

@@ -21,6 +21,10 @@ const PORT = 6107;
 export default defineConfig({
   testDir: './gate',
   fullyParallel: true,
+  // L08 decision 7: one baseline per story and scheme, with no platform in the name, because they
+  // are generated and compared only in the pinned Linux container. CI never writes a missing one.
+  snapshotPathTemplate: '{testDir}/__screenshots__/{arg}{ext}',
+  updateSnapshots: process.env.CI ? 'none' : 'missing',
   forbidOnly: Boolean(process.env.CI),
   reporter: process.env.CI ? [['list'], ['github']] : 'list',
   use: {

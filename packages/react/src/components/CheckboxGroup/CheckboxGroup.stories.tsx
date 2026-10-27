@@ -72,5 +72,5 @@ export const RequiredSubmit: Story = {
 /** For forced colours: L08's gate screenshots it with forced colours emulated. */
 export const ForcedColors: Story = {
   args: { error: 'Choose at least one topic.', defaultValue: ['news'] },
-  parameters: { forcedColors: 'active' },
+  tags: ['forced-colors'],
 };

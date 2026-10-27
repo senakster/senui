@@ -374,8 +374,8 @@ export const ForcedColors: Story = {
     description: 'The border is the only edge in forced colours: shadows are removed.',
     footer: <Button>Save</Button>,
   },
+  tags: ['forced-colors'],
   parameters: {
-    forcedColors: 'active',
     docs: {
       description: {
         story:

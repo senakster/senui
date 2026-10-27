@@ -85,5 +85,6 @@ export const Matrix: Story = {
  */
 export const ForcedColors: Story = {
   ...Matrix,
-  parameters: { controls: { disable: true }, forcedColors: 'active' },
+  tags: ['forced-colors'],
+  parameters: { controls: { disable: true } },
 };

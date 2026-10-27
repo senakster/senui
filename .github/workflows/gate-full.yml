@@ -1,0 +1,45 @@
+name: Gate (all engines)
+
+# L08 decision 11: pull requests run the gate in Chromium (ci.yml); main and a nightly run cover
+# Chromium, Firefox and WebKit, so an engine difference surfaces within a day, before a release.
+on:
+  push:
+    branches: [main]
+  schedule:
+    - cron: '17 3 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: gate-full-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  gate:
+    runs-on: ubuntu-latest
+    container:
+      image: mcr.microsoft.com/playwright:v1.64.0-noble
+      options: --ipc=host
+    env:
+      HOME: /root
+      SENUI_GATE_CONTAINER: '1'
+      SENUI_GATE_BROWSERS: chromium,firefox,webkit
+    steps:
+      - uses: actions/checkout@v5
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v5
+        with:
+          node-version-file: .node-version
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm build
+      - run: pnpm --filter docs build-storybook
+      - run: pnpm --filter docs exec playwright test
+      - if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: gate-results-all-engines
+          path: apps/docs/test-results/
+          retention-days: 7

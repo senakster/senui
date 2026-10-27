@@ -131,8 +131,8 @@ export const RightToLeft: Story = {
 
 export const ForcedColors: Story = {
   args: { defaultOpen: true },
+  tags: ['forced-colors'],
   parameters: {
-    forcedColors: 'active',
     docs: {
       description: {
         story:
