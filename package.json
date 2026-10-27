@@ -16,7 +16,8 @@
     "format:check": "prettier --check .",
     "test": "pnpm -r --if-present test",
     "build": "pnpm -r build",
-    "changeset": "changeset"
+    "changeset": "changeset",
+    "test:gate": "pnpm build && pnpm --filter docs build-storybook && pnpm --filter docs exec playwright test"
   },
   "devDependencies": {
     "@changesets/cli": "3.0.3",

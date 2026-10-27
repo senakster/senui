@@ -319,6 +319,32 @@ server-render test per component is part of L08's gate.
 
 **Enforced by:** `component-api-reviewer`, and each component's behaviour tests for the disabled guard.
 
+## The a11y gate (L08)
+
+Every story is also checked by the gate in `apps/docs/gate/`: Playwright over the **built**
+Storybook, styled by the package's **built** stylesheet (a `<meta name="senui-css">` marker proves
+it). Run it with `pnpm test:gate`; CI runs it on every pull request. It reads the story list from
+Storybook's `index.json`, so a new story is checked without touching the gate.
+
+What it checks today, on every story: axe in light and dark with rendered contrast (an incomplete
+contrast result fails too), and the contract's `semantics` (element, role, a required name in the
+accessibility tree). More checks land through L08.
+
+For story authors:
+
+- A story is checked in its **end state**: after its play function, and after every finite
+  animation finishes. A story meant for a manual keyboard or screen-reader run has no play
+  function, or the run starts from the end state (L07).
+- A story may render the component only after an interaction (a scenario story); each component's
+  first story must render it.
+- A story skips one check only with a `gate-skip-<check>` tag **and** a dated entry in
+  `apps/docs/gate/exceptions.json`, naming the reason and an expiry. An axe exception names the
+  rule ids it hides; `color-contrast:incomplete` hides only results axe couldn't compute. A tag
+  without an entry, an entry without a tag, and an expired entry all fail.
+- A failure names the story id, the check and the element. Open the story at
+  `iframe.html?id=<id>` in the built Storybook (`pnpm --filter docs exec vite preview --outDir
+storybook-static`) to see it as the gate did.
+
 ## Public surface
 
 Everything below is public API under semver. Removing or renaming any of it is a major version,

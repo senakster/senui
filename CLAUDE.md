@@ -104,7 +104,10 @@ resolves), and format:check. `pnpm test` must pass too: Vitest in `packages/toke
 `packages/react`, including type tests (`*.test-d.tsx`, type-checked, never executed), the
 runtime check of every a11y contract, and `*.browser.test.tsx` in Chromium (run
 `pnpm --filter @senakster/senui exec playwright install chromium` once per machine). CI (`.github/workflows/ci.yml`) also runs
-`pnpm --filter docs build-storybook`. `pnpm build` runs tsdown with publint, which fails on a broken
+`pnpm --filter docs build-storybook` and then **the a11y gate** (L08): Playwright over the built
+Storybook, styled by the package's built CSS, checking every story against its component's a11y
+contract. Run it locally with `pnpm test:gate` (it builds first); it is not part of `pnpm check`.
+Its exceptions live in `apps/docs/gate/exceptions.json` (tagged, dated, expiring). `pnpm build` runs tsdown with publint, which fails on a broken
 `exports` map. Component conventions are in `packages/react/CONVENTIONS.md`.
 
 The toolchain is pinned below its newest majors on purpose: TypeScript 6.0 (typescript-eslint's

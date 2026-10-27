@@ -9,11 +9,14 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@senakster/senui": "workspace:*",
     "@senakster/senui-tokens": "workspace:*"
   },
   "devDependencies": {
+    "@playwright/test": "1.64.0",
     "@storybook/addon-docs": "10.6.2",
     "@storybook/react-vite": "10.6.2",
+    "@types/node": "24.9.2",
     "@types/react": "19.3.0",
     "@types/react-dom": "19.3.0",
     "react": "19.3.1",

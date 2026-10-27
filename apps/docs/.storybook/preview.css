@@ -1,0 +1,7 @@
+/* The page a story renders on is the theme's surface, as a consumer's page would be. The library
+   styles no page (only `[data-theme]` subtrees, ADR-0005), so without this the canvas behind a
+   dark-theme story stays the browser's, and the L08 gate measured dark text against white. */
+body {
+  background-color: var(--senui-color-bg-default);
+  color: var(--senui-color-fg-default);
+}
