@@ -1,7 +1,9 @@
 // L02 CSS contract (ADR-0001). Values are checked by Stylelint (ADR-0007/0009); this checks structure:
 // - the package's CSS entry imports layers.css first, then only component stylesheets;
 // - every other stylesheet under src/ is entirely inside one `@layer senui.components { … }` block,
-//   so no senui rule can land unlayered and beat a consumer's override.
+//   so no senui rule can land unlayered and beat a consumer's override;
+// - every `@container` query names a senui- container its own stylesheet declares, and uses rem on
+//   size features only (ADR-0016), which no built-in Stylelint rule can see.
 import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import { join, relative } from 'node:path';
 
@@ -46,6 +48,45 @@ function cssFiles(dir) {
   );
 }
 
+// ADR-0016: Stylelint checks no unit inside an `@container` condition, so this does. A container
+// query names a `senui-` container, and its only unit is `rem`, on a size feature.
+const SIZE_FEATURE = /^(min-|max-)?(width|height|inline-size|block-size)$/;
+const DIMENSION = /(?<![\w-])[+-]?(\d*\.)?\d+([a-z%]+)/gi;
+function checkContainerQueries(css, name) {
+  // Names this stylesheet declares (`container: a b / inline-size`, `container-name: a b`). A
+  // query naming anything else (a typo) would silently never match.
+  const declared = new Set(
+    [...css.matchAll(/\bcontainer(?:-name)?\s*:\s*([^;/}]+)/g)].flatMap(([, names]) =>
+      names.trim().split(/\s+/),
+    ),
+  );
+  for (const [, prelude] of css.matchAll(/@container\b([^{]*)\{/g)) {
+    const query = prelude.trim();
+    const container = /^(senui-[a-z0-9-]+)\s/.exec(query)?.[1];
+    if (!container) {
+      errors.push(`${name}: \`@container ${query}\` must name a senui- container (ADR-0016)`);
+    } else if (!declared.has(container)) {
+      errors.push(
+        `${name}: \`@container ${container}\` names a container this stylesheet doesn't declare (ADR-0016)`,
+      );
+    }
+    // Innermost parenthesised groups: one feature each, `(min-width: 30rem)` or `(30rem < width)`.
+    for (const [, group] of query.matchAll(/\(([^()]*)\)/g)) {
+      const units = [...group.matchAll(DIMENSION)].map((m) => m[2].toLowerCase());
+      if (units.length === 0) continue;
+      const feature = group
+        .replace(DIMENSION, ' ')
+        .split(/[\s:<>=]+/)
+        .find(Boolean);
+      if (units.some((unit) => unit !== 'rem') || !SIZE_FEATURE.test(feature ?? '')) {
+        errors.push(
+          `${name}: \`(${group.trim()})\` in an @container condition: only rem, on a size feature (ADR-0016)`,
+        );
+      }
+    }
+  }
+}
+
 const open = '@layer senui.components {';
 // A component stylesheet may start by importing another component's stylesheet it depends on
 // (L06: AlertDialog needs Dialog), so the per-component export works alone. Plain `@import`, never
@@ -66,6 +107,7 @@ for (const file of cssFiles(SRC)) {
     }
     css = css.slice(statement.length);
   }
+  checkContainerQueries(css, name);
   if (!css.startsWith(open)) {
     errors.push(`${name}: must start with \`${open}\` and keep every rule inside it`);
     continue;

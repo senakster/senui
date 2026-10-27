@@ -1001,6 +1001,22 @@
           "unit": "rem"
         }
       }
+    },
+    "illustration": {
+      "$type": "dimension",
+      "$description": "Box size of a decorative illustration (an empty state's icon or picture). sm sits beside text in a compact layout, lg above it in a stacked one. In rem, so it grows with the user's font size.",
+      "sm": {
+        "$value": {
+          "value": 2.5,
+          "unit": "rem"
+        }
+      },
+      "lg": {
+        "$value": {
+          "value": 5,
+          "unit": "rem"
+        }
+      }
     }
   }
 }

@@ -13,13 +13,32 @@ Status legend — plan: `plan-ready` · `not-planned` (plan not written yet upst
 | L04 | FormField + TextInput             | L04-formfield-and-textinput   | plan-ready  | done           | 2026-10-19   |
 | L05 | Checkbox / Switch                 | L05-checkbox-and-switch       | plan-ready  | done           | 2026-10-20   |
 | L06 | Dialog                            | L06-dialog                    | plan-ready  | done           | 2026-10-21   |
-| L07 | EmptyState                        | L07-empty-state               | plan-ready  | not-started    | 2026-10-19   |
+| L07 | EmptyState                        | L07-empty-state               | plan-ready  | done           | 2026-10-27   |
 | L08 | Test & a11y gate                  | —                             | not-planned | not-started    | 2026-10-15   |
 | L09 | Docs & machine-readable manifest  | —                             | not-planned | not-started    | 2026-10-15   |
 | L10 | Release, versioning & deprecation | —                             | not-planned | not-started    | 2026-10-15   |
 | L11 | Motion                            | —                             | not-planned | not-started    | 2026-10-15   |
 
 ## Changelog
+
+- **2026-10-27** — L07 done. Every acceptance criterion is met. Emil's keyboard, NVDA 2026.3 and forced-colours runs are recorded word for word, including a re-check of Deleted last item after the review fix (the status is now read once). Review: 13/13 accepted. ADR-0016 also requires a container query's name to be declared in its own stylesheet, so a misspelled name fails `pnpm check` (Emil kept the `senui-` name rule). Deviations: scope-decisions § L07. `pnpm check`; `pnpm test`: tokens 32, react 648; build-storybook.
+
+- **2026-10-26** — L07 reviewed. The three reviewers returned 13 distinct findings, and Emil accepted all of them (none rejected or escalated). Among the fixes:
+  - `actions` must be an element, so text, `null`, `false` and arrays no longer type-check.
+  - The root takes no `tabIndex` and no description attributes.
+  - The illustration is inert.
+  - The contract can now say an element has no name (L02's contract type and check).
+  - Deleted last item sets its status after the focus move.
+
+  Emil's manual runs are recorded: keyboard, NVDA 2026.3 (Speech Viewer, word for word) and forced colours. Two story defects came out of those runs. The 300 ms status debounce read every letter, so it is now 1,000 ms. And Storybook ran the play functions on load, so a manual run started from the end state; those two stories have no play function now. `pnpm check`; `pnpm test`: tokens 32, react 648/648; build-storybook. Waiting on one NVDA re-check of Deleted last item.
+
+- **2026-10-26** — L07 in progress. Claude wrote EmptyState for Emil's review (Emil's choice, as in L03 to L06):
+  - A plain `<div>` with a heading (`headingLevel` 2 to 6, required), a description `<p>`, a decorative illustration in `aria-hidden` and an actions slot. No role, no live region, and no focus moves; the heading has `tabindex="-1"` and a `headingRef`.
+  - The layout follows a named container: compact (illustration beside the text) below 30rem, stacked and centred above.
+  - Emil's API calls: `role` stays out (L02's rule), and `aria-label` / `aria-labelledby` are typed `never`. Also a development warning for an empty title.
+  - ADR-0016 amends ADR-0015: `rem` in size container queries, and nothing else in an `@container` condition. Stylelint never checked those conditions, so `check-component-css.mjs` now does (an L02 guard gap, probed). New tokens `size.illustration.sm/lg`.
+
+  `pnpm check` passes. `pnpm test`: tokens 32; react 633/634, where the only failure is the contract gate (no manual runs yet). Browser tests 23/23, with seven of eight probes caught and the eighth turned into two new tests. Storybook builds 13 EmptyState stories. Next: Emil's review, manual runs, then the reviewers.
 
 - **2026-10-21** — L06 done. Every acceptance criterion is met. Dialog and AlertDialog passed Emil's keyboard, NVDA 2026.2 (Speech Viewer, exact speech recorded) and forced-colours runs, in Chrome. Review: 10/10 accepted. Deviations: scope-decisions § L06, 1 to 11. ADR-0014 (scroll lock) and ADR-0015 (`rem` in media queries). `pnpm check`; `pnpm test`: tokens 32, react 552; browser tests in three engines; build-storybook.
 

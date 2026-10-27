@@ -69,7 +69,9 @@ export function contractErrors(dir: string, contract: A11yContract, today: strin
         errors.push(`wcag: a focusable component must address ${criterion}`);
     }
     requireResponsibility(contract, 'keepFocusRing', errors);
-    if (contract.semantics.name.sources.includes('content')) {
+    // Only where a consumer can name the component: an element with no name can't take aria-label.
+    const { name } = contract.semantics;
+    if (name !== 'none' && name.sources.includes('content')) {
       requireResponsibility(contract, 'labelInName', errors);
     }
   }

@@ -1,0 +1,133 @@
+@layer senui.components {
+  /* Public surface (semver): the `.senui-empty-state` class, the `senui-empty-state` container name,
+     and the fourteen `--senui-empty-state-*` tokens below. The part classes (`__body`,
+     `__illustration`, `__content`, `__title`, `__description`, `__actions`) are internal and may
+     change in any release.
+
+     Compact and stacked values are separate tokens, set on the root, so a consumer's override holds
+     in both layouts; the body picks one through internal `--_senui-empty-state-*` properties. */
+  :where(.senui-empty-state) {
+    --senui-empty-state-padding-compact: var(--senui-space-4);
+    --senui-empty-state-padding-stacked: var(--senui-space-10);
+    --senui-empty-state-gap: var(--senui-space-2);
+    --senui-empty-state-illustration-gap: var(--senui-space-4);
+    --senui-empty-state-actions-gap: var(--senui-space-3);
+    --senui-empty-state-illustration-size-compact: var(--senui-size-illustration-sm);
+    --senui-empty-state-illustration-size-stacked: var(--senui-size-illustration-lg);
+    --senui-empty-state-illustration-color: var(--senui-color-fg-muted);
+    --senui-empty-state-title-color: var(--senui-color-fg-default);
+    --senui-empty-state-title-font-size-compact: var(--senui-font-size-md);
+    --senui-empty-state-title-font-size-stacked: var(--senui-font-size-lg);
+    --senui-empty-state-description-color: var(--senui-color-fg-muted);
+    --senui-empty-state-description-font-size: var(--senui-font-size-md);
+    --senui-empty-state-description-max-inline-size: 60ch;
+
+    /* L07 decision 9: a named container, so an unnamed @container rule in slotted content can't
+       resolve against it. Decision 10: inline-size containment stops content sizing the root, so
+       the root fills its parent; a shrink-to-fit parent needs a width of its own. */
+    container: senui-empty-state / inline-size;
+    display: block;
+    box-sizing: border-box;
+    inline-size: 100%;
+  }
+
+  /* Compact by default: a start-aligned row, the illustration beside the text. */
+  :where(.senui-empty-state__body) {
+    --_senui-empty-state-illustration-size: var(--senui-empty-state-illustration-size-compact);
+
+    display: flex;
+    align-items: flex-start;
+    gap: var(--senui-empty-state-illustration-gap);
+    box-sizing: border-box;
+    padding: var(--senui-empty-state-padding-compact);
+    text-align: start;
+  }
+
+  :where(.senui-empty-state__illustration) {
+    display: grid;
+    flex: none;
+    place-items: center;
+    inline-size: var(--_senui-empty-state-illustration-size);
+    block-size: var(--_senui-empty-state-illustration-size);
+    overflow: clip;
+    color: var(--senui-empty-state-illustration-color);
+  }
+
+  /* Any illustration fits the square box without distortion (review): media at any depth (inside
+     a `<span>` or `<picture>`) fills it and keeps its aspect ratio; anything else is clipped. */
+  :where(.senui-empty-state__illustration) :where(svg, img, video) {
+    inline-size: 100%;
+    block-size: 100%;
+    object-fit: contain;
+  }
+
+  :where(.senui-empty-state__content) {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--senui-empty-state-gap);
+    min-inline-size: 0;
+  }
+
+  :where(.senui-empty-state__title) {
+    margin: 0;
+    color: var(--senui-empty-state-title-color);
+    font-family: var(--senui-font-family-sans);
+    font-size: var(--senui-empty-state-title-font-size-compact);
+    font-weight: var(--senui-font-weight-bold);
+    line-height: var(--senui-font-line-height-tight);
+    overflow-wrap: anywhere;
+    text-wrap: balance;
+  }
+
+  /* The heading takes focus only from your script (L07 decision 8); show where it went. */
+  :where(.senui-empty-state__title):focus-visible {
+    outline: var(--senui-focus-ring-width) solid var(--senui-color-focus-ring);
+    outline-offset: var(--senui-focus-ring-offset);
+  }
+
+  :where(.senui-empty-state__description) {
+    margin: 0;
+    max-inline-size: var(--senui-empty-state-description-max-inline-size);
+    color: var(--senui-empty-state-description-color);
+    font-family: var(--senui-font-family-sans);
+    font-size: var(--senui-empty-state-description-font-size);
+    line-height: var(--senui-font-line-height-normal);
+    overflow-wrap: anywhere;
+  }
+
+  :where(.senui-empty-state__actions) {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--senui-empty-state-actions-gap);
+    margin-block-start: var(--senui-empty-state-gap);
+  }
+
+  /* Stacked and centred from 30rem of container width (Emil, 2026-10-26): a page column or a wide
+     card. rem, so the switch follows the user's font size; a breakpoint can't be a token
+     (ADR-0016). */
+  @container senui-empty-state (inline-size >= 30rem) {
+    :where(.senui-empty-state__body) {
+      --_senui-empty-state-illustration-size: var(--senui-empty-state-illustration-size-stacked);
+
+      flex-direction: column;
+      align-items: center;
+      padding: var(--senui-empty-state-padding-stacked);
+      text-align: center;
+    }
+
+    :where(.senui-empty-state__content) {
+      flex: none;
+      align-items: center;
+    }
+
+    :where(.senui-empty-state__title) {
+      font-size: var(--senui-empty-state-title-font-size-stacked);
+    }
+
+    :where(.senui-empty-state__actions) {
+      justify-content: center;
+    }
+  }
+}

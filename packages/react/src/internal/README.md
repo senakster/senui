@@ -9,7 +9,7 @@ put the file at the top level.
 | `a11y/`    | The accessibility contract type, its runtime check and test, the WCAG table, and `useNameCheck`   |
 | `dev/`     | Development-only diagnostics: `warnOnce`, `deprecate`                                             |
 | `dialog/`  | `ModalDialog` and `useModalDialog`, shared by Dialog and AlertDialog (L06)                        |
-| `dom/`     | DOM and prop plumbing: `mergeIds`, `useComposedRefs`, `NativeProps`                               |
+| `dom/`     | DOM and prop plumbing: `mergeIds`, `useComposedRefs`, `NativeProps`, `firstFocusable`             |
 | `field/`   | Form-control wiring shared by FormField and the controls (ADR-0011, ADR-0012): ids, errors, reset |
 | `state/`   | `useControllableState`                                                                            |
 | `testing/` | Test helpers: axe, story controls, layout checks. Imported only by tests                          |

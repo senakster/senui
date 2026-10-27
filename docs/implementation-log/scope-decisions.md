@@ -214,20 +214,20 @@ var(--senui-color-focus-ring); outline-offset: var(--senui-focus-ring-offset)`, 
 
 ## L02 — Component API conventions
 
-| Deliverable / criterion                               | Decision                                    | Reason                                                                                                                                 | Re-include when                                           |
-| ----------------------------------------------------- | ------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------- |
-| Polymorphic `as` / `asChild`                          | out (ADR-0006)                              | Emil: no polymorphism. Each component renders one element, named in its contract                                                       | ADR-0006's revisit triggers (link-styled Button, routers) |
-| Hook, `deprecate`, contract type, `CONVENTIONS.md`    | in, Claude drafts and Emil reviews          | Emil's call; L02 is conventions and tooling, not component source                                                                      | n/a                                                       |
-| Raw-value guard for component CSS                     | in, Stylelint (ADR-0007, amended by 0009)   | Built-in rules beat a grep script that reads CSS as text                                                                               | n/a                                                       |
-| Ref forwarding                                        | `forwardRef`, React 18.3 kept in peer range | On 18 a `ref` prop is silently dropped                                                                                                 | The peer range drops React 18                             |
-| `adaptation` section in the a11y contract             | in (ADR-0008)                               | WCAG review: target size, forced colours, motion, RTL and overflow had nowhere to go                                                   | n/a                                                       |
-| Contract bound to props, runtime contract test        | in                                          | WCAG review blocker: free strings let a contract drift from its component unnoticed                                                    | n/a                                                       |
-| Tested-with evidence per method, WCAG 2.2 table       | in                                          | WCAG review: empty lists, invalid criteria and unattributed runs passed the type                                                       | n/a                                                       |
-| AT, browser and OS product names in `testedWith` data | in: exempt from the no-brand rule           | Emil: compatibility facts, not branding. Types and fixtures stay generic (CLAUDE.md)                                                   | n/a                                                       |
-| Focus ring vs consumer resets                         | in: documented and tested, not `!important` | Emil: keeps principle 3. Every focusable contract lists `RESPONSIBILITIES.keepFocusRing`; L08 tests a reset                            | A reset breaks the ring in a real consumer anyway         |
-| Per-component stylesheet export                       | in: `./styles/<Name>.css`                   | API review: ADR-0001 promised one; once published, the subpath is semver API                                                           | n/a                                                       |
-| Contract staleness                                    | warning only, skipped in shallow clones     | Failing on every refactor would block commits until a manual screen-reader run; CI checks out shallow, where commit dates mean nothing | Contracts drift despite the warning                       |
-| Positive `tabIndex` in the type                       | out                                         | Not in the accepted triage option (only `role` is removed from native props); the reviewer marked it "where practical"                 | A component ships with a positive tabindex in use         |
+| Deliverable / criterion                               | Decision                                        | Reason                                                                                                                                 | Re-include when                                           |
+| ----------------------------------------------------- | ----------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------- |
+| Polymorphic `as` / `asChild`                          | out (ADR-0006)                                  | Emil: no polymorphism. Each component renders one element, named in its contract                                                       | ADR-0006's revisit triggers (link-styled Button, routers) |
+| Hook, `deprecate`, contract type, `CONVENTIONS.md`    | in, Claude drafts and Emil reviews              | Emil's call; L02 is conventions and tooling, not component source                                                                      | n/a                                                       |
+| Raw-value guard for component CSS                     | in, Stylelint (ADR-0007, amended by 0009)       | Built-in rules beat a grep script that reads CSS as text                                                                               | n/a                                                       |
+| Ref forwarding                                        | in: `forwardRef`, React 18.3 kept in peer range | On 18 a `ref` prop is silently dropped                                                                                                 | The peer range drops React 18                             |
+| `adaptation` section in the a11y contract             | in (ADR-0008)                                   | WCAG review: target size, forced colours, motion, RTL and overflow had nowhere to go                                                   | n/a                                                       |
+| Contract bound to props, runtime contract test        | in                                              | WCAG review blocker: free strings let a contract drift from its component unnoticed                                                    | n/a                                                       |
+| Tested-with evidence per method, WCAG 2.2 table       | in                                              | WCAG review: empty lists, invalid criteria and unattributed runs passed the type                                                       | n/a                                                       |
+| AT, browser and OS product names in `testedWith` data | in: exempt from the no-brand rule               | Emil: compatibility facts, not branding. Types and fixtures stay generic (CLAUDE.md)                                                   | n/a                                                       |
+| Focus ring vs consumer resets                         | in: documented and tested, not `!important`     | Emil: keeps principle 3. Every focusable contract lists `RESPONSIBILITIES.keepFocusRing`; L08 tests a reset                            | A reset breaks the ring in a real consumer anyway         |
+| Per-component stylesheet export                       | in: `./styles/<Name>.css`                       | API review: ADR-0001 promised one; once published, the subpath is semver API                                                           | n/a                                                       |
+| Contract staleness                                    | in: warning only, skipped in shallow clones     | Failing on every refactor would block commits until a manual screen-reader run; CI checks out shallow, where commit dates mean nothing | Contracts drift despite the warning                       |
+| Positive `tabIndex` in the type                       | out                                             | Not in the accepted triage option (only `role` is removed from native props); the reviewer marked it "where practical"                 | A component ships with a positive tabindex in use         |
 
 ### Review (2026-10-16)
 
@@ -275,6 +275,18 @@ both reviews (the entry could export from `internal/` without a contract). No `O
   `adaptation`.
 - **L09** — generate `components.json` / `llms.txt` from the contracts. Derive each criterion's level
   from `WCAG22`; label `announces` as observed with the AT named in `testedWith`.
+
+### Defects found later
+
+- **2026-10-26 (found in L07): the unit guard never covered `@container` conditions.** ADR-0009's
+  allow-list and ADR-0015's media-feature rule are Stylelint rules, and none of them checks an
+  `@container` condition: a probe passed `px`, `em` and `ch` there, while the same file rejected `px`
+  in `@media` and in a declaration. Nothing had used a container query before L07. Fixed by ADR-0016:
+  `check-component-css.mjs` now allows only `rem` on size features in a container condition, and
+  requires a `senui-` container name. Probed with 14 forms, valid and invalid. On 2026-10-27 Emil
+  kept the name rule and it gained a declared-name check: the queried name must be declared
+  (`container:` or `container-name:`) in the same stylesheet, so a typo fails instead of never
+  matching. Probed with four forms.
 
 ## L03 — Button
 
@@ -491,16 +503,16 @@ Applied:
 
 Plan synced 2026-10-19 (the planner added L05 to L07 in `89ae68b`, after ADR-0011).
 
-| Deliverable / criterion                                    | Decision                                                                                   | Reason                                                                                                                                                      | Re-include when                                                                                                        |
-| ---------------------------------------------------------- | ------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------- |
-| Checkbox, CheckboxGroup, Switch, wiring hook               | in, Claude writes and Emil reviews                                                         | Emil, 2026-10-19, as in L03 and L04                                                                                                                         | n/a                                                                                                                    |
-| Label ownership (plan #4)                                  | in: own `label`, `description`, `error`                                                    | Emil chose the plan over ADR-0011's L05 note: a checkbox's label sits after the control. ADR-0012 amends ADR-0011                                           | n/a                                                                                                                    |
-| `checked` / `onCheckedChange` (plan #6, #7)                | in, through `useControllableState`; native `onChange` passes through                       | Emil: the component owns checked state (and the select-all pattern needs `onCheckedChange`). CONVENTIONS rule 5's amendment narrowed to text-entry controls | n/a                                                                                                                    |
-| Screen-reader runs (plan: NVDA, JAWS, VoiceOver, TalkBack) | Narrator and NVDA (Windows)                                                                | Emil's setup; NVDA is free and is the reader the plan's announcement claims cite                                                                            | Someone with JAWS, macOS/iOS VoiceOver or TalkBack runs them; until then the contracts claim nothing for those readers |
-| Open question 1, thumb under reduced motion                | resolved: `--senui-motion-reduce` scales the duration, never the distance                  | Emil. The thumb's position is the state; the same pattern as Button's spinner (L03 deviation 9)                                                             | L11 refines motion                                                                                                     |
-| `className` / `style`                                      | on the wrapper (`.senui-checkbox`, `.senui-switch`); native props and the ref on the input | Emil: consumers lay out the row                                                                                                                             | n/a                                                                                                                    |
-| Group `required`                                           | the prop is the message: `required="Choose at least one topic."`                           | Emil: the library ships no English text, and the type forces a message                                                                                      | n/a                                                                                                                    |
-| Group children                                             | context, matched by each Checkbox's `value`; a dev warning for a child without one         | Emil: plain children read better for a list of options; the type can't see context (as with FormField)                                                      | n/a                                                                                                                    |
+| Deliverable / criterion                                    | Decision                                                                                       | Reason                                                                                                                                                      | Re-include when                                                                                                        |
+| ---------------------------------------------------------- | ---------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------- |
+| Checkbox, CheckboxGroup, Switch, wiring hook               | in, Claude writes and Emil reviews                                                             | Emil, 2026-10-19, as in L03 and L04                                                                                                                         | n/a                                                                                                                    |
+| Label ownership (plan #4)                                  | in: own `label`, `description`, `error`                                                        | Emil chose the plan over ADR-0011's L05 note: a checkbox's label sits after the control. ADR-0012 amends ADR-0011                                           | n/a                                                                                                                    |
+| `checked` / `onCheckedChange` (plan #6, #7)                | in, through `useControllableState`; native `onChange` passes through                           | Emil: the component owns checked state (and the select-all pattern needs `onCheckedChange`). CONVENTIONS rule 5's amendment narrowed to text-entry controls | n/a                                                                                                                    |
+| Screen-reader runs (plan: NVDA, JAWS, VoiceOver, TalkBack) | in: Narrator and NVDA (Windows)                                                                | Emil's setup; NVDA is free and is the reader the plan's announcement claims cite                                                                            | Someone with JAWS, macOS/iOS VoiceOver or TalkBack runs them; until then the contracts claim nothing for those readers |
+| Open question 1, thumb under reduced motion                | in (resolved): `--senui-motion-reduce` scales the duration, never the distance                 | Emil. The thumb's position is the state; the same pattern as Button's spinner (L03 deviation 9)                                                             | L11 refines motion                                                                                                     |
+| `className` / `style`                                      | in: on the wrapper (`.senui-checkbox`, `.senui-switch`); native props and the ref on the input | Emil: consumers lay out the row                                                                                                                             | n/a                                                                                                                    |
+| Group `required`                                           | in: the prop is the message: `required="Choose at least one topic."`                           | Emil: the library ships no English text, and the type forces a message                                                                                      | n/a                                                                                                                    |
+| Group children                                             | in: context, matched by each Checkbox's `value`; a dev warning for a child without one         | Emil: plain children read better for a list of options; the type can't see context (as with FormField)                                                      | n/a                                                                                                                    |
 
 ### Deviations from the plan
 
@@ -559,7 +571,7 @@ follows them.
 | New tokens: backdrop scrim, dialog widths                                 | in, Claude drafts and Emil reviews: semantic `color.bg.backdrop` (`surface: true`) and `size.dialog.sm/md/lg`, plus `--senui-dialog-*` component tokens that default to them (L02 rule 10)                                                                                        | Emil. Principle 4 rules out raw values in `dialog.css`, and nothing in the L01 set fits                | n/a                                                                           |
 | ADR-0015 (planner repo)                                                   | in: adopted as senui ADR-0014, which cites it                                                                                                                                                                                                                                     | Emil: the scroll-lock selector is public API, so the decision belongs in senui's own corpus            | n/a                                                                           |
 | Open question 1, support data                                             | resolved 2026-10-20 against webstatus.dev, with nothing changed. `closedby` has no Safari entry, so the fallback stays (plan #5). Overscroll containment has no Safari entry, so the root lock stays. `overlay` is Chromium-only, so the exit animation is driven by `data-state` | The plan asked for a re-check at implementation start                                                  | Safari ships `closedby` (drop the fallback) or containment (ADR-0015 trigger) |
-| Screen-reader runs                                                        | NVDA (Windows), as in L05                                                                                                                                                                                                                                                         | Emil's setup                                                                                           | Someone runs JAWS, VoiceOver or TalkBack                                      |
+| Screen-reader runs                                                        | in: NVDA (Windows), as in L05                                                                                                                                                                                                                                                     | Emil's setup                                                                                           | Someone runs JAWS, VoiceOver or TalkBack                                      |
 | Sheets, non-modal, Invoker Commands, unsaved-changes blocking             | out, as the plan says                                                                                                                                                                                                                                                             | Plan decisions 2 and 19, and Out of scope                                                              | The plan's own triggers                                                       |
 
 ### Deviations from the plan
@@ -637,3 +649,103 @@ none, so there are no `OVERRIDES.md` rows. Applied:
 - **L01:** new tokens `color.bg.backdrop` (a translucent surface: black at 50 %, 70 % in dark mode, `surface: true`) and `size.dialog.sm/md/lg` (24, 32 and 48 rem), plus primitive `black.70`. Drafted by Claude for Emil's review.
 - **L02:** `packages/react/src/internal/` is grouped by concern (`a11y/`, `dev/`, `dialog/`, `dom/`, `field/`, `state/`, `testing/`) with a README (Emil, 2026-10-20; its own commit). Side effect: `check-a11y-contracts` now warns that Button, FormField and TextInput changed after their last manual runs, although only their import paths did. The warning keys on commit dates. A fix (ignoring commits that touch only imports) is L08 or tooling work.
 - **L08:** custom browser commands (`packages/react/vitest.commands.ts`: backdrop wheel and click, reduced-motion emulation) are the first use of Playwright beyond Vitest's API. The a11y gate can reuse them.
+
+## L07 — EmptyState
+
+Plan synced 2026-10-20 and current at the start (2026-10-26). No ADR supersedes any of its 12
+decisions. L02 and L06 have newer plans upstream; both modules are done, so no re-sync first.
+
+| Deliverable / criterion                                     | Decision                                                                                                                                                                                   | Reason                                                                                                                   | Re-include when                          |
+| ----------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------ | ---------------------------------------- |
+| Component, CSS, contract, tests, stories                    | in, Claude writes and Emil reviews                                                                                                                                                         | Emil, 2026-10-26, as in L03 to L06. Public-API choices go to Emil as questions before they are written                   | n/a                                      |
+| Container breakpoint                                        | in: `rem`, through a new ADR that extends ADR-0015 to size container features. `check-component-css.mjs` rejects any other unit in an `@container` condition                               | Emil, 2026-10-26. A probe showed Stylelint checks no unit in an `@container` condition (`px` and `em` passed): see § L02 | n/a                                      |
+| Illustration size                                           | in: new semantic `size.illustration.sm/lg`, Claude drafts and Emil reviews; `--senui-empty-state-*` component tokens default to them                                                       | Emil, 2026-10-26. Nothing in the token set fits; same path as `size.dialog.*` (L06)                                      | n/a                                      |
+| Playwright axe on `#storybook-root`, forced-colours capture | in, as L03 to L06: axe on every composed story in unit and browser tests (with `heading-order` on for the page and card stories), and a `ForcedColors` story with `forcedColors: 'active'` | Emil, 2026-10-26: one harness. A second runner and the screenshot are L08 work                                           | L08 builds the Playwright gate           |
+| Screen-reader runs                                          | in: NVDA (Windows), as in L05 and L06                                                                                                                                                      | Emil's setup                                                                                                             | Someone runs JAWS, VoiceOver or TalkBack |
+| Loading state, error pages, illustration set, auto-use      | out, as the plan says                                                                                                                                                                      | Plan, Out of scope and decision 5                                                                                        | The plan's own triggers                  |
+
+### Public API (Emil, 2026-10-26)
+
+| Choice                                              | Decision                                                                                                                             | Reason                                                                                                                                                               |
+| --------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Breakpoint                                          | in: `30rem` container inline size. Narrower is compact, wider is stacked and centred                                                 | Emil. A card or sidebar is compact; a page column or wide card is stacked                                                                                            |
+| Compact                                             | in: a start-aligned row, the illustration at the inline start, with the heading, description and actions in a column beside it       | Emil. Saves height in table cells                                                                                                                                    |
+| Empty title                                         | in: a once-per-component development warning for `""` or whitespace; the heading still renders                                       | Emil. The type rules out `null` and `false`, not empty strings (principle 1)                                                                                         |
+| Description                                         | in: `description?: ReactNode`, rendered in a `<p>`; the JSDoc says phrasing content only                                             | Emil. Same type as Dialog's description; the plan's `<p>`                                                                                                            |
+| `role`                                              | in: not accepted (L02's `NativeProps`); `aria-live` still passes through, and the contract says overriding it is the consumer's call | Emil: "roles are context dependent, components are intended to be independent". A consumer who wants a landmark wraps EmptyState in their own `<section aria-label>` |
+| `aria-label`, `aria-labelledby`                     | in: typed `never`, locked by a type test                                                                                             | Emil. Naming is prohibited on a role-less `<div>` (ARIA `generic`), so a name there is never heard; the heading is the name                                          |
+| Status debounce in the NoResults story (2026-10-26) | in: 1,000 ms, not the first draft's 300 ms; the contract tells consumers to update the status once typing pauses for about a second  | Emil's NVDA run: with key echo, typing was slower than 300 ms, and NVDA read a result after every letter                                                             |
+
+### Deviations from the plan
+
+1. **`--senui-*` tokens and classes, `EmptyState.css`, colocated stories, the `axe-core` helper and
+   Vitest browser mode** in place of the plan's `--ds-*`, `empty-state.css`,
+   `apps/docs/src/EmptyState.stories.tsx` and the Playwright run (as L03 deviations 2, 3 and 6, and
+   L06 deviation 2).
+2. **`role` can't be overridden** (plan #3 lets `role` and `aria-live` pass through). The plan was
+   synced after L02 removed `role` from every component's native props, and Emil kept L02's rule
+   (2026-10-26): a role depends on the context, and a component is meant to be independent of it.
+   `aria-live` passes through as the plan says.
+3. **`title` is `string | ReactElement`** as the plan says, narrower than Dialog's `Content`.
+4. **The plan's "story tests" are browser tests that render the composed story** (no-results,
+   deleted-last-item), because the suite doesn't run play functions; the stories keep their play
+   functions for Storybook. Same harness as L03 to L06.
+5. **Two browser tests the plan doesn't list:** the root fills a start-aligned grid and a flex row.
+   Probing showed the table-cell criterion ("root width non-zero") passes with `inline-size: auto`
+   too, because the story gives its cell a width; the `100%` matters in a parent that sizes items
+   to fit. The new tests fail with `auto`.
+
+### Review (2026-10-26)
+
+The `review-component` workflow (API, accessibility, platform) over `components/EmptyState`: 14
+findings, 13 distinct (the API and accessibility reviewers both found `tabIndex` on the root). Emil
+accepted all 13, rejected none and escalated none, so `OVERRIDES.md` has no rows. Each fix's test
+was probed against the old code.
+
+- **A. `actions` is `ReactElement | undefined`** (plan #6 says `ReactNode`; a deviation). A string,
+  `null`, `false` and an array are type errors; a fragment of Buttons and links still works, and a
+  conditional action passes `undefined`. A development warning fires when `actions` contains nothing
+  focusable.
+- **B. `tabIndex` is `never`**, pointing to `headingRef`. Event handlers still pass through for
+  delegation; the contract says never to make the root the only trigger of an action, and 2.1.1 and
+  1.4.10 are now "enables".
+- **C. The illustration wrapper is also `inert`**, set in the ref callback (React 18 drops a boolean
+  `inert`), after the focusable check. A link in it is now unreachable for everyone, not only
+  unannounced, and the warning explains why. The browser test that asserted axe's
+  `aria-hidden-focus` now asserts no violation.
+- **D. An empty-string description renders no paragraph.**
+- **E. `--senui-empty-state-description-font-size`**: the fourteenth token.
+- **F. Illustrations of any shape fit the box:** media at any depth fills it with
+  `object-fit: contain`, and the wrapper clips. A proposed `> *` rule was dropped: probes showed
+  the nested media rule alone fits a `<span>`-wrapped SVG and a `<picture>` in Chromium. New
+  IllustrationShapes story.
+- **G. Inline margin on EmptyState overflows** (`inline-size: 100%` doesn't cover margin):
+  documented in the contract and the JSDoc ("put inline margin on a wrapper"). Re-open when
+  `inline-size: stretch` ships unprefixed in Chromium, Firefox and WebKit.
+- **H. `adaptation.forcedColors` is `'no-states'`**: no border or fill marks a state, and the focus
+  ring is an outline, which forced colours keep.
+- **I. A contract can say its element has no name** (`semantics.name: 'none'`, L02 tooling), and
+  the check then doesn't require `labelInName`. EmptyState drops the sentence.
+- **J. `aria-describedby`, `aria-description` and `aria-roledescription` are `never`**: never read
+  on an unnamed, unfocusable `<div>`, and the last is prohibited there (ARIA 1.2).
+- **K. 2.1.1 and 1.4.10 are claimed as "enables"** (with B and G).
+- **L. The warnings follow value changes**: the title check is keyed to `title`; the illustration
+  and actions checks are inline ref callbacks that run after every commit.
+- **M. DeletedLastItem sets its status after the focus move** (NVDA read it twice before). A browser
+  test reads the status at the moment focus lands. To be re-heard by Emil.
+
+### Cross-module notes
+
+- **L01:** new semantic tokens `size.illustration.sm` (2.5 rem) and `size.illustration.lg` (5 rem),
+  drafted by Claude for Emil's review (2026-10-26).
+- **L02:** `firstFocusable` moved from `internal/dialog/useModalDialog.ts` to
+  `internal/dom/focusable.ts`, since EmptyState's illustration check uses it too. Dialog imports it
+  from there; nothing else changed. The container-query guard gap is under § L02, "Defects found
+  later" (ADR-0016).
+- **L02 (resolved in the review, I):** `A11yContract`'s `semantics.name` can be `'none'` for an
+  element with no accessible name, and `contractErrors` then doesn't require
+  `RESPONSIBILITIES.labelInName`. Tested in `a11y-contracts.test.ts`. L09's generator must handle
+  the `'none'` value when it renders the name row.
+- **L08:** the `ForcedColors` story carries `forcedColors: 'active'` (compact and stacked side by
+  side). The browser tests set the viewport with `page.viewport()` because the runner's default
+  414 px is below the 30rem breakpoint; a Playwright gate over Storybook will hit the same.

@@ -70,10 +70,16 @@ export interface Semantics {
   /** The ARIA Authoring Practices pattern followed, when one applies. */
   readonly pattern?: `https://www.w3.org/WAI/ARIA/apg/patterns/${string}`;
   /** Where the accessible name comes from. `required: false` only for components with no name. */
-  readonly name: {
-    readonly sources: NonEmpty<'content' | 'aria-label' | 'aria-labelledby' | 'label-element'>;
-    readonly required: boolean;
-  };
+  readonly name:
+    | {
+        readonly sources: NonEmpty<'content' | 'aria-label' | 'aria-labelledby' | 'label-element'>;
+        readonly required: boolean;
+      }
+    /**
+     * The element has no accessible name and can't be given one: a role-less `<div>` (ARIA
+     * `generic`) whose type rules out `aria-label` (L07 review). Its parts may have their own.
+     */
+    | 'none';
   /** States the component exposes, and when each is set. */
   readonly states: readonly {
     readonly attribute:

@@ -4,11 +4,11 @@ import {
   type DialogHeadingLevel,
   type DialogNativeProps,
 } from '../../internal/dialog/ModalDialog.js';
-import {
-  firstFocusable,
-  type DialogDismiss,
-  type DialogOpenChangeDetails,
+import type {
+  DialogDismiss,
+  DialogOpenChangeDetails,
 } from '../../internal/dialog/useModalDialog.js';
+import { firstFocusable } from '../../internal/dom/focusable.js';
 
 export type {
   DialogCloseReason,
