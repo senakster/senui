@@ -299,6 +299,18 @@ both reviews (the entry could export from `internal/` without a contract). No `O
   kept the name rule and it gained a declared-name check: the queried name must be declared
   (`container:` or `container-name:`) in the same stylesheet, so a typo fails instead of never
   matching. Probed with four forms.
+- **2026-10-27 (found in L08 PR 4): a controlled mount set state during render, which broke
+  hydration ids under React 18.3.** `useControllableState` started its internal copy from
+  `defaultValue` and synced it to the controlled value during render, so every controlled component
+  rendered twice on mount. Under React 18.3, a render-phase update on mount in a component that calls
+  `useId` (ModalDialog, every form control through `useFieldWiring`) can make server and client
+  disagree on its descendants' ids. L08's hydration test failed on Dialog's Form story (FormField's
+  label `htmlFor`). A probe matrix of 16 Dialog shapes under 18.3 failed only with a controlled
+  `open`, and never with `defaultOpen`. React 19 is clean. Fixed by starting the internal copy from
+  the controlled value. No public behaviour changes: the copy was only ever read after a switch to
+  uncontrolled. A unit test locks one render on mount, and it fails with the old line (probed).
+  CONVENTIONS rule 5 records the rule. A code edit outside `components/**` (Emil chose the fix,
+  2026-10-27).
 
 ## L03 — Button
 
@@ -510,6 +522,10 @@ Applied:
 - **L05** — Checkbox and Switch take `field?: FormFieldBinding` the same way and call
   `useFormFieldControl`. `FieldElement` is `HTMLInputElement`, which already fits.
 - **L08** — the FormField and TextInput `ForcedColors` stories carry `parameters.forcedColors`.
+- **L08 PR 4 (open, Emil deferred it, 2026-10-27):** TextInput's contract row "Home, End: moves the
+  caret to the start or end" isn't true on macOS, where Home and End don't move the caret in a text
+  field. The key-titled test passes in Chromium on Windows and Linux. Settle the row with
+  `wcag-auditor`: make it platform-specific, or drop it. Found by `component-api-reviewer` (M1).
 
 ## L05 — Checkbox / Switch
 
@@ -957,3 +973,110 @@ Each failed for its own reason, and everything was restored:
 - **Light against dark (decision 7's day-one probe):** all nine pairs differ, as distinct
   high-contrast palettes (black on white with dark-red disabled and navy pressed; white on black with
   green disabled and cyan pressed). Both are kept.
+
+### PR 4 (2026-10-27): SSR and hydration, React 18.3, keyboard traceability
+
+- **Emil's calls (2026-10-27):** a test covers several keys by listing them before the colon,
+  comma-separated (`'Tab, Shift+Tab: …'`). The React 18.3 job swaps React in on the runner with
+  `pnpm add`, so nothing extra is committed.
+- **`scripts/check-keyboard-trace.mjs`**, run by `check:components`. It parses the browser tests with
+  the TypeScript compiler API (regex literals in test bodies rule out a bracket matcher). The 22 keys
+  are now traced by key-titled tests in seven components.
+- **Vitest `ssr` project** (`src/internal/ssr/`): every composed story rendered with `renderToString`
+  in Node, failing on a throw or a console warning. It writes the markup and a manifest (this run's
+  id, and the story ids) to `.ssr-fixtures/`. `hydrate.browser.test.tsx` hydrates each story and
+  fails on `onRecoverableError` or `console.error`, and refuses markup from another run. Ordered by
+  `sequence.groupOrder`.
+- **React 18.3 job** in `gate-full.yml` (main and nightly): the unit, ssr and browser projects, with
+  `SENUI_EXPECT_REACT=18.3.1`, which each project asserts from inside its tests.
+
+#### Deviations from the plan
+
+1. **The run id is shared through `globalThis`**, because Vitest evaluates `vitest.config.ts` more
+   than once per process (the first full run had two ids 64 ms apart).
+2. **Fixture ids are compared as sets**: Node and the browser order `import.meta.glob`'s matches
+   differently.
+3. **The React 18.3 job doesn't swap `@types/react`**: it proves runtime behaviour only. That is said
+   in the workflow and in CONVENTIONS rule 10 (review finding R2).
+4. **Main's first three-engine run (PR 3's workflow) failed 5 of 3,918 tests**, all fixed here:
+   - Firefox: Storybook's own loading spinner (`.sb-wrapper`) was recorded as the story's motion.
+     The motion check now skips `.sb-wrapper`.
+   - WebKit, two failures: Checkbox's RequiredSubmit story used a raw `<button>`, which failed
+     contrast and the boundary check in dark mode. It is senui's Button now.
+   - WebKit, two failures: it scrolls a Tab-focused element into view at the next rendering update,
+     so the tab walk measured inputs below the fold as off screen. Probed in the pinned image: right
+     after the press `scrollY` was 0, two frames later 2, while Chromium had already scrolled. The
+     walk waits two animation frames per stop.
+   - Re-run in the pinned image, all three engines: 141 passed, 21 skipped. The Firefox fix rests on
+     the code, not the re-run: the spinner appears only when a story is slow.
+
+#### Defect found (Emil: fix it in ModalDialog's area)
+
+- **Hydration ids under React 18.3**, from `useControllableState`'s render-phase update on mount.
+  Recorded under L02, "Defects found later". Before the fix, React 18.3 passed 879 of 880, and only
+  Dialog's Form story failed.
+
+#### Component-folder edits (Emil's authorisation)
+
+- New `Switch.browser.test.tsx`: Switch's share of Checkbox's `describe.each`, and the thumb tests,
+  moved unchanged, with its Space test key-titled.
+- `Checkbox.browser.test.tsx`: Checkbox only now, with its Space test key-titled.
+- `AlertDialog.browser.test.tsx`: the AlertDialog behaviour block moved from Dialog's file, plus
+  key-titled tests for Escape, Tab/Shift+Tab and Enter/Space.
+- `Dialog.browser.test.tsx`: Escape and Tab/Shift+Tab tests retitled. The Tab loop presses literals.
+  A new test for the arrow and page keys.
+- `Button.browser.test.tsx`: two `test.each` rows became literal key-titled tests, with the same
+  assertions.
+- `TextInput.browser.test.tsx`: new tests for typing, Enter's implicit submission, and Home/End.
+- `EmptyState.browser.test.tsx`: a new Tab, Shift+Tab test.
+- `Checkbox.stories.tsx`: RequiredSubmit uses senui's Button.
+- `useControllableState.ts` (outside `components/**`): the fix above, with a unit test.
+
+#### Review (`component-api-reviewer`, 2026-10-27)
+
+18 findings, none blocking. Emil accepted all of them, rejected none, and escalated none. M1 is
+deferred to TextInput (see L04). No `OVERRIDES.md` rows.
+
+- **Keyboard trace:** tests that may not run no longer count (`skipIf`, `runIf`, `fails`,
+  `skip.each`, a `skip()` in the body). Only plain literals count. Modifiers are held across calls.
+  Code-form modifiers are read, and a non-literal `tab()` option is an error. Contract keys must be
+  inline literals. Almost-right key lists are errors, and the messages say what isn't read.
+- **SSR:** the run-id manifest (S1). The setup file moved onto the unit and browser projects (S2).
+  The `ssr` project asserts every component with stories contributes (S3).
+- **React 18.3:** the in-test version assertion (R1) and the types note (R2).
+- **Dialog's scroll test** waits for each scroll to start before it settles (M2).
+
+#### Probes
+
+Each failed for its own reason, and everything was restored:
+
+- **Traceability:**
+  - a key pressed only in a differently titled test;
+  - `test.skip`, `test.skipIf`, `describe.skip`, `describe.skip.each`, and `skip()` in the body;
+  - a titled test that no longer presses its key;
+  - `fill` instead of `type`;
+  - a conditional press;
+  - Shift held from an earlier call, and `[ShiftLeft>]`;
+  - a non-literal `tab()` option;
+  - `keys: CONSTANT`;
+  - a lowercase or misspelt key list.
+    Shift held across three separate calls now passes, where it used to fail wrongly.
+- **SSR:**
+  - text from `typeof window` fails hydration in 54 stories (55 once RequiredSubmit had a Button),
+    under React 19 and 18.3;
+  - a `typeof window` attribute fails, under React 19;
+  - reading `window` during render throws in Node;
+  - a plain `useLayoutEffect` fails the ssr project under 18.3, which warns (19 doesn't);
+  - stale fixtures (a browser-only run) are refused;
+  - an empty stories glob fails;
+  - a throwing setup file no longer loads in the ssr project;
+  - `SENUI_EXPECT_REACT=18.3.1` on React 19 fails all three projects.
+- **useControllableState:** its one-render test fails with the old line.
+
+#### Verified
+
+- `pnpm check`.
+- `pnpm test`: tokens 32, react 886, on React 19. The same 886 pass on React 18.3 with the version
+  asserted.
+- `pnpm test:gate`: 1,378 passed, 122 skipped (Chromium, with the walk's frame wait).
+- The pinned image: the four failing stories in three engines.

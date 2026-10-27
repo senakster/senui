@@ -15,15 +15,12 @@ import * as switchStories from '../Switch/Switch.stories.js';
 import { Checkbox } from './Checkbox.js';
 import * as checkboxStories from './Checkbox.stories.js';
 
-// Real key presses, clicks, layout and computed styles (Chromium) for Checkbox, CheckboxGroup and
-// Switch: the L05 criteria the plan assigns to Playwright.
-describe.each([
-  ['Checkbox', 'checkbox', () => <Checkbox label="Subscribe" />],
-  ['Switch', 'switch', () => <Switch label="Wi-Fi" />],
-] as const)('%s in a browser', (_name, role, element) => {
-  test('Space toggles it; Enter does not', async () => {
-    const { getByRole } = render(element());
-    const control = getByRole(role);
+// Real key presses, clicks, layout and computed styles (Chromium) for Checkbox and CheckboxGroup:
+// the L05 criteria the plan assigns to Playwright. Switch's own are in Switch.browser.test.tsx.
+describe('Checkbox in a browser', () => {
+  test('Space: toggles it; Enter does not', async () => {
+    const { getByRole } = render(<Checkbox label="Subscribe" />);
+    const control = getByRole('checkbox');
     control.focus();
     await userEvent.keyboard('{Enter}');
     expect(control).not.toBeChecked();
@@ -32,15 +29,15 @@ describe.each([
   });
 
   test('a click on the label toggles it', async () => {
-    const { getByRole, container } = render(element());
+    const { getByRole, container } = render(<Checkbox label="Subscribe" />);
     await userEvent.click(container.querySelector('label') as HTMLLabelElement);
-    expect(getByRole(role)).toBeChecked();
+    expect(getByRole('checkbox')).toBeChecked();
   });
 
   test('draws focus as an offset outline, not a box-shadow (ADR-0005)', async () => {
-    const { getByRole } = render(element());
+    const { getByRole } = render(<Checkbox label="Subscribe" />);
     await userEvent.tab();
-    const style = getComputedStyle(getByRole(role));
+    const style = getComputedStyle(getByRole('checkbox'));
     expect(style.outlineStyle).toBe('solid');
     expect(parseFloat(style.outlineWidth)).toBeGreaterThan(0);
     expect(style.boxShadow).toBe('none');
@@ -56,34 +53,6 @@ describe('hit area (WCAG 2.5.8, L05 decision 15)', () => {
     const box = getByRole(role).getBoundingClientRect();
     expect(box.width).toBeGreaterThanOrEqual(24);
     expect(box.height).toBeGreaterThanOrEqual(24);
-  });
-});
-
-describe('Switch thumb', () => {
-  // The thumb moves by its start margin (ADR-0018: a logical property, no `:dir()`). Read physically:
-  // the left margin pushes it right, the right margin pushes it left. Read while it may still be
-  // transitioning, so the tests poll for the side, not an exact distance.
-  const margin = (control: HTMLElement, side: 'left' | 'right') =>
-    parseFloat(getComputedStyle(control, '::before').getPropertyValue(`margin-${side}`));
-
-  test('moves to the end when on', async () => {
-    const { getByRole } = render(<Switch label="Wi-Fi" />);
-    const control = getByRole('switch');
-    expect(margin(control, 'left')).toBe(0);
-    await userEvent.click(control);
-    await expect.poll(() => margin(control, 'left')).toBeGreaterThan(0);
-  });
-
-  test('moves to the start when on in right-to-left', async () => {
-    const { getByRole } = render(
-      <div dir="rtl">
-        <Switch label="Wi-Fi" />
-      </div>,
-    );
-    const control = getByRole('switch');
-    await userEvent.click(control);
-    await expect.poll(() => margin(control, 'right')).toBeGreaterThan(0);
-    expect(margin(control, 'left')).toBe(0);
   });
 });
 

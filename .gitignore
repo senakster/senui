@@ -8,6 +8,8 @@ packages/tokens/src/generated/
 .DS_Store
 # Vitest browser-mode attachments (failure screenshots).
 .vitest/
+# Server markup the `ssr` project writes for the hydration test (L08 decision 9).
+.ssr-fixtures/
 
 # Vendored modular-web catalogue plans and the index built from them. Not this
 # project's to publish; re-vendor with /modular-web:new-project (ADR-0014 upstream).

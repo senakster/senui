@@ -6,14 +6,14 @@ import { commands, page, userEvent } from 'vitest/browser';
 import '@senakster/senui-tokens/tokens.css';
 import '../../styles/index.css';
 import { expectNoAxeViolations } from '../../internal/testing/axe.js';
-import { AlertDialog } from '../AlertDialog/AlertDialog.js';
 import * as alertStories from '../AlertDialog/AlertDialog.stories.js';
 import { Button } from '../Button/Button.js';
 import { Dialog, type DialogOpenChangeDetails, type DialogProps } from './Dialog.js';
 import * as dialogStories from './Dialog.stories.js';
 
-// Real modality, focus, key presses, pointer, scroll and layout for Dialog and AlertDialog: the L06
-// criteria the plan assigns to Playwright, run here in Vitest browser mode (scope-decisions § L06).
+// Real modality, focus, key presses, pointer, scroll and layout for Dialog: the L06 criteria the plan
+// assigns to Playwright, run here in Vitest browser mode (scope-decisions § L06). AlertDialog's own
+// behaviour is in AlertDialog.browser.test.tsx; the axe pass below covers both components' stories.
 // All three engines: SENUI_BROWSERS=chromium,firefox,webkit.
 
 type Extra = Partial<
@@ -246,7 +246,7 @@ describe('Dialog in a browser', () => {
     expect(dialog.matches(':modal')).toBe(true);
   });
 
-  test('Esc closes it and focus returns to the trigger', async () => {
+  test('Escape: closes it and focus returns to the trigger', async () => {
     const onOpenChange = vi.fn();
     render(<Opener onOpenChange={onOpenChange} />);
     const dialog = await open();
@@ -344,7 +344,7 @@ describe('Dialog in a browser', () => {
     expect(onOpenChange).not.toHaveBeenCalled();
   });
 
-  test('Tab never focuses an element outside the open dialog', async () => {
+  test('Tab, Shift+Tab: never focus an element outside the open dialog', async () => {
     render(
       <>
         <button>Outside</button>
@@ -357,7 +357,9 @@ describe('Dialog in a browser', () => {
     const outside = screen.getByRole('button', { name: 'Outside' });
     const trigger = screen.getByRole('button', { name: 'Open' });
     for (let press = 0; press < 8; press++) {
-      await userEvent.keyboard(press % 3 === 2 ? '{Shift>}{Tab}{/Shift}' : '{Tab}');
+      // Literal presses, so check-keyboard-trace.mjs can read both keys.
+      if (press % 3 === 2) await userEvent.keyboard('{Shift>}{Tab}{/Shift}');
+      else await userEvent.keyboard('{Tab}');
       const active = document.activeElement;
       expect(active).not.toBe(outside);
       expect(active).not.toBe(trigger);
@@ -365,6 +367,44 @@ describe('Dialog in a browser', () => {
       // then reports <body>, never a page control.
       if (active !== document.body) expect(dialog.contains(active)).toBe(true);
     }
+  });
+
+  test('ArrowDown, ArrowUp, PageDown, PageUp: scroll long content while the dialog has focus', async () => {
+    render(
+      <Opener footer={<Button>Accept</Button>}>
+        {Array.from({ length: 30 }, (_, index) => (
+          <p key={index}>Clause {index + 1}. The terms run longer than the viewport.</p>
+        ))}
+      </Opener>,
+    );
+    const dialog = await open();
+    expect(document.activeElement).toBe(dialog);
+    expect(dialog.scrollHeight).toBeGreaterThan(dialog.clientHeight);
+    // Keyboard scrolling may be smooth: wait for it to start, then read the position once it stops
+    // changing. (Settling alone could pass two samples taken before the first frame.)
+    const settled = async (from: number) => {
+      await expect.poll(() => dialog.scrollTop).not.toBe(from);
+      let last = -1;
+      await expect
+        .poll(() => {
+          const same = dialog.scrollTop === last;
+          last = dialog.scrollTop;
+          return same;
+        })
+        .toBe(true);
+      return last;
+    };
+    await userEvent.keyboard('{ArrowDown}');
+    const arrowed = await settled(0);
+    expect(arrowed).toBeGreaterThan(0);
+    await userEvent.keyboard('{PageDown}');
+    const paged = await settled(arrowed);
+    expect(paged).toBeGreaterThan(arrowed);
+    await userEvent.keyboard('{ArrowUp}');
+    const back = await settled(paged);
+    expect(back).toBeLessThan(paged);
+    await userEvent.keyboard('{PageUp}');
+    expect(await settled(back)).toBeLessThan(back);
   });
 
   test('a wheel over the backdrop doesn’t scroll the page (ADR-0014)', async () => {
@@ -586,64 +626,6 @@ describe('Dialog in a browser', () => {
       .poll(() => warn.mock.calls.flat().join(' '))
       .toContain('Dialog closed after the element that opened it was removed');
     warn.mockRestore();
-  });
-});
-
-describe('AlertDialog in a browser', () => {
-  function Confirm({
-    onOpenChange,
-  }: {
-    onOpenChange?: (open: boolean, d: DialogOpenChangeDetails) => void;
-  }) {
-    const [open, setOpen] = useState(false);
-    return (
-      <>
-        <Button
-          onClick={() => {
-            setOpen(true);
-          }}
-        >
-          Open
-        </Button>
-        <AlertDialog
-          title="Delete project?"
-          description="This can’t be undone."
-          cancelLabel="Cancel"
-          action={<Button variant="danger">Delete</Button>}
-          open={open}
-          onOpenChange={(next, details) => {
-            onOpenChange?.(next, details);
-            setOpen(next);
-          }}
-        />
-      </>
-    );
-  }
-
-  test('focuses Cancel on open', async () => {
-    render(<Confirm />);
-    await open();
-    await expect
-      .poll(() => document.activeElement)
-      .toBe(screen.getByRole('button', { name: 'Cancel' }));
-  });
-
-  test('Esc closes it', async () => {
-    const onOpenChange = vi.fn();
-    render(<Confirm onOpenChange={onOpenChange} />);
-    const dialog = await open();
-    await userEvent.keyboard('{Escape}');
-    await closed(dialog);
-    expect(onOpenChange).toHaveBeenCalledWith(false, { reason: 'escape' });
-  });
-
-  test('a backdrop click never closes it', async () => {
-    const onOpenChange = vi.fn();
-    render(<Confirm onOpenChange={onOpenChange} />);
-    const dialog = await open();
-    await commands.clickBackdrop();
-    expect(onOpenChange).not.toHaveBeenCalled();
-    expect(dialog.open).toBe(true);
   });
 });
 

@@ -11,7 +11,7 @@
     "typecheck": "pnpm build && pnpm -r typecheck",
     "lint": "eslint . --max-warnings 0 && stylelint \"packages/react/src/**/*.css\" --max-warnings 0 --allow-empty-input",
     "sync:wcag": "node scripts/sync-wcag.mjs",
-    "check:components": "node scripts/check-a11y-contracts.mjs && node scripts/check-component-css.mjs && node scripts/check-dist-css.mjs",
+    "check:components": "node scripts/check-a11y-contracts.mjs && node scripts/check-keyboard-trace.mjs && node scripts/check-component-css.mjs && node scripts/check-dist-css.mjs",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "test": "pnpm -r --if-present test",

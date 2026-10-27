@@ -1,6 +1,6 @@
 import { composeStories } from '@storybook/react-vite';
 import { render } from '@testing-library/react';
-import { describe, expect, test } from 'vitest';
+import { describe, expect, test, vi } from 'vitest';
 import { userEvent } from 'vitest/browser';
 import '@senakster/senui-tokens/tokens.css';
 import '../../styles/index.css';
@@ -68,6 +68,45 @@ describe('TextInput in a browser', () => {
     expect(input).toHaveFocus();
     await userEvent.type(input, 'ada@example.com');
     expect(input).toHaveAttribute('aria-invalid', 'false');
+  });
+});
+
+// The contract's keyboard rows, one key-named test each, traced by check-keyboard-trace.mjs (L08).
+describe('TextInput keyboard', () => {
+  test('printable character: types into the field', async () => {
+    const { getByRole } = render(<TextInput aria-label="Name" />);
+    const input = getByRole('textbox');
+    await userEvent.type(input, 'Ada');
+    expect(input).toHaveValue('Ada');
+  });
+
+  test('Enter: submits its form (implicit submission)', async () => {
+    const onSubmit = vi.fn();
+    const { getByRole } = render(
+      <form
+        onSubmit={(event) => {
+          event.preventDefault();
+          onSubmit();
+        }}
+      >
+        <TextInput aria-label="Search" />
+      </form>,
+    );
+    getByRole('textbox').focus();
+    await userEvent.keyboard('{Enter}');
+    expect(onSubmit).toHaveBeenCalledOnce();
+  });
+
+  test('Home, End: move the caret to the start and the end', async () => {
+    const { getByRole } = render(<TextInput aria-label="Name" defaultValue="Ada" />);
+    const input = getByRole('textbox') as HTMLInputElement;
+    input.focus();
+    // From the middle, so each press has to move the caret.
+    input.setSelectionRange(1, 1);
+    await userEvent.keyboard('{Home}');
+    expect([input.selectionStart, input.selectionEnd]).toEqual([0, 0]);
+    await userEvent.keyboard('{End}');
+    expect([input.selectionStart, input.selectionEnd]).toEqual([3, 3]);
   });
 });
 

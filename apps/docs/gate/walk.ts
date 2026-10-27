@@ -10,7 +10,11 @@ interface Stop {
 
 /** Checks the element that has focus now. Null when focus has left the document or is on <body>. */
 function checkStop(page: Page, checkRing: boolean): Promise<Stop | null> {
-  return page.evaluate((ring) => {
+  return page.evaluate(async (ring) => {
+    // WebKit scrolls a Tab-focused element into view at the next rendering update, not during the
+    // key press as Chromium does: measured before that, a control below the fold reads as off
+    // screen (main's first WebKit run). Two frames let every engine finish the scroll.
+    await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
     const m = window.__senuiMeasure;
     const el = document.activeElement;
     if (!el || el === document.body || el === document.documentElement) return null;

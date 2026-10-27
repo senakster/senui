@@ -34,21 +34,18 @@ describe('Button in a browser', () => {
 
   // Real key presses (Playwright), not synthetic click events: the native button turns Enter and
   // Space into a click, and Button must neither block that when idle nor allow it when loading.
-  test.each([
-    ['Enter', '{Enter}'],
-    ['Space', ' '],
-  ])('%s activates it once', async (_key, keys) => {
+  // Key-named titles and literal presses: the contract's keyboard rows are traced to them (L08).
+  test('Enter, Space: each activates it once', async () => {
     const onClick = vi.fn();
     const { getByRole } = render(<Button onClick={onClick}>Save</Button>);
     getByRole('button').focus();
-    await userEvent.keyboard(keys);
+    await userEvent.keyboard('{Enter}');
     expect(onClick).toHaveBeenCalledOnce();
+    await userEvent.keyboard(' ');
+    expect(onClick).toHaveBeenCalledTimes(2);
   });
 
-  test.each([
-    ['Enter', '{Enter}'],
-    ['Space', ' '],
-  ])('%s does nothing while loading', async (_key, keys) => {
+  test('Enter, Space: do nothing while loading', async () => {
     const onClick = vi.fn();
     const { getByRole } = render(
       <Button loading onClick={onClick}>
@@ -56,7 +53,8 @@ describe('Button in a browser', () => {
       </Button>,
     );
     getByRole('button').focus();
-    await userEvent.keyboard(keys);
+    await userEvent.keyboard('{Enter}');
+    await userEvent.keyboard(' ');
     expect(onClick).not.toHaveBeenCalled();
   });
 

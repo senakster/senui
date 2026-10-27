@@ -187,6 +187,41 @@ describe('EmptyState in a browser', () => {
     expect(document.activeElement).toBe(screen.getByRole('button', { name: 'Create project' }));
   });
 
+  // The contract's keyboard row, traced by check-keyboard-trace.mjs (L08).
+  test('Tab, Shift+Tab: reach the actions in order, and no stop of its own', async () => {
+    render(
+      <>
+        <button type="button">Before</button>
+        <EmptyState
+          headingLevel={2}
+          title="No projects yet"
+          description="Projects you create appear here."
+          actions={
+            <>
+              <button type="button">Create project</button>
+              <button type="button">Import</button>
+            </>
+          }
+        />
+        <button type="button">After</button>
+      </>,
+    );
+    const focused = () => document.activeElement?.textContent;
+    screen.getByRole('button', { name: 'Before' }).focus();
+    await userEvent.keyboard('{Tab}');
+    expect(focused()).toBe('Create project');
+    await userEvent.keyboard('{Tab}');
+    expect(focused()).toBe('Import');
+    await userEvent.keyboard('{Tab}');
+    expect(focused()).toBe('After');
+    await userEvent.keyboard('{Shift>}{Tab}{/Shift}');
+    expect(focused()).toBe('Import');
+    await userEvent.keyboard('{Shift>}{Tab}{/Shift}');
+    expect(focused()).toBe('Create project');
+    await userEvent.keyboard('{Shift>}{Tab}{/Shift}');
+    expect(focused()).toBe('Before');
+  });
+
   test('illustrations of any shape fit the box without distortion (review)', async () => {
     const { IllustrationShapes } = composeStories(stories);
     const { container } = render(<IllustrationShapes />);

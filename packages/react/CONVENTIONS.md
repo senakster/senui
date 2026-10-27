@@ -160,8 +160,12 @@ const [checked, setChecked] = useControllableState({
   value with no change handler (a frozen control). Pass `readOnly: true` for a component that is
   intentionally read-only.
 - Switching from controlled to uncontrolled continues from the last controlled value.
+- The first render never sets state: the internal value starts from the controlled one. Under
+  React 18.3, a render-phase update on mount, in a component that calls `useId`, can give its
+  descendants different ids on the server and the client (found by L08's hydration test).
 
-**Enforced by:** [`useControllableState.test.ts`](src/internal/state/useControllableState.test.ts).
+**Enforced by:** [`useControllableState.test.ts`](src/internal/state/useControllableState.test.ts),
+and the hydration test under React 18.3 (rule 10).
 
 ## 6. The CSS contract
 
@@ -305,8 +309,19 @@ Ids come from `useId`, never from counters or `Math.random()`.
 - A consumer's `aria-describedby` / `aria-labelledby` is merged with the ids the component generates,
   never replaced and never replacing them: [`mergeIds()`](src/internal/dom/ids.ts).
 
-**Enforced by:** [`ids.test.ts`](src/internal/dom/ids.test.ts) and `component-api-reviewer` for now. A
-server-render test per component is part of L08's gate.
+An effect that must run before paint uses an isomorphic layout effect (`useEffect` on the server),
+because React 18 warns about `useLayoutEffect` during server rendering.
+
+**Enforced by:** [`ids.test.ts`](src/internal/dom/ids.test.ts), `component-api-reviewer`, and the
+`ssr` Vitest project (L08 decision 9). It renders every story in Node with `renderToString` and fails
+on a thrown error or a console warning;
+[`hydrate.browser.test.tsx`](src/internal/ssr/hydrate.browser.test.tsx) then hydrates each story's
+markup in the browser and fails on any mismatch. The `ssr` project writes the markup to
+`.ssr-fixtures/`, stamped with the run's id, and runs in an earlier group, so run both together
+(`vitest run`, or `--project ssr --project browser`): the hydration test refuses markup from another
+run. The `main` and nightly runs repeat the unit, `ssr` and browser projects under React 18.3, the
+lowest version the peer range admits (`gate-full.yml`), and each project asserts the version it
+rendered with. That covers runtime only: the type tests still use React 19's types.
 
 ## 11. Prop names and defaults
 
@@ -369,6 +384,18 @@ For story authors:
 - A failure names the story id, the check and the element. Open the story at
   `iframe.html?id=<id>` in the built Storybook (`pnpm --filter docs exec vite preview --outDir
 storybook-static`) to see it as the gate did.
+
+For test authors, keyboard traceability (decision 5, checked by `pnpm check:components`):
+
+- Every key in a component's contract is pressed in its `<Name>.browser.test.tsx`, in a test whose
+  title names the key before a colon: `test('Escape: closes the innermost dialog', …)`. Several
+  keys are comma-separated, and the test presses each of them: `'Tab, Shift+Tab: …'`.
+- A title that names a key the test doesn't press fails too. A key pressed only to reach a state
+  (Enter on a trigger) is no evidence for its row; put it in a test that isn't key-titled.
+- Presses are read from literal arguments: `userEvent.keyboard('{Escape}')`, `' '` for Space,
+  `userEvent.tab()`, `userEvent.tab({ shift: true })` or `'{Shift>}{Tab}{/Shift}'`, and
+  `userEvent.type(el, 'text')` for `printable character`. A key in a variable or a `test.each`
+  title isn't seen, and skipped tests don't count.
 
 ## Public surface
 

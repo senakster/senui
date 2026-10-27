@@ -21,6 +21,15 @@ Status legend — plan: `plan-ready` · `not-planned` (plan not written yet upst
 
 ## Changelog
 
+- **2026-10-27** — L08, PR 4 of 4: SSR and hydration, React 18.3, keyboard traceability. Built, not yet committed.
+  - PR 3 merged as #10. On `main` its CI passed. The first three-engine gate failed 5 of 3,918, from two harness defects and one story's raw button, all fixed here.
+  - **Traceability:** `check-keyboard-trace.mjs` (in `check:components`) traces all 22 contract keys to key-titled browser tests. Switch has its own browser test file now.
+  - **SSR:** a Vitest `ssr` project renders every story in Node; the browser project hydrates the markup from the same run.
+  - **React 18.3:** a job in `gate-full.yml` runs the package's tests on 18.3 and asserts the version inside them.
+  - **Found by 18.3:** `useControllableState` set state during render on a controlled mount, which shifted descendants' hydration ids. Fixed under L02.
+  - **Review:** `component-api-reviewer`, 18 findings, all accepted. The TextInput Home/End row on macOS is deferred to L04.
+  - **Verified:** `pnpm check`; `pnpm test`: tokens 32, react 886, and the same 886 on React 18.3; `pnpm test:gate` 1378 passed, 122 skipped; the failing stories in three engines in the pinned image.
+
 - **2026-10-27** — L08, PR 3 of 4: forced colours and the pinned container.
   - The nine forced-colours stories carry a `forced-colors` tag instead of a parameter. The gate screenshots them in light and dark (Chromium, forced colours emulated), and runs the ring and boundary checks under forced colours on every story.
   - A component that keeps states visible by border or system colour must have such a story.
