@@ -573,3 +573,45 @@ Entry format: date — module · Did · Verified · Scope decisions · Plan adju
 - **Light against dark:** all nine pairs differ (distinct palettes), so both are kept.
 - **Diff probe:** a checked checkbox drawn as unchecked fails both Checkbox screenshots (282 and 317 px). The first attempt changed the control element under its `::before` box and passed: a wrong probe, seen by looking at the baseline.
 - **Next:** commit PR 3 with the baselines and open it when Emil asks. CI's first run then compares the local-container baselines on GitHub's runner.
+
+## 2026-10-27 — L08 PR 4: SSR, React 18.3, keyboard traceability
+
+- **Reconciled at start:** the checkpoint said PR 3 was uncommitted, but it had merged as #10 with
+  CI green. `main`'s first "Gate (all engines)" run then failed 5 of 3,918 tests in 45 min. Branch
+  `feature/a11y-gate-L08-4` from `main`.
+- **Emil's calls:**
+  - a key list before the colon in test titles;
+  - the React swap done on the CI runner;
+  - a fix in the code (not an exception, not dropping 18) for the 18.3 hydration ids;
+  - all 18 review findings accepted, with M1 deferred.
+- **Built:** `scripts/check-keyboard-trace.mjs`; the `ssr` project and the hydration test with a
+  run-id manifest; the `react-18` job; key-titled tests in seven components (Switch's own file); the
+  three-engine fixes (motion ignores `.sb-wrapper`, the tab walk waits two frames, RequiredSubmit
+  uses Button); CONVENTIONS rules 5 and 10, and the test-author section.
+- **Found:**
+  - Under React 18.3, controlled components set state during their first render
+    (`useControllableState`). In a component that calls `useId`, that gave descendants different
+    ids on server and client: a probe matrix failed only with a controlled `open`. Fixed under L02.
+  - WebKit scrolls a Tab-focused element into view at the next rendering update; probed in the
+    pinned image.
+  - Vitest evaluates `vitest.config.ts` more than once per process, so the run id is kept on
+    `globalThis`.
+- **Harness mistakes, caught before trusting a result:**
+  - a `forEachChild` callback that returned truthy stopped the walk early;
+  - a `catch` that hid `readFile`'s root-relative path;
+  - `pnpm -s` is rejected by pnpm 12, so one probe batch ran nothing. Its restore step also ran
+    `git checkout` on a tracked file, and the backup put my edits back. Probes since then restore
+    only from backups;
+  - an in-browser `renderToString` probe loaded two Reacts, so it was discarded;
+  - a "wait for scroll to start" that read the start after the press.
+- **Verified:**
+  - `pnpm check`;
+  - `pnpm test`: tokens 32, react 886, on React 19, and 886 on 18.3 with the version asserted;
+  - `pnpm test:gate` 1378 passed, 122 skipped;
+  - the pinned image, three engines, the four failing stories: 141 passed;
+  - every probe listed in scope-decisions § L08, "PR 4".
+- **Review:** `component-api-reviewer`: 18 findings; 18 accepted (M1 deferred to L04), 0
+  rejected, 0 escalated.
+- **Next, with Emil's OK:** commit PR 4 and open it. After it merges, watch `main`'s "Gate (all
+  engines)" run, which includes the new `react-18` job. Then record the PR gate job's duration as its
+  budget, and mark L08 done.

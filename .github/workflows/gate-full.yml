@@ -2,6 +2,7 @@ name: Gate (all engines)
 
 # L08 decision 11: pull requests run the gate in Chromium (ci.yml); main and a nightly run cover
 # Chromium, Firefox and WebKit, so an engine difference surfaces within a day, before a release.
+# Decision 9a: the same runs test the package against the lowest React its peer range admits.
 on:
   push:
     branches: [main]
@@ -43,3 +44,31 @@ jobs:
           name: gate-results-all-engines
           path: apps/docs/test-results/
           retention-days: 7
+
+  react-18:
+    # The packages publish `react: ^18.3 || ^19`, and the lockfile resolves 19. This job swaps in
+    # 18.3 for the package's unit, ssr and browser projects. The lockfile change stays on the runner.
+    # It proves runtime behaviour only: @types/react stays at 19, so the type tests still check the
+    # .d.ts against React 19's types, not what an 18 consumer compiles against.
+    runs-on: ubuntu-latest
+    container:
+      image: mcr.microsoft.com/playwright:v1.64.0-noble
+      options: --ipc=host
+    env:
+      HOME: /root
+    steps:
+      - uses: actions/checkout@v5
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v5
+        with:
+          node-version-file: .node-version
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm --filter @senakster/senui-tokens build
+      - run: pnpm --filter @senakster/senui add -D react@18.3.1 react-dom@18.3.1
+      # Fail loudly if the swap didn't take, rather than test 19 under an 18 label.
+      - run: test "$(pnpm --filter @senakster/senui exec node -p "require('react-dom/package.json').version")" = 18.3.1
+      # Each project also asserts, from inside its tests, that it rendered with this version.
+      - run: pnpm --filter @senakster/senui test
+        env:
+          SENUI_EXPECT_REACT: 18.3.1

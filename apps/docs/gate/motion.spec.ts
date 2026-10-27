@@ -57,6 +57,9 @@ function movements(page: Page): Promise<Movement[]> {
         const effect = animation.effect as KeyframeEffect | null;
         const target = effect?.target;
         if (!effect || !target) continue;
+        // Storybook's own preview UI (its loading spinner, recorded from first paint when the story is
+        // slow to render: Firefox on main) sits in `.sb-wrapper`, outside every story.
+        if (target.closest('.sb-wrapper')) continue;
         const pseudo = effect.pseudoElement ?? null;
         const timing = effect.getComputedTiming();
         const duration = Number(timing.duration) || 0;

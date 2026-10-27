@@ -4,13 +4,13 @@ Single source of truth for **where the implementation is right now**. Overwritte
 `implement-module` skill at the end of every run. For history, see `log.md`; for status, see
 `docs/PROGRESS.md`.
 
-| Field         | Value                                                                                          |
-| ------------- | ---------------------------------------------------------------------------------------------- |
-| Target app    | repo root (pnpm workspace: `packages/tokens`, `packages/react`, `apps/docs`)                   |
-| Active module | L08 — Test & a11y gate (in progress)                                                           |
-| Sub-step      | PRs 1 and 2 merged (#8, #9); PR 3 built and verified, uncommitted on `feature/a11y-gate-L08-3` |
-| Last verified | 2026-10-27: `pnpm check`; `pnpm test` tokens 32, react 649; `pnpm test:gate` 1378 passed       |
-| Updated       | 2026-10-27                                                                                     |
+| Field         | Value                                                                                           |
+| ------------- | ----------------------------------------------------------------------------------------------- |
+| Target app    | repo root (pnpm workspace: `packages/tokens`, `packages/react`, `apps/docs`)                    |
+| Active module | L08 — Test & a11y gate (in progress)                                                            |
+| Sub-step      | PRs 1–3 merged (#8, #9, #10); PR 4 built and verified, uncommitted on `feature/a11y-gate-L08-4` |
+| Last verified | 2026-10-27: `pnpm check`; `pnpm test` tokens 32, react 886 (also on React 18.3); gate 1378      |
+| Updated       | 2026-10-27                                                                                      |
 
 ## Brief
 
@@ -23,23 +23,16 @@ public-API change goes to Emil first.
 **Four PRs (Emil):**
 
 1. **Merged (#8):** harness, CSS marker, render wait, axe light/dark, semantics, exceptions, CI step, `pnpm test:gate`.
-2. **Merged (#9):** target size, reflow and text spacing, motion with `essentialMotion` (ADR-0017), RTL static and runtime, ADR-0018 (no `:dir()`; Switch's thumb fixed), tab walk with ring and boundary checks, resets (in-house fixtures), the socket-error reload, CONVENTIONS. Deviations: scope-decisions § L08, "PR 2".
-3. **Built, uncommitted (baselines still to come from CI):** `forced-colors` tag migration (from the `forcedColors` parameter), Chromium screenshots light and dark, the pinned Playwright container for every gate job, `snapshotPathTemplate`, `gate-full.yml` (main and nightly, three engines), `update-snapshots.yml`. Probe whether the light and dark forced-colours baselines differ.
-4. Vitest `ssr` project (Node markup fixtures) and hydration test, the React 18.3 job, `scripts/check-keyboard-trace.mjs` with key-titled browser tests for all 22 contract keys (new browser tests for Switch and CheckboxGroup).
-
-**Invariants (run 2026-10-27):** runtime dependencies are `@senakster/senui-tokens` only; the
-docs app's new dev dependencies are `@playwright/test` 1.64.0 and `@types/node` 24.9.2; no
-`stylelint-disable` in component CSS; no physical CSS properties in component CSS (for PR 2's
-rule); 22 contract keys, 0 key-titled tests (for PR 4).
+2. **Merged (#9):** contract-derived checks, ADR-0017, ADR-0018.
+3. **Merged (#10):** forced colours, the pinned container, `gate-full.yml`, `update-snapshots.yml`. On `main`, CI passed; the first three-engine gate failed 5 of 3,918 (fixed in PR 4).
+4. **Built, uncommitted:** `check-keyboard-trace.mjs` (22 keys traced), the Vitest `ssr` project and hydration test (run-id manifest), the `react-18` job in `gate-full.yml` with in-test version asserts, the `useControllableState` fix (recorded under L02), the three-engine fixes, CONVENTIONS. Review: 18/18 accepted. Detail: scope-decisions § L08, "PR 4".
 
 ## In-flight notes
 
-- Gate facts: 113 stories; 1368 tests in Chromium (1264 run, 104 skip by design); ~8 min locally,
-  so expect the CI gate step to grow from 2 min 20 s (PR 1) accordingly. PR 3's container should
-  remove most of the 8 min browser install. Engines via `SENUI_GATE_BROWSERS`. Never adopt a
-  running server (`reuseExistingServer: false`). On Windows a story failing only on an OS socket
-  error is loaded once more.
+- Gate facts: 113 stories; 1378 passed, 122 skipped in Chromium locally (~8 min). PR 3's CI run took 9 min 35 s.
+- `main`'s three-engine run takes ~45 min. The `react-18` job runs alongside it and has never run in CI yet.
 - Exceptions: Dialog Fullscreen and LongContent, `color-contrast:incomplete`, expire 2027-04-27.
+- Open for L04/TextInput (Emil deferred it): the Home/End contract row isn't true on macOS (scope-decisions § L04, cross-module notes).
 - **Storybook on GitHub Pages (Emil, 2026-10-26): comes with L09.** On a push to `main`, the CI `verify` job uploads the Storybook it builds as a Pages artifact, and a `deploy-storybook` job (`needs: verify`) publishes it to `https://senakster.github.io/senui/`. Claude enables Pages with `gh api -X POST repos/senakster/senui/pages -f build_type=workflow` once merged (Emil's OK).
 - **npm publishing (Emil, 2026-10-26):** after L07 to L10; L10 builds the pipeline first. Gaps: no npm login on this machine, no LICENSE in the packages, no `repository`/`homepage`/`bugs`.
 - **L09:** the docs generator must handle `semantics.name: 'none'`; it can reuse `gate/stories.ts`'s story-to-contract mapping.
@@ -49,9 +42,6 @@ rule); 22 contract keys, 0 key-titled tests (for PR 4).
 
 With Emil's OK:
 
-1. Commit PR 3 on `feature/a11y-gate-L08-3`, with the 18 baselines generated in the pinned image under Docker, and open it. CI's first run is the cross-machine reproduction check.
-2. If CI's runner renders differently, regenerate with the `update-snapshots` label and record why.
-
-The owed probes are done: the baselines reproduce, a hidden state is a diff, and light and dark differ.
-
-Then PR 4: the `ssr` project and hydration test, the React 18.3 job, and keyboard traceability.
+1. Commit PR 4 on `feature/a11y-gate-L08-4` and open it.
+2. After merge, watch `main`'s "Gate (all engines)" run: three engines plus the first CI run of `react-18`.
+3. When it is green: record the PR gate job's duration as its budget (acceptance criterion), tick L08's criteria, and mark L08 done in PROGRESS.

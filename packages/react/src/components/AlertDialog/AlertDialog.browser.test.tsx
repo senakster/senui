@@ -1,15 +1,123 @@
 import { render, screen } from '@testing-library/react';
-import { describe, expect, test } from 'vitest';
-import { page } from 'vitest/browser';
+import { useState } from 'react';
+import { describe, expect, test, vi } from 'vitest';
+import { commands, page, userEvent } from 'vitest/browser';
 import '@senakster/senui-tokens/tokens.css';
 // Only AlertDialog's own stylesheet, as a consumer of `styles/AlertDialog.css` loads it. Each
 // browser test file runs in its own frame, so nothing else from the package is loaded here.
 import './AlertDialog.css';
 import { Button } from '../Button/Button.js';
+import type { DialogOpenChangeDetails } from '../Dialog/Dialog.js';
 import { AlertDialog } from './AlertDialog.js';
 
-// Behaviour is tested with Dialog's (Dialog.browser.test.tsx). This file checks the per-component
-// stylesheet: it brings Dialog's styles with it, in senui.components itself, not a sub-layer.
+// Real modality, focus and key presses for AlertDialog (Chromium; all three engines with
+// SENUI_BROWSERS). What it shares with Dialog is tested in Dialog.browser.test.tsx.
+describe('AlertDialog in a browser', () => {
+  function Confirm({
+    onOpenChange,
+    onDelete,
+  }: {
+    onOpenChange?: (open: boolean, d: DialogOpenChangeDetails) => void;
+    onDelete?: () => void;
+  }) {
+    const [open, setOpen] = useState(false);
+    return (
+      <>
+        <Button
+          onClick={() => {
+            setOpen(true);
+          }}
+        >
+          Open
+        </Button>
+        <AlertDialog
+          title="Delete project?"
+          description="This can’t be undone."
+          cancelLabel="Cancel"
+          action={
+            <Button variant="danger" onClick={onDelete}>
+              Delete
+            </Button>
+          }
+          open={open}
+          onOpenChange={(next, details) => {
+            onOpenChange?.(next, details);
+            setOpen(next);
+          }}
+        />
+      </>
+    );
+  }
+
+  const dialogEl = () => document.querySelector<HTMLDialogElement>('dialog:modal');
+  /** Opens with the keyboard, which behaves the same in every engine (see Dialog's tests). */
+  const open = async () => {
+    screen.getByRole('button', { name: 'Open' }).focus();
+    await userEvent.keyboard('{Enter}');
+    await expect.poll(dialogEl).not.toBeNull();
+    return dialogEl() as HTMLDialogElement;
+  };
+  const closed = async (dialog: HTMLDialogElement) => {
+    await expect.poll(() => dialog.open).toBe(false);
+  };
+  const cancel = () => screen.getByRole('button', { name: 'Cancel' });
+  const remove = () => screen.getByRole('button', { name: 'Delete' });
+
+  test('focuses Cancel on open', async () => {
+    render(<Confirm />);
+    await open();
+    await expect.poll(() => document.activeElement).toBe(cancel());
+  });
+
+  // The contract's keyboard rows, one key-named test each, traced by check-keyboard-trace.mjs (L08).
+  test('Escape: asks to close, like Cancel', async () => {
+    const onOpenChange = vi.fn();
+    render(<Confirm onOpenChange={onOpenChange} />);
+    const dialog = await open();
+    await userEvent.keyboard('{Escape}');
+    await closed(dialog);
+    expect(onOpenChange).toHaveBeenCalledWith(false, { reason: 'escape' });
+  });
+
+  test('Tab, Shift+Tab: move between Cancel and the action', async () => {
+    render(<Confirm />);
+    await open();
+    await expect.poll(() => document.activeElement).toBe(cancel());
+    await userEvent.keyboard('{Tab}');
+    expect(document.activeElement).toBe(remove());
+    await userEvent.keyboard('{Shift>}{Tab}{/Shift}');
+    expect(document.activeElement).toBe(cancel());
+  });
+
+  test('Enter, Space: activate the focused button', async () => {
+    const onOpenChange = vi.fn();
+    const onDelete = vi.fn();
+    render(<Confirm onOpenChange={onOpenChange} onDelete={onDelete} />);
+    const dialog = await open();
+    await expect.poll(() => document.activeElement).toBe(cancel());
+    await userEvent.keyboard('{Enter}');
+    await closed(dialog);
+    expect(onOpenChange).toHaveBeenCalledWith(false, { reason: 'cancel' });
+
+    await open();
+    await expect.poll(() => document.activeElement).toBe(cancel());
+    await userEvent.keyboard('{Tab}');
+    await userEvent.keyboard(' ');
+    expect(onDelete).toHaveBeenCalledOnce();
+  });
+
+  test('a backdrop click never closes it', async () => {
+    const onOpenChange = vi.fn();
+    render(<Confirm onOpenChange={onOpenChange} />);
+    const dialog = await open();
+    await commands.clickBackdrop();
+    expect(onOpenChange).not.toHaveBeenCalled();
+    expect(dialog.open).toBe(true);
+  });
+});
+
+// This file also checks the per-component stylesheet: it brings Dialog's styles with it, in
+// senui.components itself, not a sub-layer.
 describe('styles/AlertDialog.css on its own', () => {
   test('styles the dialog: Dialog.css comes with it', async () => {
     // Wide enough that the size token, not the viewport clamp, sets the width.

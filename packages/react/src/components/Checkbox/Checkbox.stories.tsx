@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { useState, type ReactNode } from 'react';
 import { expect, fn, userEvent, within } from 'storybook/test';
+import { Button } from '../Button/Button.js';
 import { Checkbox, type CheckboxProps } from './Checkbox.js';
 
 /**
@@ -85,7 +86,8 @@ export const RequiredSubmit: Story = {
       }}
     >
       <Checkbox {...args} />
-      <button type="submit">Continue</button>
+      {/* senui's Button: an unstyled native one failed contrast in WebKit's dark theme (L08). */}
+      <Button type="submit">Continue</Button>
     </form>
   ),
   play: async ({ canvasElement }) => {

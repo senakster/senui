@@ -49,7 +49,10 @@ export function useControllableState<T>({
   readOnly = false,
 }: UseControllableStateOptions<T>): readonly [T, Dispatch<SetStateAction<T>>] {
   const controlled = value !== undefined;
-  const [uncontrolled, setUncontrolled] = useState(defaultValue);
+  // Starts from the controlled value, so the first render never sets state. Under React 18.3, a
+  // render-phase update on mount in a component that calls useId (Dialog, every form control) can
+  // make server and client disagree on its descendants' ids, and hydration mismatches (L08).
+  const [uncontrolled, setUncontrolled] = useState(value !== undefined ? value : defaultValue);
   // While controlled, keep the internal value in step with the prop, so that switching to
   // uncontrolled continues from the last value shown rather than jumping back to `defaultValue`.
   // Setting state during render to follow a prop is React's documented pattern for derived state.

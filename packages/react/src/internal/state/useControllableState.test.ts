@@ -29,6 +29,18 @@ describe('useControllableState', () => {
     expect(onChange).toHaveBeenCalledExactlyOnceWith(true);
   });
 
+  // A render-phase update on mount re-runs the component; under React 18.3 that shifts the useId
+  // values of its descendants between server and client (L08's hydration test, React 18.3 job).
+  test('controlled: mounts in one render, without setting state', async () => {
+    const useControllableState = await load();
+    let renders = 0;
+    renderHook(() => {
+      renders++;
+      return useControllableState({ value: true, defaultValue: false, onChange: noop, name });
+    });
+    expect(renders).toBe(1);
+  });
+
   test('controlled: the prop wins, and setValue only reports', async () => {
     const useControllableState = await load();
     const onChange = vi.fn();
