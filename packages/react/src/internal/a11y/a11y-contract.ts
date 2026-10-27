@@ -171,20 +171,33 @@ export interface RequiredProp<P> {
 }
 
 /** ADR-0008: how the component adapts. Every field is closed so docs and checks can rely on it. */
-export interface Adaptation {
+export type Adaptation = {
   /** WCAG 2.5.8: at least 24×24 CSS px, or meets the spacing exception. */
   readonly targetSize: 'min-24' | 'spacing-exception' | 'not-a-target';
   /** WCAG 2.5.2: activation happens on the up event (`click` qualifies). */
   readonly activatesOn: 'click' | 'pointerup' | 'not-activatable';
   /** How states stay visible in forced-colours mode, where backgrounds are replaced. */
   readonly forcedColors: 'border' | 'system-colour' | 'no-states';
-  /** ADR-0005: movement is scaled by `--senui-motion-reduce`, or there is none. */
-  readonly reducedMotion: 'motion-factor' | 'no-motion';
   /** Whether layout and arrow keys mirror in right-to-left text. */
   readonly rtl: 'mirrors' | 'direction-neutral';
   /** WCAG 1.4.10 / 1.4.12: whether text wraps or is truncated when space runs out. */
   readonly textOverflow: 'wraps' | 'truncates';
-}
+} & (
+  | {
+      /** ADR-0005: movement is scaled by `--senui-motion-reduce`, so it stops under reduced motion. */
+      readonly reducedMotion: 'motion-factor';
+      /**
+       * ADR-0017: the one animation the component keeps under reduced motion, on purpose.
+       * `'progress-rotation'`: an in-place rotation that shows work is in progress (a spinner).
+       */
+      readonly essentialMotion?: 'progress-rotation';
+    }
+  | {
+      /** The component moves nothing, in either mode. */
+      readonly reducedMotion: 'no-motion';
+      readonly essentialMotion?: never;
+    }
+);
 
 export interface WcagClaim {
   readonly criterion: WcagCriterion;

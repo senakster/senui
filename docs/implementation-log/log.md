@@ -532,3 +532,17 @@ Entry format: date — module · Did · Verified · Scope decisions · Plan adju
 - **Probes:** a dist-only contrast defect (fails light only), a new unannounced story (throwing play, `console.error`, image without `alt`), Switch's contract without its role, an expired exception, and a missing CSS marker each fail. One probe first ran no test at all (a `-g` that matched nothing) and was redone.
 - **Verified:** `pnpm check`; `pnpm test` (tokens 32, react 648); `pnpm test:gate` 351/351 in Chromium; the development alias resolves to the source CSS.
 - **Next:** commit PR 1 on `feature/a11y-gate-L08` and open it when Emil asks; then PR 2 (target size, reflow, text spacing, motion and its ADR, RTL, tab walk, ring, resets).
+
+## 2026-10-27 — L08 PR 2: the contract-derived checks
+
+- **Branch:** `feature/a11y-gate-L08-2` from `main` after PR #8 merged (CI green on Linux in 12 min 9 s, of which the gate took 2 min 20 s and installing Chromium 8 min 17 s).
+- **Contract:** ADR-0017 adds `adaptation.essentialMotion` (amends ADR-0008, whose revisit trigger fired on Button's spinner). The type allows it only with `motion-factor`; type-tested. Button declares it.
+- **Static RTL:** Stylelint rejects physical inline properties, `text-align: left|right`, and four-value shorthands; probed both ways (20 forms).
+- **Gate:** `adaptation.spec.ts`, `motion.spec.ts`, `tab-walk.spec.ts` and `resets.spec.ts`, with in-page helpers in `gate/browser/measure.js`. The reset fixtures are written in-house (the brand-name rule).
+- **Found:**
+  - Switch's thumb didn't mirror in a production build: Vite lowers `:dir()` to `:lang()`. Emil chose a logical property, ADR-0018 and a Stylelint guard. Recorded under L05.
+  - Harness bugs, each fixed before trusting a result: a reflow clip that fell back to the viewport; a settle wait that hung on infinite animations; a spinner measured at different angles; nested components judged by the outer contract; a hit test used as paint order; a boundary check on non-controls; a transparency test that read opaque black as transparent.
+- **Probes (decision 15):** batch A (ten built-CSS defects plus four probe stories) and batch B (`spacing-exception`, `not-a-target`, the `!important` ring) each fail for their own reason.
+- **Windows:** `net::ERR_NO_BUFFER_SPACE`, then `net::ERR_ADDRESS_IN_USE`, on single stories in full local runs (local ports exhausted). A story whose only errors are those OS socket failures loads once more; any other error, or the same twice, fails (probed three ways). Four workers did not prevent it and were dropped.
+- **Verified:** `pnpm check`; `pnpm test`: tokens 32, react 649 (two Switch browser tests now read the thumb margin, not `translate`); `pnpm test:gate` 1264 passed, 104 skipped (RTL on non-mirroring components, full motion on motion-factor ones), 7.8 min locally.
+- **Next:** commit PR 2 and open it when Emil asks; then PR 3 (forced colours, container, workflows).

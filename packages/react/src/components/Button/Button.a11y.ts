@@ -79,6 +79,8 @@ export const a11y = defineA11yContract<ButtonProps>()({
     activatesOn: 'click',
     forcedColors: 'border',
     reducedMotion: 'motion-factor',
+    // ADR-0017: the loading spinner keeps turning, four times slower, so it never reads as a hang.
+    essentialMotion: 'progress-rotation',
     rtl: 'direction-neutral',
     textOverflow: 'wraps',
   },

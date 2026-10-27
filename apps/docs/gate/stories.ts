@@ -2,7 +2,7 @@
 import { readFileSync } from 'node:fs';
 import { basename, dirname, join } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
-import { expect, type Page } from '@playwright/test';
+import { expect, type ConsoleMessage, type Page } from '@playwright/test';
 import type { A11yContract } from '../../../packages/react/src/internal/a11y/a11y-contract.js';
 
 const DOCS = fileURLToPath(new URL('..', import.meta.url));
@@ -65,6 +65,11 @@ export async function contractFor(story: GateStory): Promise<A11yContract> {
   return module.a11y;
 }
 
+/** Injects the in-page helpers (`window.__senuiMeasure`, `browser/measure.js`). */
+export async function injectMeasure(page: Page): Promise<void> {
+  await page.addScriptTag({ path: join(DOCS, 'gate/browser/measure.js') });
+}
+
 /** `EmptyState` → `senui-empty-state`, the component's public root class. */
 export function rootClass(component: string): string {
   return `senui-${component.replace(/(?<=[a-z])(?=[A-Z])/g, '-').toLowerCase()}`;
@@ -99,27 +104,47 @@ function watchStory(): void {
   });
 }
 
+/** Pages that already have the channel watcher (`addInitScript` persists across navigations). */
+const watched = new WeakSet<Page>();
+/** OS-level socket failures on a loaded machine (seen on Windows), never a story's own error. */
+const SOCKET_ERROR = /net::ERR_(ADDRESS_IN_USE|NO_BUFFER_SPACE)\b/;
+
 /**
  * Opens a story in its own page and waits until it has rendered, play function included. Fails on
  * a Storybook error, a page error, a `console.error`, or a Storybook built against source CSS.
  */
 export async function openStory(page: Page, story: GateStory): Promise<void> {
-  const problems: string[] = [];
-  page.on('pageerror', (error) => problems.push(`pageerror: ${error.message}`));
-  page.on('console', (message) => {
-    if (message.type() === 'error') problems.push(`console.error: ${message.text()}`);
-  });
-  await page.addInitScript(watchStory);
-  await page.goto(`/iframe.html?id=${story.id}&viewMode=story`);
-  await page.waitForFunction(() => {
-    const state = (window as unknown as { __senuiGate?: { rendered: boolean; errors: string[] } })
-      .__senuiGate;
-    return Boolean(state && (state.rendered || state.errors.length > 0));
-  });
-  const storybookErrors = await page.evaluate(
-    () => (window as unknown as { __senuiGate: { errors: string[] } }).__senuiGate.errors,
-  );
-  expect([...storybookErrors, ...problems], `${story.id} rendered with errors`).toEqual([]);
+  if (!watched.has(page)) {
+    await page.addInitScript(watchStory);
+    watched.add(page);
+  }
+  for (let attempt = 1; ; attempt += 1) {
+    const problems: string[] = [];
+    const onPageError = (error: Error) => problems.push(`pageerror: ${error.message}`);
+    const onConsole = (message: ConsoleMessage) => {
+      if (message.type() === 'error') problems.push(`console.error: ${message.text()}`);
+    };
+    page.on('pageerror', onPageError);
+    page.on('console', onConsole);
+    await page.goto(`/iframe.html?id=${story.id}&viewMode=story`);
+    await page.waitForFunction(() => {
+      const state = (window as unknown as { __senuiGate?: { rendered: boolean; errors: string[] } })
+        .__senuiGate;
+      return Boolean(state && (state.rendered || state.errors.length > 0));
+    });
+    const storybookErrors = await page.evaluate(
+      () => (window as unknown as { __senuiGate: { errors: string[] } }).__senuiGate.errors,
+    );
+    page.off('pageerror', onPageError);
+    page.off('console', onConsole);
+    const errors = [...storybookErrors, ...problems];
+    // The operating system refusing a socket is the machine, not the story: on Windows a full gate
+    // run (a fresh context per test) exhausted local ports and socket buffers. Load once more; any
+    // other error, or the same one twice, fails.
+    if (attempt === 1 && errors.length > 0 && errors.every((e) => SOCKET_ERROR.test(e))) continue;
+    expect(errors, `${story.id} rendered with errors`).toEqual([]);
+    break;
+  }
   // Checks measure the designed state, not a frame of an enter animation: mid-animation, boxes and
   // colours are the animation's (rule 42), and axe reported a dialog title as obscured. Infinite
   // animations (a loading spinner) never finish and are left running. The motion checks record

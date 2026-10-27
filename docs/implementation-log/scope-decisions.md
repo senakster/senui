@@ -570,6 +570,17 @@ Emil accepted all 14, rejected 0 and escalated 0, so there are no `OVERRIDES.md`
 Probes: putting the host back on the first box, narrowing the effect's dependencies, removing the
 group's reset and removing the Switch clamp each failed its new test; all restored.
 
+### Defects found later
+
+- **2026-10-27 (found in L08): Switch's thumb didn't mirror in right-to-left text in a production
+  build.** The `:where(.senui-switch__control:checked:dir(rtl))::before` rule was correct in source,
+  and every per-component test passed on source CSS. Vite's default production build lowers `:dir()`
+  to a `:lang(ar, ckb, fa, he, …)` list, so a `dir="rtl"` page in any other language left the thumb
+  on the left-to-right side. Found by the L08 gate's runtime RTL check over the built Storybook.
+  Fixed by ADR-0018: the thumb moves with `margin-inline-start`, a logical property that mirrors
+  natively; Stylelint now rejects `:dir()`. Reduced motion is unchanged (the duration is scaled, the
+  thumb still jumps the whole way).
+
 ## L06 — Dialog
 
 Plan synced 2026-10-19, with the planner's ADR-0015 (dialog scroll lock). L02, L04 and L05 were re-synced
@@ -831,3 +842,68 @@ Each failed as intended, and everything was restored in the same command:
 #### Verified
 
 `pnpm check`; `pnpm test` (tokens 32, react 648); `pnpm test:gate` 351/351 (Chromium).
+
+### PR 2 (2026-10-27): target size, reflow, text spacing, motion, RTL, tab walk, ring, resets
+
+- **ADR-0017** (amends ADR-0008, whose revisit trigger fired): an optional `adaptation.essentialMotion`
+  (`'progress-rotation'`, with `reducedMotion: 'motion-factor'` only; type-tested). Button declares
+  it for its loading spinner.
+- **ADR-0018** (Emil, 2026-10-27): component CSS never uses `:dir()`, enforced by Stylelint's
+  built-in `selector-pseudo-class-disallowed-list`. Found by the gate's runtime RTL check (below).
+- **Stylelint (decision 10, static):** physical inline properties (`margin-left`, `left`, `float`,
+  `clear`, `border-left-*`, `border-top-right-radius`…), `text-align: left|right`, and four-value
+  `margin`/`padding`/`inset`/`scroll-*`/`border-radius` shorthands are rejected. Probed both ways
+  (20 forms); component CSS was clean.
+- **Gate specs:** `adaptation.spec.ts` (target size at 1280 and 320 px, reflow at 320 px, text
+  spacing, RTL mirroring), `motion.spec.ts`, `tab-walk.spec.ts` (6a, 6b, both viewports),
+  `resets.spec.ts`; in-page helpers in `gate/browser/measure.js`.
+
+#### Deviations from the plan
+
+1. **Reflow is measured per component, not per document:** the component may not scroll sideways,
+   its content stays inside it (or inside a clipping box within it), and it fails for its own width
+   only when it pushes a container that fits the viewport past the viewport. Stories lay components
+   in fixed-width scaffolding (side-by-side comparisons, a `12ch` box), which a document-level check
+   would report as the component's fault.
+2. **The RTL runtime check flips `dir` on `<html>` after render** (`:dir()` restyles live) and waits
+   for finite animations; infinite ones are paused at their first frame for both snapshots. Stories
+   that set their own `dir` are skipped.
+3. **Motion is judged by the owning component's contract:** an animated element belongs to its
+   nearest component root (a Button's spinner inside a Dialog is judged by Button's contract).
+4. **The control-boundary check (1.4.11) applies to targets only**, not to a focused container (a
+   dialog, a heading focused by script), and skips `aria-disabled` controls.
+5. **"Painted over" follows CSS paint order**, not hit-testing: outlines aren't hit-testable, and a
+   sticky header's descendant's ring paints over the non-positioned body below it.
+6. **The reset fixtures are written in-house** (normalize-style, preflight-style), not vendored: the
+   project names no third-party products in fixtures (CLAUDE.md), and the MIT licences of the
+   well-known resets name their authors.
+7. **`truncates` on a non-input** (its full value in the accessible name) is not implemented: no
+   component uses it. Re-include when one does.
+8. **The text-spacing overlap rule compares text within one layer:** a sticky header or footer covers
+   content scrolling under it by design.
+9. **A story whose only errors are OS socket failures loads once more.** Full local runs on Windows
+   failed single stories with `net::ERR_NO_BUFFER_SPACE`, then `net::ERR_ADDRESS_IN_USE` (a fresh
+   context per test exhausted local ports; capping workers at four didn't prevent it, and CI on
+   Linux never saw it). Any other error, or the same one twice, still fails; probed all three ways.
+   Not Playwright retries, which would also hide a story's own nondeterminism. `openStory` also
+   stopped stacking listeners and init scripts when a test reopens a story.
+
+#### Defect found (Emil: fixed in L08)
+
+- **Switch's thumb didn't mirror in a consumer's production build.** Vite's default build lowers
+  `:dir(rtl)` to a `:lang(ar, he, …)` list. Fixed by moving the thumb with `margin-inline-start`
+  (ADR-0018); recorded under L05. A component-folder edit (`Switch.css`).
+
+#### Component-folder edits (Emil's authorisation)
+
+- `Button.a11y.ts`: `essentialMotion: 'progress-rotation'` (ADR-0017).
+- `Switch.css`: the thumb moves with `margin-inline-start`; the `:dir(rtl)` rule is gone (ADR-0018).
+
+#### Probes
+
+Each failed for its own reason, and everything was restored:
+
+- **Built CSS, batch A:** a 16 px small button fails target size. A moving EmptyState title fails motion in both modes, and Button's spinner without `essentialMotion` fails under reduce. A 500 px description fails reflow, and a 600 px paragraph fails it inside the top-layer dialog. A physical `margin-left` on the checkbox label fails RTL. A transparent TextInput ring and a Switch ring below 3:1 fail the tab walk. A fixed-height, clipping FormField description fails text spacing. A reset fixture that kills outlines fails every component's reset test.
+- **Probe stories:** a button inside `aria-hidden`, an unnamed button, a button covered by a fixed overlay (both viewports), and a clipped ring each fail the tab walk.
+- **Batch B:** a 2 px pair of 16 px targets under `spacing-exception` fails, and the same pair 40 px apart passes. A raw button in EmptyState's actions fails `not-a-target`. An `!important` ring "still shows" under both resets that should remove it.
+- **The batch-B ring probe first passed:** the reset check treated opaque black, `rgb(0, 0, 0)`, as transparent (a string test for `" 0)"`). Fixed to read alpha through the canvas, then re-probed.

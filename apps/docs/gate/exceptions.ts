@@ -3,7 +3,18 @@ import { readFileSync } from 'node:fs';
 import type { GateStory } from './stories.js';
 
 /** The gate's checks a story can opt out of. Grows as checks land (L08 PRs 2 to 4). */
-export const CHECKS = ['axe', 'semantics', 'test-tag'] as const;
+export const CHECKS = [
+  'axe',
+  'semantics',
+  'test-tag',
+  'target-size',
+  'reflow',
+  'text-spacing',
+  'rtl',
+  'motion',
+  'tab-walk',
+  'resets',
+] as const;
 export type Check = (typeof CHECKS)[number];
 
 export interface Exception {

@@ -51,6 +51,35 @@ describe('A11yContract', () => {
     expectTypeOf(define(minimal)).toEqualTypeOf<A11yContract<ExampleProps>>();
   });
 
+  test('essential motion only with the motion factor (ADR-0017)', () => {
+    void define({
+      ...minimal,
+      adaptation: {
+        ...minimal.adaptation,
+        reducedMotion: 'motion-factor',
+        essentialMotion: 'progress-rotation',
+      },
+    });
+    void define({
+      ...minimal,
+      adaptation: {
+        ...minimal.adaptation,
+        reducedMotion: 'no-motion',
+        // @ts-expect-error -- a component that moves nothing has no motion to keep
+        essentialMotion: 'progress-rotation',
+      },
+    });
+    void define({
+      ...minimal,
+      adaptation: {
+        ...minimal.adaptation,
+        reducedMotion: 'motion-factor',
+        // @ts-expect-error -- not a kind of essential motion
+        essentialMotion: 'pulse',
+      },
+    });
+  });
+
   test('every section is required', () => {
     const { adaptation: _omitted, ...missingASection } = minimal;
     // @ts-expect-error -- adaptation is required (ADR-0008)
