@@ -183,6 +183,15 @@ describe('contractErrors', () => {
     ]);
   });
 
+  test('a focusable component with no name needs keepFocusRing, not labelInName (L07 review)', () => {
+    expect(
+      errorsFor({
+        semantics: { ...valid.semantics, name: 'none' },
+        consumerResponsibilities: [],
+      }),
+    ).toEqual(['consumerResponsibilities must include RESPONSIBILITIES.keepFocusRing']);
+  });
+
   test('a component that never takes focus needs neither keyboard runs nor the baseline', () => {
     const errors = errorsFor({
       focus: { tabStop: 'none' },

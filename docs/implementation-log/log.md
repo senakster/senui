@@ -452,3 +452,73 @@ Entry format: date — module · Did · Verified · Scope decisions · Plan adju
 - **Renamed (Emil):** `@senakster/react` → `@senakster/senui`, `@senakster/tokens` → `@senakster/senui-tokens`, in every live file: manifests, imports, the CSS import, CI, CLAUDE.md, CONVENTIONS, READMEs and the pending changesets. History files keep the old names. The lockfile was regenerated with `pnpm install`.
 - **Verified:** `pnpm check`; `pnpm test`: tokens 32, react 552; build-storybook.
 - **Next:** L07 (EmptyState).
+
+## 2026-10-26 — L07: EmptyState written for review
+
+- **Orient:** L07's plan is current; L02 and L06 have newer plans upstream (both done, no re-sync). Local `main` was behind: PR #6 (the rename) was already merged, so the branch `feature/empty-state-L07` starts from `origin/main`.
+- **Scope (Emil):** Claude writes, Emil reviews. `rem` breakpoint through ADR-0016. New `size.illustration.*` tokens. Gates as in L03 to L06. Public API: a 30rem breakpoint; the compact layout puts the illustration beside the text; a development warning for an empty title; `description` is a `ReactNode` in a `<p>`; no `role` (Emil: "roles are context dependent, components are intended to be independent"); `aria-label` and `aria-labelledby` typed `never`. See scope-decisions § L07.
+- **L02 defect found:** Stylelint checks no unit inside an `@container` condition (a probe passed `px`, `em` and `ch`). ADR-0016 extends ADR-0015 to size container features, and `check-component-css.mjs` enforces it, along with the `senui-` container name. Probed with 14 forms.
+- **Written:** `EmptyState.tsx`, `.css` (13 `--senui-empty-state-*` tokens), `.a11y.ts`, `.test.tsx`, `.test-d.tsx`, `.browser.test.tsx`, `.stories.tsx` (13 stories), `.changeset/add-empty-state.md`; tokens `size.illustration.sm/lg`; `firstFocusable` moved to `internal/dom/focusable.ts`.
+- **Probes:** type tests (loosened types trip six `@ts-expect-error`s); unit and browser, one behaviour broken at a time: tabIndex, aria-hidden, focus grabbed on mount (caught in jsdom and by the no-results story), breakpoint moved, focus not moved after delete. `inline-size: auto` was not caught, because the table-cell story gives its cell a width; two new tests (start-aligned grid, flex row) now catch it.
+- **Verified:** `pnpm check`. `pnpm test`: tokens 32; react 633/634, with only the contract gate failing (no keyboard or screen-reader run yet). EmptyState browser tests 23/23 (Chromium). build-storybook. The step 2b invariant greps hold.
+- **Next:** Emil reviews the code and the new tokens. Then Emil's keyboard, NVDA and forced-colours runs, recorded in the contract, and then the `review-component` workflow.
+
+## 2026-10-26 — L07: NVDA and forced-colours runs
+
+- **Emil's NVDA run** (Speech Viewer, NVDA in Danish, Chrome 155): NoData read line by line ("overskrift niveau 2 No projects yet", the description, "knap Create project"; nothing from the illustration); heading navigation ("No projects yet overskrift niveau 2"); a script-focused heading in FocusVisible (same wording); NoResults at 300 ms ("No results for “x”", then "“xy”", then "“xyz”", with focus staying in the field). Recorded word for word in the contract, with screen-reader evidence on 1.3.1, 2.4.6, 4.1.3 and 4.1.2. NVDA version recorded as reported ("2026.37155"), to be confirmed.
+- **Tab-only readings** ("Create project knap") are focus mode by design: the heading and description aren't focusable. Storybook's frame announcements are the iframe artefact (rule 37).
+- **DeletedLastItem:** under NVDA, Space on Delete "did nothing". Real key presses in Chromium (Playwright) delete and move focus for both Space and Enter, now a browser test. Not yet explained; Emil to repeat with NVDA off (the keyboard run) and with Enter under NVDA.
+- **Debounce (Emil):** at 300 ms, NVDA read every intermediate result, so the NoResults story now waits 1,000 ms (`STATUS_DEBOUNCE_MS`), and the contract tells consumers to update the status once typing pauses for about a second. Not yet heard at 1,000 ms.
+- **Forced colours (Emil):** fine. Recorded, with forced-colours evidence on 1.4.11.
+- **Verified:** typecheck, ESLint; EmptyState browser tests 25/25; unit tests, where only the contract gate fails (no keyboard run).
+- **Next:** the keyboard run, the NVDA version, NoResults at 1,000 ms; then the `review-component` workflow.
+
+## 2026-10-26 — L07: keyboard run
+
+- **Emil's keyboard run** (NVDA off, Chrome): DeletedLastItem by keyboard leaves the item deleted, the status shown and focus, with its ring, on "Create report" (screenshot). Recorded, with keyboard evidence on 2.1.1, 2.4.3 and 2.4.7.
+- **Story fix:** the status paragraphs in NoResults and DeletedLastItem rendered in the browser's default serif; they now use the sans token.
+- **Verified:** `pnpm check`; `pnpm test`: tokens 32, react 636/636. The contract gate passes.
+- **Next:** the NVDA version, NoResults re-heard at 1,000 ms, then the `review-component` workflow (Emil's opt-in).
+
+## 2026-10-26 — L07: keyboard run withdrawn; play functions removed
+
+- **Correction:** the keyboard run recorded in the previous entry is withdrawn. Emil's Speech Viewer showed "Component test is rendering / running / completed successfully": Storybook runs a story's play function when the story opens, so DeletedLastItem had already deleted the item and focused "Create report" (which has no handler, hence "Space or Enter does nothing"). The screenshot showed that end state, not a keyboard run. NoResults' play function had likewise typed "xyz", so Emil's "1,000 ms is ok" may not have been hand typing.
+- **Fix:** no play functions on NoResults and DeletedLastItem; the browser tests already drive both with real keys. FocusVisible keeps its play function, since showing that state is the story's point. The 300 ms reading stays: its intermediate results show Emil's own typing.
+- **Recorded:** NVDA 2026.3 (2026.3.0.58174). Keyboard evidence removed from 2.1.1, 2.4.3 and 2.4.7.
+- **Lesson for the planner (rule 37):** a story with a play function can't host a manual run; the reader announces the play function's steps as "Component test …". Stories meant for manual runs open in their start state.
+- **Verified:** typecheck, ESLint; EmptyState unit and browser tests pass; only the contract gate fails (no keyboard run).
+- **Next:** Emil's keyboard run and NoResults at 1,000 ms, in a reloaded Storybook.
+
+## 2026-10-26 — L07: DeletedLastItem heard with NVDA
+
+- **Emil's NVDA run** on the play-free DeletedLastItem: focus on "Delete Quarterly report", then "Quarterly report deleted", "Create report knap", "Quarterly report deleted". Space or Enter now works; the earlier "does nothing" was the play function. Recorded as a consumer-owned focus-move announcement. The status is read twice, before and after the focus move; that is the app's status region and focus move, not EmptyState.
+- **Still owed:** the keyboard run with NVDA off (a reader turns keys into clicks, so this run doesn't count as one), and NoResults at 1,000 ms by hand.
+
+## 2026-10-26 — L07: keyboard run, and NoResults at 1,000 ms
+
+- **Emil's keyboard run** (NVDA off, Chrome, play-free stories): DeletedLastItem by Space and by Enter deletes the item and moves focus to "Create report" (Space shows the native pressed state, Enter clicks on key-down); NoResults keeps focus in the field. Recorded, with keyboard evidence on 2.1.1, 2.4.3 and 2.4.7.
+- **NoResults with NVDA at 1,000 ms**, typing by hand: "x", "y", "z", then one "No results for “xyz”". Recorded in the contract.
+- **Verified:** `pnpm check`; `pnpm test`: tokens 32, react 636/636 (the contract gate passes); build-storybook.
+- **Next:** the `review-component` workflow (Emil's opt-in) and triage.
+
+## 2026-10-26 — L07 review: triaged and applied
+
+- **Reviewers:** the `review-component` workflow (API, accessibility, platform) over `components/EmptyState`. 14 findings, 13 distinct; the API and accessibility reviewers both found `tabIndex` on the root.
+- **Triage with Emil (three batches):** accepted 13, rejected 0, escalated 0. No `OVERRIDES.md` rows. Details in scope-decisions § L07, "Review (2026-10-26)", A to M.
+- **Applied:** `actions` is `ReactElement | undefined` with a no-focusable warning; `tabIndex`, `aria-describedby`, `aria-description` and `aria-roledescription` are `never`; the illustration wrapper is inert; empty descriptions render nothing; a fourteenth token (description font size); illustrations of any shape fit the box; the warnings follow value changes; DeletedLastItem sets its status after the focus move; the contract has `name: 'none'` (new in L02's contract type and check), `forcedColors: 'no-states'`, 2.1.1 and 1.4.10 as "enables", and the inline-margin note.
+- **Probes:** each fix's test fails against the old behaviour (inert, status order, object-fit, empty description, title check on mount only, no actions warning). A `> *` sizing rule from the review wasn't needed by any test, a `<picture>` included, and was dropped.
+- **Verified:** `pnpm check`; `pnpm test`: tokens 32, react 648/648; EmptyState browser tests 30/30; build-storybook.
+- **Next:** Emil re-hears DeletedLastItem with NVDA (the status should now be read once, after "Create report knap"); then L07 is done and committed on request.
+
+## 2026-10-27 — L07 done
+
+- **Emil's NVDA re-check** of DeletedLastItem after review fix M: "Create report knap", then "Quarterly report deleted" once. Recorded in the contract.
+- **ADR-0016's container-name rule (Emil):** kept, as recommended, with a declared-name check: a queried `senui-` name must be declared in the same stylesheet, so a misspelled name fails instead of silently never matching. ADR-0016, the script header and CLAUDE.md say so. Probed: a typo and an undeclared name fail; `container:` and a `container-name` list pass.
+- **Acceptance:** every L07 criterion is met. Review: 13 accepted, 0 rejected, 0 escalated; no overrides. Deviations and review fixes: scope-decisions § L07.
+- **Verified:** `pnpm check`; `pnpm test`: tokens 32, react 648/648; build-storybook; the step 2b invariant greps.
+- **Next:** commit on `feature/empty-state-L07` and open a PR when Emil asks. L08 (test and a11y gate) is next and has no plan upstream yet.
+
+## 2026-10-27 — Decision index: nine scope rows fixed; L07 field report
+
+- **`catalogue-next` flagged five records it couldn't parse:** five L05 rows whose Decision cell stated the choice without `in`/`out` (the file's own format contract requires one), so they had status `other` and no filter showed them. Prefixed with `in:` (one as `in (resolved):`). Four more rows (L02 ref forwarding and contract staleness, L06 and L07 screen-reader runs) got `in` only from an incidental word in their prose; also prefixed. After a rebuild: no `other`, no incidental matches.
+- **Field report for the planner:** `modular-website-planner/docs/field-reports/2026-10-27-library-l07-senui.md` (proposals only; nothing applied to the plugin).

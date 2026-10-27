@@ -28,3 +28,8 @@ export type {
 } from './components/Dialog/Dialog.js';
 export { AlertDialog } from './components/AlertDialog/AlertDialog.js';
 export type { AlertDialogProps, AlertDialogSize } from './components/AlertDialog/AlertDialog.js';
+export { EmptyState } from './components/EmptyState/EmptyState.js';
+export type {
+  EmptyStateHeadingLevel,
+  EmptyStateProps,
+} from './components/EmptyState/EmptyState.js';

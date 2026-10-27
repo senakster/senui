@@ -23,6 +23,7 @@ ADR that supersedes it. Every ADR names what was rejected and what the choice co
 | [0013](0013-aria-invalid-always-explicit.md)       | Form controls always render `aria-invalid`, `"true"` or `"false"`                                                | Accepted                         |
 | [0014](0014-dialog-scroll-lock.md)                 | Dialog scroll lock: containment, plus a scoped root lock on by default                                           | Accepted                         |
 | [0015](0015-rem-in-media-queries.md)               | `rem` is allowed in size media queries                                                                           | Accepted                         |
+| [0016](0016-rem-in-container-queries.md)           | `rem` is allowed in size container queries, and only there                                                       | Accepted                         |
 
 ## Template
 
