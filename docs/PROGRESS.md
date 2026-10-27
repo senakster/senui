@@ -14,12 +14,17 @@ Status legend — plan: `plan-ready` · `not-planned` (plan not written yet upst
 | L05 | Checkbox / Switch                 | L05-checkbox-and-switch       | plan-ready  | done           | 2026-10-20   |
 | L06 | Dialog                            | L06-dialog                    | plan-ready  | done           | 2026-10-21   |
 | L07 | EmptyState                        | L07-empty-state               | plan-ready  | done           | 2026-10-27   |
-| L08 | Test & a11y gate                  | L08-test-and-a11y-gate        | plan-ready  | in-progress    | 2026-10-27   |
+| L08 | Test & a11y gate                  | L08-test-and-a11y-gate        | plan-ready  | done           | 2026-10-27   |
 | L09 | Docs & machine-readable manifest  | —                             | not-planned | not-started    | 2026-10-15   |
 | L10 | Release, versioning & deprecation | —                             | not-planned | not-started    | 2026-10-15   |
 | L11 | Motion                            | —                             | not-planned | not-started    | 2026-10-15   |
 
 ## Changelog
+
+- **2026-10-27** — L08 done. PR 4 merged as #11.
+  - **On `main`:** the three-engine gate passed (3,918 tests, 33 min 46 s), and the first `react-18` CI run passed (886/886 on React 18.3.1).
+  - **PR gate budget (Emil):** the gate step is held to 10 min, from 8 min 41 s on #11. It has a 15-min timeout against hangs.
+  - **Acceptance criteria:** all met. The narrowings are in scope-decisions § L08.
 
 - **2026-10-27** — L08, PR 4 of 4: SSR and hydration, React 18.3, keyboard traceability. Built, not yet committed.
   - PR 3 merged as #10. On `main` its CI passed. The first three-engine gate failed 5 of 3,918, from two harness defects and one story's raw button, all fixed here.
