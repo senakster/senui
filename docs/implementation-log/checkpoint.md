@@ -4,13 +4,13 @@ Single source of truth for **where the implementation is right now**. Overwritte
 `implement-module` skill at the end of every run. For history, see `log.md`; for status, see
 `docs/PROGRESS.md`.
 
-| Field         | Value                                                                                                 |
-| ------------- | ----------------------------------------------------------------------------------------------------- |
-| Target app    | repo root (pnpm workspace: `packages/tokens`, `packages/react`, `apps/docs`)                          |
-| Active module | L09 — Docs & machine-readable manifest (in progress)                                                  |
-| Sub-step      | PRs 1–2 merged (#13, #14); PR 3 built and verified, uncommitted on `feature/docs-L09-3`; Emil reviews |
-| Last verified | 2026-10-28: `pnpm check`; `pnpm test` tokens 32, react 952; gate 1480 passed, 0 failed                |
-| Updated       | 2026-10-28                                                                                            |
+| Field         | Value                                                                                                          |
+| ------------- | -------------------------------------------------------------------------------------------------------------- |
+| Target app    | repo root (pnpm workspace: `packages/tokens`, `packages/react`, `apps/docs`)                                   |
+| Active module | L09 — Docs & machine-readable manifest (in progress)                                                           |
+| Sub-step      | PRs 1–2 merged (#13, #14); PR 3 open (#15); PR 4 (Pages deploy) built on `feature/docs-L09-4`, stacked on PR 3 |
+| Last verified | 2026-10-28: `pnpm check`; `pnpm test` tokens 32, react 952; gate 1480 passed, 0 failed                         |
+| Updated       | 2026-10-28                                                                                                     |
 
 ## Brief
 
