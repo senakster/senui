@@ -33,7 +33,8 @@ async function runAxe(
   exclude: readonly string[],
   only?: readonly string[],
 ): Promise<string[]> {
-  await page.addScriptTag({ path: AXE });
+  // Once per page: the combined test below runs axe four times on one load.
+  if (!(await page.evaluate(() => 'axe' in window))) await page.addScriptTag({ path: AXE });
   const results = await page.evaluate(
     async ({ tags, exclude: excluded, only: rules }) => {
       const axe = (
@@ -68,11 +69,14 @@ async function runAxe(
         },
       );
       // Axe can't compute the contrast of text scrolled out of view inside a scroll region (it
-      // reports it "partially obscured"). Each such element is scrolled into its region's view
-      // and checked again on its own; only what is still incomplete, or fails, is reported.
+      // reports it "partially obscured"). Those elements are scrolled into view, region by region,
+      // and every one visible at that scroll position is checked again in a single axe run (one run
+      // per element cost several seconds a page at 320 px). Only what is still incomplete, or
+      // fails, is reported.
       const incompleteContrast: typeof result.incomplete = [];
       for (const finding of result.incomplete.filter((r) => r.id === 'color-contrast')) {
         const still: { target: string[] }[] = [];
+        const byRegion = new Map<Element, { node: { target: string[] }; el: Element }[]>();
         for (const node of finding.nodes) {
           const el = document.querySelector(node.target.join(' '));
           const region = el?.closest('.docs-scroll, .docs-canvas');
@@ -80,18 +84,45 @@ async function runAxe(
             still.push(node);
             continue;
           }
-          el.scrollIntoView({ block: 'center', inline: 'nearest' });
-          const again = await axe.run(
-            { include: [el] },
-            {
-              runOnly: { type: 'rule', values: ['color-contrast'] },
-              resultTypes: ['violations', 'incomplete'],
-            },
+          const items = byRegion.get(region) ?? [];
+          items.push({ node, el });
+          byRegion.set(region, items);
+        }
+        const inView = (el: Element, box: DOMRect) => {
+          const r = el.getBoundingClientRect();
+          return (
+            r.left >= box.left - 0.5 &&
+            r.right <= box.right + 0.5 &&
+            r.top >= 0 &&
+            r.bottom <= window.innerHeight
           );
-          region.scrollLeft = 0;
-          if (again.violations.length > 0) {
+        };
+        for (const [region, items] of byRegion) {
+          let left = items;
+          while (left.length > 0) {
+            const [first] = left;
+            if (!first) break;
+            first.el.scrollIntoView({ block: 'center', inline: 'nearest' });
+            const box = region.getBoundingClientRect();
+            const visible = left.filter(({ el }) => inView(el, box));
+            const batch = visible.length > 0 ? visible : [first];
+            const again = await axe.run(
+              { include: batch.map(({ el }) => [el]) },
+              {
+                runOnly: { type: 'rule', values: ['color-contrast'] },
+                resultTypes: ['violations', 'incomplete'],
+              },
+            );
             result.violations.push(...again.violations);
-          } else if (again.incomplete.length > 0) still.push(node);
+            const unresolved = new Set(
+              again.incomplete.flatMap((r) =>
+                r.nodes.map((n) => document.querySelector(n.target.join(' '))),
+              ),
+            );
+            for (const item of batch) if (unresolved.has(item.el)) still.push(item.node);
+            left = left.filter((item) => !batch.includes(item));
+          }
+          region.scrollLeft = 0;
         }
         if (still.length > 0) incompleteContrast.push({ ...finding, nodes: still });
       }
@@ -114,21 +145,33 @@ async function runAxe(
 
 const docsEntries = loadDocs();
 
-for (const scheme of ['light', 'dark'] as const) {
-  for (const width of [1280, 320]) {
-    test.describe(`docs page axe, ${scheme}, ${String(width)} px`, () => {
-      test.use({ colorScheme: scheme, viewport: { width, height: 800 } });
-      for (const docs of docsEntries) {
-        test(docs.id, async ({ page }) => {
-          await openDocs(page, docs);
-          expect(
-            await runAxe(page, DOCS_EXCLUDE),
-            `${docs.id} in ${scheme} at ${String(width)} px`,
-          ).toEqual([]);
-        });
+// One page load per docs page: each scheme and width is applied in place (the docs surface follows
+// `color-scheme` live, and a resize reflows it), because loading the page and waiting for every
+// inline story was most of the cost when each combination loaded it again.
+for (const docs of docsEntries) {
+  test(`docs page axe, light and dark, 1280 and 320 px: ${docs.id}`, async ({ page }) => {
+    // Four axe runs, so four tests' worth of time.
+    test.setTimeout(120_000);
+    await page.setViewportSize({ width: 1280, height: 800 });
+    await page.emulateMedia({ colorScheme: 'light' });
+    await openDocs(page, docs);
+    const failures: string[] = [];
+    for (const scheme of ['light', 'dark'] as const) {
+      await page.emulateMedia({ colorScheme: scheme });
+      for (const width of [1280, 320]) {
+        await page.setViewportSize({ width, height: 800 });
+        // Let the new scheme and width settle before measuring: two frames.
+        await page.evaluate(
+          () =>
+            new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve))),
+        );
+        for (const failure of await runAxe(page, DOCS_EXCLUDE)) {
+          failures.push(`${scheme}, ${String(width)} px: ${failure}`);
+        }
       }
-    });
-  }
+    }
+    expect(failures, docs.id).toEqual([]);
+  });
 }
 
 /** Headings in the docs root, inline stories included, framed ones (their own documents) not. */

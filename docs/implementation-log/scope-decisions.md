@@ -1374,3 +1374,22 @@ components-emptystate--title-only` timed out waiting for the story to render, wi
 - Also in this PR: the published gate run, the workflow comments and CONVENTIONS rule 10 say Firefox
   and WebKit run on demand, because the three-engine workflow is disabled for budget reasons
   (§ L08, "After done").
+
+#### The gate's time budget (2026-10-28, after #15's first CI run)
+
+- **The cause.** On CI's default 2 Playwright workers, the 99 docs-page tests pushed the gate step
+  past its 15-minute timeout. 1,483 tests had passed and none had failed when it was stopped.
+- **Workers (Emil: "4 workers in CI, then measure").** The runner has 4 vCPUs, so CI now runs 4
+  workers; local runs keep Playwright's default. The step then passed in 13 min 56 s, still over
+  the 10-minute budget, so the runner's CPU isn't the limit.
+- **Emil: "try cheaper checks and raise budget and timeout."**
+  - The four docs-page axe runs (light and dark, 1280 and 320 px) now share one page load per docs
+    page, with the scheme and width switched in place. Axe is injected once per page.
+  - At 320 px, the contrast re-check is batched: every scrolled-out element visible at one scroll
+    position is checked in a single axe run, not one run per element.
+  - Locally the docs tests went from 490 s to 400 s of test time; the axe part from about 246 s to
+    156 s.
+  - Probe: a dark-only contrast break in the docs CSS fails in dark at both widths and never in
+    light. Restored and rebuilt.
+  - **Budget:** the gate step is now held to 15 minutes, up from L08's 10, with a 25-minute
+    timeout against hangs.
