@@ -19,7 +19,7 @@ export const a11y = defineA11yContract<FormFieldProps>()({
     ],
     hiddenFromAT: ['the required marker (*)', 'the error icon'],
     notes:
-      'Sets the control\'s `aria-invalid` ("true" or "false", never absent: ADR-0013) from `error`, or from a native constraint error after a submit attempt, and its `required` from `required`. aria-errormessage is not used (L04 decision 2).',
+      'Sets the control\'s `aria-invalid` ("true" or "false", never absent: ADR-0013) from `error`, or from a native constraint error after a submit attempt, and its `required` from `required`. aria-errormessage is not used.',
   },
   keyboard: [],
   focus: { tabStop: 'none' },
@@ -30,6 +30,7 @@ export const a11y = defineA11yContract<FormFieldProps>()({
       owner: 'component',
       announces:
         '"Email, edit, Please fill out this field." (Narrator in English, Chrome; NativeValidation story with Name filled in): label, role, then the browser’s message from the error node. Required and invalid are also read (exact wording not transcribed). With both fields empty, focus lands on Name.',
+      language: 'en',
     },
     {
       when: 'When `error` changes and `announce="polite"` is set',
@@ -112,8 +113,9 @@ export const a11y = defineA11yContract<FormFieldProps>()({
     {
       // Narrator in English on a Danish system: NativeValidation, SubmitWithErrors, AnnounceOnChange.
       method: 'screen reader',
-      at: 'Narrator (English)',
+      at: 'Narrator',
       atVersion: 'Windows 11 26H2 (build 26300.9711)',
+      language: 'en',
       browser: 'Chrome',
       browserVersion: '155.0.8059.40',
       os: 'Windows 11 Pro 26H2 (build 26300.9711)',
@@ -124,7 +126,7 @@ export const a11y = defineA11yContract<FormFieldProps>()({
     {
       method: 'forced colours',
       detail:
-        'Chrome 155.0.8059.40, ForcedColors story (Emil): the error icon and message, the required marker and the description stay readable.',
+        'Chrome 155.0.8059.40, ForcedColors story: the error icon and message, the required marker and the description stay readable.',
       result: 'pass',
       date: '2026-10-19',
     },

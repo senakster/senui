@@ -26,6 +26,7 @@ ADR that supersedes it. Every ADR names what was rejected and what the choice co
 | [0016](0016-rem-in-container-queries.md)           | `rem` is allowed in size container queries, and only there                                                       | Accepted                         |
 | [0017](0017-contract-essential-motion.md)          | Contracts declare essential motion                                                                               | Accepted                         |
 | [0018](0018-no-dir-pseudo-class.md)                | Component CSS mirrors with logical properties, never `:dir()`                                                    | Accepted                         |
+| [0019](0019-screen-reader-run-language.md)         | Screen-reader runs record their language                                                                         | Accepted                         |
 
 ## Template
 

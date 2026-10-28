@@ -38,6 +38,7 @@ export const a11y = defineA11yContract<ButtonProps>()({
       mechanism: 'focus',
       owner: 'component',
       announces: '"Save, button" (Narrator, Chrome)',
+      language: 'en',
     },
     {
       when: 'While loading',
@@ -45,6 +46,7 @@ export const a11y = defineA11yContract<ButtonProps>()({
       owner: 'component',
       announces:
         '"Save, button, disabled" (Narrator, Chrome). The name does not change and the spinner is silent.',
+      language: 'en',
     },
     {
       when: 'When a loading action finishes or fails',
@@ -58,7 +60,8 @@ export const a11y = defineA11yContract<ButtonProps>()({
       mechanism: 'state-change',
       owner: 'component',
       announces:
-        '"Bold, toggle button, slået fra" (Narrator in Danish, Chrome; "slået fra" is "not pressed").',
+        '"Bold, toggle button, slået fra" (Narrator in Danish, Chrome; "slået fra" means not pressed).',
+      language: 'da',
     },
   ],
   requiredProps: [
@@ -157,6 +160,7 @@ export const a11y = defineA11yContract<ButtonProps>()({
       method: 'screen reader',
       at: 'Narrator',
       atVersion: 'Windows 11 26H2 (build 26300.9711)',
+      language: 'en',
       browser: 'Chrome',
       browserVersion: '155.0.8059.40',
       os: 'Windows 11 Pro 26H2 (build 26300.9711)',
@@ -167,8 +171,9 @@ export const a11y = defineA11yContract<ButtonProps>()({
     {
       // After the review fixes: the toggle button (aria-pressed) and the aria-hidden icon wrapper.
       method: 'screen reader',
-      at: 'Narrator (Danish)',
+      at: 'Narrator',
       atVersion: 'Windows 11 26H2 (build 26300.9711)',
+      language: 'da',
       browser: 'Chrome',
       browserVersion: '155.0.8059.40',
       os: 'Windows 11 Pro 26H2 (build 26300.9711)',

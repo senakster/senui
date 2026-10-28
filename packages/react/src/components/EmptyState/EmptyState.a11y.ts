@@ -8,11 +8,9 @@ export const a11y = defineA11yContract<EmptyStateProps>()({
     name: 'none',
     states: [],
     relationships: [],
-    hiddenFromAT: [
-      'the illustration (always inside aria-hidden="true" and inert; L07 decision 4 and review)',
-    ],
+    hiddenFromAT: ['the illustration (always inside aria-hidden="true" and inert)'],
     notes:
-      'A plain <div> with no role, so no landmark: an empty state in every table and card would flood the landmark list (L07 decision 3). The heading (h2 to h6, from headingLevel) is what a screen-reader user finds by heading navigation, and the only focusable part, by script only (tabindex="-1"). No live region and no focus moves of its own (decisions 7 and 8). The root takes no `role`, `tabIndex`, `aria-label`, `aria-labelledby`, `aria-describedby`, `aria-description` or `aria-roledescription`; `aria-live` and event handlers pass through.',
+      'A plain <div> with no role, so no landmark: an empty state in every table and card would flood the landmark list. The heading (h2 to h6, from headingLevel) is what a screen-reader user finds by heading navigation, and the only focusable part, by script only (tabindex="-1"). No live region and no focus moves of its own. The root takes no `role`, `tabIndex`, `aria-label`, `aria-labelledby`, `aria-describedby`, `aria-description` or `aria-roledescription`; `aria-live` and event handlers pass through.',
   },
   keyboard: [
     {
@@ -31,7 +29,8 @@ export const a11y = defineA11yContract<EmptyStateProps>()({
       mechanism: 'reading',
       owner: 'component',
       announces:
-        'Heard (NVDA Speech Viewer, NVDA in Danish, Chrome, 2026-10-26, NoData story). Reading line by line: "overskrift niveau 2 No projects yet", "Projects you create or are invited to appear here.", "knap Create project" ("overskrift" is "heading", "knap" is "button"); nothing from the illustration. By heading navigation (H): "No projects yet overskrift niveau 2". Tabbing reaches only the actions, so it announces "Create project knap" alone, by design.',
+        'Heard (NVDA Speech Viewer, NVDA in Danish, Chrome, 2026-10-26, NoData story). Reading line by line: "overskrift niveau 2 No projects yet", "Projects you create or are invited to appear here.", "knap Create project" ("overskrift" means heading, "knap" means button); nothing from the illustration. By heading navigation (H): "No projects yet overskrift niveau 2". Tabbing reaches only the actions, so it announces "Create project knap" alone, by design.',
+      language: 'da',
     },
     {
       when: 'When your script focuses the heading (headingRef)',
@@ -39,13 +38,15 @@ export const a11y = defineA11yContract<EmptyStateProps>()({
       owner: 'consumer',
       announces:
         'Heard (NVDA Speech Viewer, in Danish, Chrome, 2026-10-26, FocusVisible story): "No projects yet overskrift niveau 2".',
+      language: 'da',
     },
     {
       when: 'When the last item is deleted and your app moves focus to the first action',
       mechanism: 'focus-move',
       owner: 'consumer',
       announces:
-        'Heard (NVDA Speech Viewer, in Danish, Chrome, 2026-10-27, DeletedLastItem story, which sets the status after the focus move): "Create report knap", then "Quarterly report deleted" once. Before that change (2026-10-26) the status was read twice, before and after the focus move (review).',
+        'Heard (NVDA Speech Viewer, in Danish, Chrome, 2026-10-27, DeletedLastItem story, which sets the status after the focus move): "Create report knap", then "Quarterly report deleted" once. Before that change (2026-10-26) the status was read twice, before and after the focus move.',
+      language: 'da',
     },
     {
       when: 'When the view becomes empty after a user action (a filter that matches nothing, the last item deleted)',
@@ -53,7 +54,8 @@ export const a11y = defineA11yContract<EmptyStateProps>()({
       politeness: 'polite',
       owner: 'consumer',
       announces:
-        'Nothing from EmptyState (L07 decision 7). Update your own `role="status"` region, already in the page before the change, with the result, updated once the user has stopped typing for about a second. Heard with an earlier 300 ms debounce (NVDA Speech Viewer, in Danish, Chrome, 2026-10-26), typing x, y, z: "No results for “x”", "No results for “xy”", "No results for “xyz”", with focus staying in the field. With key echo, a screen-reader user types slower than 300 ms, so every intermediate result was read. At the NoResults story’s 1,000 ms (Emil’s choice), typing x, y, z by hand: "x", "y", "z", then one "No results for “xyz”" after the pause.',
+        'Nothing from EmptyState. Update your own `role="status"` region, already in the page before the change, with the result, updated once the user has stopped typing for about a second. Heard with an earlier 300 ms debounce (NVDA Speech Viewer, in Danish, Chrome, 2026-10-26), typing x, y, z: "No results for “x”", "No results for “xy”", "No results for “xyz”", with focus staying in the field. With key echo, a screen-reader user types slower than 300 ms, so every intermediate result was read. At the NoResults story’s 1,000 ms, typing x, y, z by hand: "x", "y", "z", then one "No results for “xyz”" after the pause.',
+      language: 'da',
     },
   ],
   requiredProps: [
@@ -63,7 +65,7 @@ export const a11y = defineA11yContract<EmptyStateProps>()({
     },
     {
       props: ['headingLevel'],
-      why: 'Only you know where the empty state sits in the page outline, so there is no default; 1 is a type error (L07 decision 1, WCAG 1.3.1).',
+      why: 'Only you know where the empty state sits in the page outline, so there is no default; 1 is a type error (WCAG 1.3.1).',
     },
   ],
   consumerResponsibilities: [
@@ -171,6 +173,7 @@ export const a11y = defineA11yContract<EmptyStateProps>()({
       method: 'screen reader',
       at: 'NVDA',
       atVersion: '2026.3 (2026.3.0.58174)',
+      language: 'da',
       browser: 'Chrome',
       browserVersion: '155.0.8059.40',
       os: 'Windows 11 Pro 26H2 (build 26300.9711)',
@@ -181,7 +184,7 @@ export const a11y = defineA11yContract<EmptyStateProps>()({
     {
       method: 'forced colours',
       detail:
-        'Chrome, DevTools Rendering forced-colors: active, EmptyState ForcedColors story (Emil): text and illustration visible in the compact and stacked layouts.',
+        'Chrome, DevTools Rendering forced-colors: active, EmptyState ForcedColors story: text and illustration visible in the compact and stacked layouts.',
       result: 'pass',
       date: '2026-10-26',
     },

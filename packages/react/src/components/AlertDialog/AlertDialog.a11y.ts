@@ -11,7 +11,7 @@ export const a11y = defineA11yContract<AlertDialogProps>()({
     states: [
       {
         attribute: 'open',
-        when: 'While open, set by showModal(), which makes the dialog modal. Never rendered by React (L06 decision 1)',
+        when: 'While open, set by showModal(), which makes the dialog modal. Never rendered by React',
       },
     ],
     relationships: [
@@ -24,7 +24,7 @@ export const a11y = defineA11yContract<AlertDialogProps>()({
     ],
     hiddenFromAT: ['the rest of the page, made inert by showModal() (no aria-hidden is set)'],
     notes:
-      'Dialog’s behaviour with role="alertdialog" (L06 decision 13): a required description and Cancel, focus on Cancel, no backdrop dismiss and no close button. Esc cancels.',
+      'Dialog’s behaviour with role="alertdialog": a required description and Cancel, focus on Cancel, no backdrop dismiss and no close button. Esc cancels.',
   },
   keyboard: [
     {
@@ -35,7 +35,7 @@ export const a11y = defineA11yContract<AlertDialogProps>()({
     {
       keys: ['Tab', 'Shift+Tab'],
       action:
-        'Moves between Cancel, the action and any controls in the content; the page behind is inert. Past the last control, focus may reach the browser’s own UI, by design (L06 decision 12)',
+        'Moves between Cancel, the action and any controls in the content; the page behind is inert. Past the last control, focus may reach the browser’s own UI, by design',
     },
     { keys: ['Enter', 'Space'], action: 'Activates the focused button (Cancel on open)' },
   ],
@@ -50,7 +50,8 @@ export const a11y = defineA11yContract<AlertDialogProps>()({
       mechanism: 'focus-move',
       owner: 'component',
       announces:
-        'Heard (NVDA Speech Viewer, NVDA 2026.2 in Danish, Chrome, 2026-10-21): "Delete project? dialog Its files and history are deleted for everyone. This can’t be undone.", then "Cancel knap" ("knap" is "button"). NVDA says "dialog" for the alertdialog role here; Chromium exposes the role as alertdialog, with the name and description (probed through CDP).',
+        'Heard (NVDA Speech Viewer, NVDA 2026.2 in Danish, Chrome, 2026-10-21): "Delete project? dialog Its files and history are deleted for everyone. This can’t be undone.", then "Cancel knap" ("knap" means button). NVDA says "dialog" for the alertdialog role here; Chromium exposes the role as alertdialog, with the name and description (probed through CDP).',
+      language: 'da',
     },
     {
       when: 'On close',
@@ -58,6 +59,7 @@ export const a11y = defineA11yContract<AlertDialogProps>()({
       owner: 'component',
       announces:
         'Heard (NVDA Speech Viewer, in Danish, Chrome, 2026-10-21): "Delete project knap", the trigger, after Cancel. Not yet heard for finalFocus.',
+      language: 'da',
     },
     {
       when: 'When the action completes',
@@ -65,21 +67,21 @@ export const a11y = defineA11yContract<AlertDialogProps>()({
       politeness: 'polite',
       owner: 'consumer',
       announces:
-        'Nothing from AlertDialog. Announce the result ("Project deleted") with your own status message (WCAG 4.1.3).',
+        'Nothing from AlertDialog. Announce the result (for example, Project deleted) with your own status message (WCAG 4.1.3).',
     },
   ],
   requiredProps: [
     {
       props: ['title', 'aria-label', 'aria-labelledby'],
-      why: 'Without a name, a screen reader says just "alert dialog" (L06 decision 6).',
+      why: 'Without a name, a screen reader says just "alert dialog".',
     },
     {
       props: ['description'],
-      why: 'The consequence the user is confirming; read on open (L06 decision 13).',
+      why: 'The consequence the user is confirming; read on open.',
     },
     {
       props: ['cancelLabel'],
-      why: 'Cancel is the way out and takes focus; its text is translated by you (L06 decision 13).',
+      why: 'Cancel is the way out and takes focus; its text is translated by you.',
     },
   ],
   consumerResponsibilities: [
@@ -164,6 +166,7 @@ export const a11y = defineA11yContract<AlertDialogProps>()({
       method: 'screen reader',
       at: 'NVDA',
       atVersion: '2026.2 (2026.2.0.57764)',
+      language: 'da',
       browser: 'Chrome',
       browserVersion: '155.0.8059.40',
       os: 'Windows 11 Pro 26H2 (build 26300.9711)',
@@ -174,7 +177,7 @@ export const a11y = defineA11yContract<AlertDialogProps>()({
     {
       method: 'forced colours',
       detail:
-        'Chrome, DevTools Rendering forced-colors: active, AlertDialog ForcedColors story (Emil): the dialog border and the keyboard focus ring visible.',
+        'Chrome, DevTools Rendering forced-colors: active, AlertDialog ForcedColors story: the dialog border and the keyboard focus ring visible.',
       result: 'pass',
       date: '2026-10-21',
     },
@@ -188,7 +191,7 @@ export const a11y = defineA11yContract<AlertDialogProps>()({
     },
     {
       issue:
-        'Tab past the last control can reach the browser’s address bar and tabs. This is how native modal dialogs work, and not a keyboard trap (L06 decision 12).',
+        'Tab past the last control can reach the browser’s address bar and tabs. This is how native modal dialogs work, and not a keyboard trap.',
       workaround: 'None needed: Shift+Tab or a click returns to the dialog.',
     },
   ],

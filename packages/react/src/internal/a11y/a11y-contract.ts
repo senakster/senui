@@ -155,8 +155,17 @@ export type Announcement = {
   readonly when: string;
   /** Whether the component produces it, or the consumer must. */
   readonly owner: 'component' | 'consumer';
-  /** An example of what was heard, with the assistive technology named in `testedWith`. */
+  /**
+   * An example of what was heard, with the assistive technology named in `testedWith`. Double
+   * quotes mark verbatim speech and nothing else; write a gloss unquoted (`"til" means on`), so the
+   * published docs can mark only the speech with its language (ADR-0019).
+   */
   readonly announces: string;
+  /**
+   * The language of the speech quoted in `announces` (BCP 47, e.g. `'da'`). Required when it quotes
+   * speech, and must be the language of one of the contract's screen-reader runs (ADR-0019).
+   */
+  readonly language?: string;
 } & (
   | { readonly mechanism: 'live-region'; readonly politeness: 'polite' | 'assertive' }
   | { readonly mechanism: 'focus' | 'focus-move' | 'state-change' | 'name-change' | 'reading' }
@@ -223,6 +232,8 @@ export type TestRun =
       readonly method: 'screen reader';
       readonly at: string;
       readonly atVersion: string;
+      /** The language of the reader's speech in this run (BCP 47, e.g. `'da'`). ADR-0019. */
+      readonly language: string;
       readonly browser: string;
       readonly browserVersion: string;
       readonly os: string;

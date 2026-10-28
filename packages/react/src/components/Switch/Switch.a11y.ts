@@ -16,7 +16,7 @@ export const a11y = defineA11yContract<SwitchProps>()({
       { attribute: 'disabled', when: 'Disabled; it then leaves the tab order' },
       {
         attribute: 'aria-invalid',
-        when: 'Always "false": a switch is never invalid (L05 decision 8), and the explicit value stops a native custom validity being announced (ADR-0013)',
+        when: 'Always "false": a switch is never invalid, and the explicit value stops a native custom validity being announced (ADR-0013)',
       },
     ],
     relationships: [
@@ -29,7 +29,7 @@ export const a11y = defineA11yContract<SwitchProps>()({
     ],
     hiddenFromAT: ['the thumb'],
     notes:
-      'A native checkbox with role="switch" (L05 decision 1), not a button. No Safari `switch` attribute (decision 2), no indeterminate, required or error (decision 8), and no visible On/Off text (decision 10).',
+      'A native checkbox with role="switch", not a button. No Safari `switch` attribute, no indeterminate, required or error, and no visible On/Off text.',
   },
   keyboard: [{ keys: ['Space'], action: 'Turns it on or off' }],
   focus: { tabStop: 'native', indicator: 'focus-ring' },
@@ -39,14 +39,16 @@ export const a11y = defineA11yContract<SwitchProps>()({
       mechanism: 'focus',
       owner: 'component',
       announces:
-        '"Wi-Fi, switch, til" (NVDA in Danish, Chrome; "til" is "on", "fra" is "off"). Where a reader doesn’t map the role, "checkbox, checked" would still give the state (L05 decision 1).',
+        '"Wi-Fi, switch, til" (NVDA in Danish, Chrome; "til" means on, "fra" means off). Where a reader doesn’t map the role, a checked checkbox would still give the state.',
+      language: 'da',
     },
     {
       when: 'When toggled',
       mechanism: 'state-change',
       owner: 'component',
       announces:
-        '"fra", then "til" ("off", "on"; NVDA in Danish, Chrome): the state only, the name isn’t repeated and never changes.',
+        '"fra", then "til" (off, on; NVDA in Danish, Chrome): the state only, the name isn’t repeated and never changes.',
+      language: 'da',
     },
     {
       when: 'When the setting it controls fails to apply',
@@ -59,13 +61,13 @@ export const a11y = defineA11yContract<SwitchProps>()({
   requiredProps: [
     {
       props: ['label', 'aria-label', 'aria-labelledby'],
-      why: 'A switch has no text content: a visible label, or an ARIA name (L05 decision 5).',
+      why: 'A switch has no text content: a visible label, or an ARIA name.',
     },
   ],
   consumerResponsibilities: [
     RESPONSIBILITIES.keepFocusRing,
-    'Use a Switch only for a setting that takes effect at once. If it applies when the user saves a form, use a Checkbox (L05 decision 9).',
-    'If you add visible "On"/"Off" text, hide it from assistive technology and keep it outside the label: the role already announces the state (L05 decision 10).',
+    'Use a Switch only for a setting that takes effect at once. If it applies when the user saves a form, use a Checkbox.',
+    'If you add visible "On"/"Off" text, hide it from assistive technology and keep it outside the label: the role already announces the state.',
     'If the change is applied asynchronously and fails, set the switch back and announce why.',
   ],
   adaptation: {
@@ -138,6 +140,7 @@ export const a11y = defineA11yContract<SwitchProps>()({
       method: 'screen reader',
       at: 'NVDA',
       atVersion: 'not recorded',
+      language: 'da',
       browser: 'Chrome',
       browserVersion: '155.0.8059.40',
       os: 'Windows 11 Pro 26H2 (build 26300.9711)',
@@ -148,7 +151,7 @@ export const a11y = defineA11yContract<SwitchProps>()({
     {
       method: 'forced colours',
       detail:
-        'Chrome 155.0.8059.40, ForcedColors story (Emil): track and thumb visible, on and off, enabled and disabled.',
+        'Chrome 155.0.8059.40, ForcedColors story: track and thumb visible, on and off, enabled and disabled.',
       result: 'pass',
       date: '2026-10-20',
     },

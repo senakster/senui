@@ -3,7 +3,7 @@
 senui's React components: native elements, plain CSS on design tokens, and an accessibility
 contract for each component.
 
-> **Pre-release.** Not yet published. The first component, Button, is in progress.
+> **Pre-release.** Not yet published to npm.
 
 ## Install
 
@@ -100,6 +100,12 @@ entirely:
 
 The [`@senakster/senui-tokens` README](../tokens/README.md) covers every token and override.
 
+## Server rendering
+
+Components render on the server and hydrate without a mismatch, on React 18.3 and 19. Nothing reads
+`window` or `document` during render, and generated ids come from `useId`. The CSS is plain
+stylesheets, so there is nothing to collect on the server: load it as above.
+
 ## Accessibility
 
 Each component has an accessibility contract, kept next to its source in the repository
@@ -107,6 +113,25 @@ Each component has an accessibility contract, kept next to its source in the rep
 keyboard behaviour, focus handling, what it announces, how it adapts (target size, forced colours,
 reduced motion, right-to-left text), the WCAG 2.2 criteria it meets or helps you meet, how it was
 tested, and what your app is still responsible for. Read a component's contract before relying on it.
+
+A component can't conform to WCAG on its own; only a page can. A contract says which criteria the
+component meets by itself and which it lets your page meet if you follow its responsibilities.
+Criteria it doesn't list aren't claimed.
+
+### What senui doesn't do for your page
+
+These belong to your app, whichever components you use:
+
+- A page title and `lang` on `<html>`.
+- Landmarks (`<header>`, `<nav>`, `<main>`, `<footer>`) and a skip link to the main content.
+- The heading outline. Components that render a heading (Dialog, EmptyState) take the level from
+  you, so pick it from where they sit.
+- One status message region (`role="status"`), in the page before it is needed, for messages such
+  as "Saved" or "3 results".
+- No global reset that removes focus outlines (see "Keep the focus ring" above).
+- `scrollbar-gutter: stable` on `html`, so the page doesn't shift when a dialog locks scrolling.
+- Leaving `color-scheme` and forced-colours mode to the user, unless you set `data-theme` on
+  purpose.
 
 Types enforce what they can: an icon-only `Button` without `aria-label` or `aria-labelledby` doesn't
 compile. In development, components also warn about what types can't catch, such as an empty

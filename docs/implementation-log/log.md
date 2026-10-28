@@ -629,3 +629,34 @@ Entry format: date — module · Did · Verified · Scope decisions · Plan adju
   `HOME: /root`. It is harmless, has been there since PR 3, and was left as it is.
 - **Next:** L09 has no plan yet. Plan it in the planner, then sync it here. The TextInput Home/End
   row stays open (L04, cross-module notes).
+
+## 2026-10-28 — L09 planned; PR 1 (data foundations) built
+
+- **Plan:** written in the planner with Emil (`L09-docs-and-manifest.md`).
+  - Reviewed by `component-api-reviewer`, `wcag-auditor` and `modern-web-curator`: about 70
+    findings, all accepted, two moved to Out of scope.
+  - Vendored into the plugin and re-synced here; all 11 plans current.
+- **Emil's calls:**
+  - four PRs;
+  - Claude writes all `.docs.ts` files and Emil reviews them;
+  - ADR-0019 extended to announcements;
+  - Checkbox's run is Danish.
+- **Corrected:**
+  - **Props types.** A one-line grep reported `DialogProps`, `TextInputProps` and `EmptyStateProps`
+    as unexported. They are exported, in multi-line blocks. The scope row was withdrawn; no API
+    change.
+  - **Play functions.** A play-function listing misattributed `play` to the wrong story, which first
+    made a correct check look dead.
+- **Built:**
+  - the nightly removal;
+  - ADR-0019, the type and its runtime rules;
+  - the nine contracts cleaned up (agent-drafted, reviewed: two code spans restored, one Danish
+    quote made prose);
+  - `ComponentDocs` with type tests, and nine `.docs.ts` files;
+  - the published-text rules;
+  - a `check:components` rule for `.docs.ts`;
+  - the README as the usage source;
+  - CONVENTIONS rules 7 and 12.
+- **Verified:** `pnpm check`; `pnpm test`: tokens 32, react 919. Four probes on real files.
+- **Next:** Emil reviews the nine `.docs.ts` files and the contract rewrites. Then commit PR 1 and
+  open it. Then PR 2, the generator.

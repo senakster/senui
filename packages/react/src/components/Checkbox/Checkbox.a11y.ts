@@ -10,7 +10,7 @@ export const a11y = defineA11yContract<CheckboxProps>()({
       { attribute: 'checked', when: 'Checked; the native state, announced by the role' },
       {
         attribute: 'indeterminate',
-        when: 'The `indeterminate` prop: the native DOM property, never aria-checked (L05 decision 6)',
+        when: 'The `indeterminate` prop: the native DOM property, never aria-checked',
       },
       {
         attribute: 'aria-invalid',
@@ -40,14 +40,14 @@ export const a11y = defineA11yContract<CheckboxProps>()({
       mechanism: 'focus',
       owner: 'component',
       announces:
-        'The label, checkbox and its state, and "required" when required (NVDA, Chrome; exact wording not transcribed). "Invalid" only after a failed submit or with an error, never before (ADR-0013).',
+        'The label, checkbox and its state, and the required state when required (NVDA, Chrome; exact wording not transcribed). Invalid only after a failed submit or with an error, never before (ADR-0013).',
     },
     {
       when: 'While indeterminate',
       mechanism: 'focus',
       owner: 'component',
       announces:
-        'The mixed state, reported by Emil as "partially marked" (NVDA, Chrome), from the native property.',
+        'The mixed state (NVDA, Chrome; heard as the Danish for partially marked; exact wording not transcribed), from the native property.',
     },
     {
       when: 'When a select-all parent changes its children',
@@ -60,12 +60,12 @@ export const a11y = defineA11yContract<CheckboxProps>()({
   requiredProps: [
     {
       props: ['label', 'aria-label', 'aria-labelledby'],
-      why: 'A checkbox has no text content: a visible label, or a label for a box with no visible text of its own (L05 decision 5).',
+      why: 'A checkbox has no text content: a visible label, or a label for a box with no visible text of its own.',
     },
   ],
   consumerResponsibilities: [
     RESPONSIBILITIES.keepFocusRing,
-    'For a mixed state, keep `indeterminate` in your state and clear it in `onCheckedChange`; Checkbox re-applies the prop on every render (L05 decision 7).',
+    'For a mixed state, keep `indeterminate` in your state and clear it in `onCheckedChange`; Checkbox re-applies the prop on every render.',
     'Inside a CheckboxGroup, give every Checkbox a unique `value`, and put `required` on the group, never on the checkboxes.',
     'Explain the required marker (*) once, before the form.',
   ],
@@ -157,6 +157,7 @@ export const a11y = defineA11yContract<CheckboxProps>()({
       method: 'screen reader',
       at: 'NVDA',
       atVersion: 'not recorded',
+      language: 'da',
       browser: 'Chrome',
       browserVersion: '155.0.8059.40',
       os: 'Windows 11 Pro 26H2 (build 26300.9711)',
@@ -167,7 +168,7 @@ export const a11y = defineA11yContract<CheckboxProps>()({
     {
       method: 'forced colours',
       detail:
-        'Chrome 155.0.8059.40, ForcedColors story (Emil): box, check, dash and disabled visible in every state.',
+        'Chrome 155.0.8059.40, ForcedColors story: box, check, dash and disabled visible in every state.',
       result: 'pass',
       date: '2026-10-20',
     },
