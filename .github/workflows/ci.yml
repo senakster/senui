@@ -36,13 +36,15 @@ jobs:
       - uses: actions/checkout@v5
         with:
           fetch-depth: 0
+      # The container runs as root over a checkout it doesn't own, so git refuses it until it is
+      # marked safe. The docs generator reads the commit and history (L09), on every event.
+      - run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
       # `code` is false only when every changed file is docs. Anything else, or a push, runs it all.
       - id: changes
         if: github.event_name == 'pull_request'
         env:
           BASE: ${{ github.event.pull_request.base.sha }}
         run: |
-          git config --global --add safe.directory "$GITHUB_WORKSPACE"
           files=$(git diff --name-only "$BASE" HEAD)
           echo "$files"
           if [ -n "$files" ] && ! echo "$files" | grep -qvE '^docs/|^[^/]+\.md$|^\.changeset/'; then
