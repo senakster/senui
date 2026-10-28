@@ -30,6 +30,28 @@ export const clickBackdrop: BrowserCommand = async (context) => {
   await context.page.mouse.click(x, y);
 };
 
+/**
+ * One half of a pointer press, for WCAG 2.5.2 (L09): `'down'` presses on the first element matching
+ * `selector`, `'up'` releases on it, `'up-outside'` moves 40 px past its inline end and releases
+ * there. Real mouse events from Playwright, so the browser decides whether a click happens.
+ */
+export const pointer: BrowserCommand<
+  [step: 'down' | 'up' | 'up-outside', selector: string]
+> = async (context, step, selector) => {
+  if (context.provider.name !== 'playwright') throw new Error('pointer needs Playwright');
+  const box = await context.iframe.locator(selector).first().boundingBox();
+  if (!box) throw new Error(`nothing matches ${selector}`);
+  const y = box.y + box.height / 2;
+  if (step === 'up-outside') {
+    await context.page.mouse.move(box.x + box.width + 40, y, { steps: 4 });
+    await context.page.mouse.up();
+    return;
+  }
+  await context.page.mouse.move(box.x + box.width / 2, y);
+  if (step === 'down') await context.page.mouse.down();
+  else await context.page.mouse.up();
+};
+
 /** `prefers-reduced-motion` for every frame of the page. */
 export const emulateReducedMotion: BrowserCommand<[reduce: boolean]> = async (context, reduce) => {
   if (context.provider.name !== 'playwright')

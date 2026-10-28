@@ -18,7 +18,7 @@ export type CheckboxGroupProps = Omit<
   NativeProps<'fieldset'>,
   'defaultValue' | 'aria-invalid' | 'aria-required' | 'aria-label' | 'aria-labelledby'
 > & {
-  /** The group's visible name, read when focus enters the group (L05 decision 11). */
+  /** The group's visible name, read when focus enters the group. */
   legend: Label;
   /** Help text, read with each checkbox in the group (a fieldset's own description goes unread in NVDA). */
   description?: ReactNode;
@@ -27,7 +27,7 @@ export type CheckboxGroupProps = Omit<
   /**
    * At least one option must be checked to submit. The value is the message shown, and read, when
    * none is: `required="Choose at least one topic."`. The library ships no wording of its own, so
-   * the type asks for it. Never set `required` on the checkboxes themselves (L05 decision 12).
+   * the type asks for it. Never set `required` on the checkboxes themselves.
    */
   required?: string;
   /** Controlled: the checked options' values. Pair with `onValueChange`. */
@@ -52,8 +52,8 @@ export type CheckboxGroupProps = Omit<
 
 /**
  * A `<fieldset>` and `<legend>` around a set of Checkboxes, with one description, one error and one
- * value array (L05). The group's error is described on the fieldset only, so entering the group
- * reads legend and error once; each checkbox is `aria-invalid` while it shows (L05 decision 13).
+ * value array. The group's error is described on the fieldset only, so entering the group reads
+ * legend and error once; each checkbox is `aria-invalid` while it shows.
  *
  * ```tsx
  * <CheckboxGroup legend="Topics" required="Choose at least one topic." defaultValue={['news']}>

@@ -8,6 +8,8 @@ declare module 'vitest/browser' {
     wheelOverBackdrop: (deltaY: number) => Promise<void>;
     /** Clicks the topmost modal dialog's backdrop. */
     clickBackdrop: () => Promise<void>;
+    /** A real pointer press or release on, or released outside, the first match of `selector`. */
+    pointer: (step: 'down' | 'up' | 'up-outside', selector: string) => Promise<void>;
     /** Emulates `prefers-reduced-motion: reduce` (true) or `no-preference` (false). */
     emulateReducedMotion: (reduce: boolean) => Promise<void>;
   }

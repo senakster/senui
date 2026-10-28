@@ -12,12 +12,12 @@ export type TextInputType = 'text' | 'email' | 'password' | 'search' | 'tel' | '
 export type TextInputSize = 'sm' | 'md' | 'lg';
 
 /**
- * Where the name comes from (CONVENTIONS rule 3). Inside a FormField, the `field` binding: the
- * field's label names the input, and the field owns its id, `required` and invalid state, so the
- * input can't take a competing one (L04 decision 6). Standalone, exactly one of `aria-label` /
- * `aria-labelledby`.
+ * Where the name comes from. Inside a FormField, the `field` binding: the field's label names the
+ * input, and the field owns its id, `required` and invalid state, so the input can't take a
+ * competing one. Standalone, exactly one of `aria-label` / `aria-labelledby`.
  */
 type TextInputName =
+  /** Inside a FormField, which names the input and owns its id, `required` and invalid state. */
   | {
       /** The binding from `<FormField>{(field) => …}</FormField>`. */
       field: FormFieldBinding;
@@ -27,15 +27,19 @@ type TextInputName =
       'aria-labelledby'?: never;
       'aria-invalid'?: never;
     }
+  /** Standalone, named by `aria-label`. */
   | {
       field?: never;
+      /** The input's name, when no FormField labels it. */
       'aria-label': string;
       'aria-labelledby'?: never;
       /** Standalone only. Inside a FormField, pass `error` to the field instead. */
       'aria-invalid'?: boolean;
     }
+  /** Standalone, named by visible text elsewhere on the page, through `aria-labelledby`. */
   | {
       field?: never;
+      /** The id of the element whose text names the input. */
       'aria-labelledby': string;
       'aria-label'?: never;
       'aria-invalid'?: boolean;

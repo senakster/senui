@@ -1,6 +1,6 @@
 import { render } from '@testing-library/react';
 import { describe, expect, test, vi } from 'vitest';
-import { userEvent } from 'vitest/browser';
+import { commands, userEvent } from 'vitest/browser';
 import { composeStories } from '@storybook/react-vite';
 import { expectNoAxeViolations } from '../../internal/testing/axe.js';
 import * as stories from './Button.stories.js';
@@ -56,6 +56,22 @@ describe('Button in a browser', () => {
     await userEvent.keyboard('{Enter}');
     await userEvent.keyboard(' ');
     expect(onClick).not.toHaveBeenCalled();
+  });
+
+  // Real mouse presses, split in two: activation must wait for the release, on the button.
+  test('activates on the up event, and a press released off it does nothing (WCAG 2.5.2)', async () => {
+    const onClick = vi.fn();
+    render(<Button onClick={onClick}>Save</Button>);
+    await commands.pointer('down', '.senui-button');
+    expect(onClick).not.toHaveBeenCalled();
+    await commands.pointer('up-outside', '.senui-button');
+    expect(onClick).not.toHaveBeenCalled();
+    await commands.pointer('down', '.senui-button');
+    await commands.pointer('up', '.senui-button');
+    expect(onClick).toHaveBeenCalledOnce();
+    // Leave the keyboard as the last input: after a mouse press, script focus isn't
+    // :focus-visible, and later tests in this file focus by script.
+    await userEvent.keyboard('{Shift}');
   });
 
   test('focus stays on the button from idle to loading and back', () => {

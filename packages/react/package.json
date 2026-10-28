@@ -3,6 +3,12 @@
   "version": "0.0.0",
   "description": "senui React components: plain CSS on design tokens, accessible by contract.",
   "license": "MIT",
+  "homepage": "https://senakster.github.io/senui/",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/senakster/senui.git",
+    "directory": "packages/react"
+  },
   "type": "module",
   "sideEffects": [
     "**/*.css"
@@ -14,6 +20,11 @@
     ".": "./dist/index.js",
     "./styles.css": "./dist/styles/index.css",
     "./styles/*.css": "./dist/components/*/*.css",
+    "./components.json": "./dist/components.json",
+    "./llms.txt": "./dist/llms.txt",
+    "./llms-full.txt": "./dist/llms-full.txt",
+    "./USAGE.md": "./dist/USAGE.md",
+    "./docs/*.md": "./dist/docs/*.md",
     "./package.json": "./package.json"
   },
   "scripts": {

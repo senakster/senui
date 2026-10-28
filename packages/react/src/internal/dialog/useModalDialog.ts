@@ -10,19 +10,19 @@ import { warnOnce } from '../dev/dev.js';
 import { useControllableState } from '../state/useControllableState.js';
 
 /**
- * Why a dialog asked to close. Open to new members in a minor (L06 decision 3), so a consumer
- * switching on it keeps a default branch.
+ * Why a dialog asked to close. Open to new members in a minor, so a consumer switching on it keeps
+ * a default branch.
  *
  * `'forced'` is not a request: the browser has already closed the dialog. It does so on a second
  * Esc or back gesture with no user action in between, which a page may not refuse, or when code
- * calls `close()` on the element. Set `open` to false; refusing leaves it closed anyway (review).
+ * calls `close()` on the element. Set `open` to false; refusing leaves it closed anyway.
  */
 export type DialogCloseReason =
   'escape' | 'backdrop' | 'close-button' | 'cancel' | 'form' | 'forced';
 
 /**
  * The second argument of `onOpenChange`. A `<form method="dialog">` close carries the submitter's
- * `value` (L06 decision 22), read from the submit event, so it is never a stale `returnValue`.
+ * `value`, read from the submit event, so it is never a stale `returnValue`.
  */
 export type DialogOpenChangeDetails =
   | { readonly reason: 'form'; readonly returnValue: string }

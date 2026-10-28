@@ -27,7 +27,7 @@ describe('CheckboxGroup', () => {
     expect(container.querySelector('fieldset > legend')).toHaveTextContent('Topics');
   });
 
-  test('every box is aria-invalid and described by the description and error; the fieldset is not', () => {
+  test('every box is aria-invalid and described by the description and error; the fieldset is not (WCAG 3.3.1)', () => {
     // NVDA reads a group's name on entry but never its description (Emil's run, 2026-10-20), so
     // the description and error describe every box, whichever one takes focus.
     render(<Topics description="Pick any." error="Choose at least one topic." />);

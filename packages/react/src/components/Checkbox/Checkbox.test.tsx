@@ -75,7 +75,7 @@ describe('Checkbox', () => {
   });
 
   describe('description and error', () => {
-    test('aria-describedby has the error id only while an error is set', () => {
+    test('aria-describedby has the error id only while an error is set (WCAG 3.3.1)', () => {
       const { rerender } = render(<Checkbox label="Terms" description="Read them first." />);
       const box = screen.getByRole('checkbox');
       const description = screen.getByText('Read them first.');

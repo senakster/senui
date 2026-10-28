@@ -1,6 +1,7 @@
 // L08 decision 3: axe on every story, light and dark, with rendered contrast, over the document.
 import { createRequire } from 'node:module';
 import { expect, test } from '@playwright/test';
+import { AXE_TAGS, PAGE_RULES as GATE_PAGE_RULES } from './checks.js';
 import { exceptionFor } from './exceptions.js';
 import { loadStories, openStory } from './stories.js';
 
@@ -9,10 +10,10 @@ const AXE = createRequire(new URL('../../../packages/react/package.json', import
   'axe-core/axe.min.js',
 );
 
-// The same WCAG tags as the unit layer's helper (packages/react/src/internal/testing/axe.ts).
-const TAGS = ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22a', 'wcag22aa', 'best-practice'];
-// Page-level rules: a story is a component, not a page.
-const PAGE_RULES = ['region', 'landmark-one-main', 'page-has-heading-one'];
+// The WCAG tags and the page-level rules turned off live in checks.ts, which the docs generator
+// reads to publish what this spec covers (L09 decision 5).
+const TAGS = [...AXE_TAGS];
+const PAGE_RULES = [...GATE_PAGE_RULES];
 // Storybook's own markup in iframe.html, never the component's.
 const STORYBOOK_OWNED = [
   '#storybook-docs',

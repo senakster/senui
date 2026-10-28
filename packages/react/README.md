@@ -98,7 +98,7 @@ entirely:
 }
 ```
 
-The [`@senakster/senui-tokens` README](../tokens/README.md) covers every token and override.
+The [`@senakster/senui-tokens` README](https://www.npmjs.com/package/@senakster/senui-tokens) covers every token and override.
 
 ## Server rendering
 

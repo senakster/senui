@@ -116,9 +116,26 @@ owns. The control reads the wiring with `useFormFieldControl(field, props)`.
 A consumer wrapping a component with union props uses `DistributiveOmit` (exported from the package),
 not `Omit`, which collapses the union and drops the requirement.
 
+**Every union in a props type is a named alias, intersected at the top level** (L09):
+
+```ts
+export type DialogProps = DialogNativeProps & { … } & DialogName & DialogCloseButton & DialogOpenState;
+```
+
+The docs generator reads each such alias as an _axis_ and its members as _branches_, so the
+published props never show TypeScript's cross product of them. Write a one-line JSDoc above each
+member (``/** Named by a visible `label`. */``): it is the branch's published summary. Every own
+prop, and every prop typed `never`, has JSDoc too; for a `never` prop it says what to use instead.
+An inline union (`… & ({ a: string } | { b: string })`) or an alias that nests one is rejected. One
+nesting is allowed inside a branch: an intersection with a union of object types, published as
+"also requires one of" (DialogCloseButton's way out).
+
 **Enforced by:** `@ts-expect-error` cases in the component's `*.test-d.tsx` (a type test that stops
 erroring fails `pnpm test`), including a `DistributiveOmit` wrapper case; `useNameCheck.test.tsx`;
 the unit axe test. Reference: [`src/internal/conventions.test-d.tsx`](src/internal/conventions.test-d.tsx).
+The axis rule and the JSDoc are checked by the docs generator
+([`scripts/build-docs.mjs`](scripts/build-docs.mjs)), which fails `pnpm build`; prop JSDoc follows
+rule 7's rules for published strings.
 
 ## 4. Refs use `forwardRef`, and every component has a `displayName`
 
@@ -453,8 +470,19 @@ an optional prop required) is also a major.
 | Cascade layer names     | `senui.tokens`, `senui.base`, `senui.components` | `src/styles/layers.css`   |
 | Package export subpaths | `.`, `./styles.css`, `./styles/<Name>.css`       | `package.json`            |
 | Semantic tokens         | `--senui-color-fg-danger`                        | `@senakster/senui-tokens` |
+| Manifest and docs files | `./components.json`, `./llms.txt`, `./docs/*.md` | `scripts/build-docs.mjs`  |
 
 Adding to any of these is a minor.
+
+**The manifest** (`components.json`, typed by the exported `Manifest`; L09 decision 7). Semver
+covers the set of components and branches, prop names and whether each is required, variant
+values, data-attribute values, classes and component tokens: the same facts as the rows above,
+and a manifest that stops listing one is a major. Informative, and free to change in any release:
+printed types, descriptions, dates, story ids and URLs. Its enumerations are open (a reader treats
+an unknown value as "not described"), so adding a value is a minor. `schemaVersion` changes only
+with a breaking change to the manifest's shape, in a major, after a release that emits the old and
+new field side by side. The files `llms.txt`, `llms-full.txt`, `docs/*.md` and `USAGE.md` are
+published at stable paths; their prose is informative.
 
 **Not public:** part classes with a double underscore (`.senui-button__label`, `__icon`,
 `__spinner`) are internal and can change in any release. Each component's CSS opens with a comment

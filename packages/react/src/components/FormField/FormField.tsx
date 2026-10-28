@@ -19,14 +19,19 @@ export type FormFieldProps = Omit<
   // The ARIA props a control takes would land on this wrapper, which has no role: pass them to the
   // control instead, which merges them with the field's. Declared `never`, not just omitted: JSX
   // doesn't check hyphenated attribute names it doesn't know, so an omitted one still compiles.
+  /** Pass it to the control, which merges it with the field's description and error. */
   'aria-describedby'?: never;
+  /** The `label` names the control. */
   'aria-labelledby'?: never;
+  /** The `label` names the control. */
   'aria-label'?: never;
+  /** Use `error`, which sets the control's `aria-invalid`. */
   'aria-invalid'?: never;
+  /** Use `required`, which makes the control required. */
   'aria-required'?: never;
   /**
-   * The visible label. It names the control: the control takes no label of its own (L04 decision
-   * 6). The type can't reject an empty string; the development name check warns about one.
+   * The visible label. It names the control: the control takes no label of its own. The type
+   * can't reject an empty string; the development name check warns about one.
    */
   label: Label;
   /** Help text, read after the label when the control is focused. */
@@ -47,8 +52,8 @@ export type FormFieldProps = Omit<
   /**
    * Makes the `error` message a polite live region, so a change is announced without moving focus.
    * Use it only when you validate as the user types; otherwise focus on submit announces each
-   * error in context (L04 decisions 3 and 4). Native constraint errors are never announced this
-   * way: they are read when the field takes focus on submit.
+   * error in context. Native constraint errors are never announced this way: they are read when
+   * the field takes focus on submit.
    */
   announce?: 'polite';
   /** The control's id (generated when omitted). Use it to link to the field, e.g. from an error summary. */

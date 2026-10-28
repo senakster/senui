@@ -69,8 +69,18 @@ describe('AlertDialog in a browser', () => {
     await expect.poll(() => document.activeElement).toBe(cancel());
   });
 
+  test('focus starts on Cancel, and returns to the opener when it closes (WCAG 2.4.3)', async () => {
+    render(<Confirm />);
+    const opener = screen.getByRole('button', { name: 'Open' });
+    const dialog = await open();
+    await expect.poll(() => document.activeElement).toBe(cancel());
+    cancel().click();
+    await closed(dialog);
+    await expect.poll(() => document.activeElement).toBe(opener);
+  });
+
   // The contract's keyboard rows, one key-named test each, traced by check-keyboard-trace.mjs (L08).
-  test('Escape: asks to close, like Cancel', async () => {
+  test('Escape: asks to close, like Cancel (WCAG 2.1.2)', async () => {
     const onOpenChange = vi.fn();
     render(<Confirm onOpenChange={onOpenChange} />);
     const dialog = await open();
@@ -89,7 +99,7 @@ describe('AlertDialog in a browser', () => {
     expect(document.activeElement).toBe(cancel());
   });
 
-  test('Enter, Space: activate the focused button', async () => {
+  test('Enter, Space: activate the focused button (WCAG 2.1.2)', async () => {
     const onOpenChange = vi.fn();
     const onDelete = vi.fn();
     render(<Confirm onOpenChange={onOpenChange} onDelete={onDelete} />);

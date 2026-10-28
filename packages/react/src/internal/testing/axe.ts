@@ -1,5 +1,6 @@
 import axe from 'axe-core';
 import { expect } from 'vitest';
+import { AXE_TAGS } from './axe-tags.js';
 
 export interface AxeOptions {
   /**
@@ -26,10 +27,7 @@ export async function axeViolations(
 ): Promise<string[]> {
   const results = await axe.run(container, {
     resultTypes: ['violations'],
-    runOnly: {
-      type: 'tag',
-      values: ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22a', 'wcag22aa', 'best-practice'],
-    },
+    runOnly: { type: 'tag', values: [...AXE_TAGS] },
     rules: { 'color-contrast': { enabled: contrast } },
   });
   return results.violations.flatMap((violation) =>

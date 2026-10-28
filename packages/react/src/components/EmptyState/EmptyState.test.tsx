@@ -88,7 +88,22 @@ describe('EmptyState', () => {
     });
   });
 
-  test('never moves focus: an input keeps it through mount and re-render (L07 decision 8)', () => {
+  test('has no live region of its own, so it never announces twice (WCAG 4.1.3)', () => {
+    const { container } = render(
+      <EmptyState
+        headingLevel={2}
+        title="No results"
+        description="Try another search."
+        illustration={<svg aria-hidden="true" />}
+        actions={<button type="button">Clear</button>}
+      />,
+    );
+    expect(
+      container.querySelector('[aria-live], [role="status"], [role="alert"], [role="log"]'),
+    ).toBeNull();
+  });
+
+  test('never moves focus: an input keeps it through mount and re-render (WCAG 2.4.3)', () => {
     function Filter({ query }: { query: string }) {
       return (
         <>
@@ -121,7 +136,7 @@ describe('EmptyState', () => {
     test.each([
       ['an empty string', ''],
       ['whitespace', '   '],
-    ])('warns once for a title that is %s', async (_case, title) => {
+    ])('warns once for a title that is %s (WCAG 2.4.6)', async (_case, title) => {
       const Fresh = await load();
       const warn = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
       render(<Fresh headingLevel={2} title={title} />);
@@ -130,7 +145,7 @@ describe('EmptyState', () => {
       expect(warn.mock.calls[0]?.[0]).toMatch(/EmptyState has an empty `title`/);
     });
 
-    test('warns for an element title that renders no text', async () => {
+    test('warns for an element title that renders no text (WCAG 2.4.6)', async () => {
       const Fresh = await load();
       const warn = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
       render(<Fresh headingLevel={2} title={<span />} />);

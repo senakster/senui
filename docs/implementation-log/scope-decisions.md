@@ -1196,3 +1196,83 @@ Each failed for its own reason, and everything was restored:
 #### Verified
 
 `pnpm check`; `pnpm test`: tokens 32, react 919.
+
+### PR 2 (2026-10-28): the generator
+
+- **Day-one probes, settled:**
+  - **tsdown 0.23.1 order:** clean, then `build:before`, bundle, copy, publint. The generator runs
+    in `build:before`, so its files exist when publint checks `exports`.
+  - **Loading:** one Vite server with `createServerModuleRunner` loads all nine contracts and
+    `.docs.ts` files in about a second; the tsdown fallback isn't needed.
+  - **Props:** every props type already has the axis shape. AlertDialog and Switch import their
+    axes, so the generator resolves them with the type checker.
+- **Built:**
+  - `src/manifest.ts`: mirror types, `schemaVersion` 1, open enums. It is exported type-only, and
+    its type tests assert the internal contract and docs types are assignable to it.
+  - `scripts/build-docs.mjs` and its helpers, run from tsdown's `build:before`.
+  - Output: `components.json`, `llms.txt`, `llms-full.txt`, `docs/<component>.md` and
+    `USAGE.md` (the README), all exported.
+  - Props by axis and branch, `forbidden`, native attributes, data attributes (from the
+    checker, cross-checked against the CSS), tokens (cross-checked against each stylesheet's
+    comment) and story ids (from Storybook's CSF functions).
+  - The fixed accessibility wording and per-run `sourceChangedSince`.
+  - Checks in the generator (the build fails with a list) and in `manifest.test.ts`.
+  - CONVENTIONS: rule 3 (axes are named aliases at the top level) and a "Public surface" row.
+  - Also: `pnpm/action-setup` v4 → v6 in every workflow (Node 20 deprecation), and the
+    `.catalogue-sync.json` change from the L06 note re-sync.
+- **Props JSDoc:**
+  - private references removed from the nine components' `.tsx` files, and from two internal
+    files whose types are published as exports;
+  - one-line JSDoc added to every union branch and to every own and forbidden prop that lacked
+    one (agent-drafted, reviewed).
+- **Decision 5, finished (Emil: in PR 2):**
+  - **Gate as a run:** the L08 gate is published as an automated run, generated from
+    `apps/docs/gate/checks.ts`. A drift check compares that list with the spec files' test
+    titles, both ways.
+  - **Evidence links:** each claim links to the runs it rests on.
+  - **Traced evidence:** automated evidence must trace to an axe rule that tests the criterion
+    (from axe-core's rule metadata), a gate check that lists it, or a test titled
+    `(WCAG x.y.z)`.
+  - **The 12 untraced claims (Emil: trace them now):** 11 had tests that exercised the criterion,
+    each checked and retitled; Button's 2.5.2 had no test of the up event, and now has a
+    browser test, probed by switching activation to pointerdown. Five more focused tests were
+    added where no existing test covered the whole `how`. The `UNTRACED` list is empty, and a new
+    untraced claim fails the build.
+
+#### Deviations from the plan
+
+1. **The README is `USAGE.md`'s source** (PR 1, deviation 1). Its link to the tokens README is now
+   the npm URL, which works in `dist/USAGE.md` and on npm.
+2. **`homepage` and `repository` in `package.json`.** The generator builds story links from
+   `homepage` (the Pages site). This closes two of the npm-publishing gaps.
+3. **"Not in this branch" is wider than the plan:** a `never` prop counts as not in a branch when
+   anything else accepts it, not only a sibling. Otherwise TextInput's `id` would be published as
+   forbidden.
+4. **One nested union is allowed:** DialogCloseButton's `{cancelLabel} | {footer} | {dismiss}`
+   is published as `requiresOneOf`. CONVENTIONS says so.
+5. **Union members print sorted by code unit**, so `values` lose their authored order;
+   determinism wins.
+6. **`testRuns[]` sits beside the contract**, so `accessibility` stays exactly as written.
+7. **Two extra manifest fields:** `wcag.claims` and `conformance`, so PR 3's blocks render the
+   same wording from data.
+8. **Two judgement calls in the gate's criteria:**
+   - the tab walk isn't credited with 2.1.1, because it reaches stops but doesn't operate them;
+   - RTL mirroring, the forced-colours screenshots and bookkeeping are credited with no
+     criterion.
+
+#### Probes
+
+Each failed for its own reason, and everything was restored from backups:
+
+- **Build-time data checks:** a prop without JSDoc, an inline union in a props type, and a module
+  reference in prop JSDoc each fail the build.
+- **Gate check list:** removing the gate's 2.4.11 coverage fails the build for seven components;
+  a renamed gate title fails the drift check both ways.
+- **Button's 2.5.2 test:** pointerdown activation fails the new test.
+
+#### Verified
+
+- `pnpm check`;
+- `pnpm test`: tokens 32, react 952;
+- `pnpm test:gate`: 1,378 passed, 122 skipped;
+- two builds byte-identical, including reordered program files and a CRLF read.

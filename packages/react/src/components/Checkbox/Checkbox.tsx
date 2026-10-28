@@ -23,14 +23,32 @@ import { CheckboxGroupContext } from '../CheckboxGroup/context.js';
 type Label = Exclude<ReactNode, null | undefined | boolean>;
 
 /**
- * Where the name comes from (CONVENTIONS rule 3, L05 decision 5): a visible `label`, placed after
- * the box, or exactly one of `aria-label` / `aria-labelledby` (a select-all box in a table header,
- * say, with no visible text of its own).
+ * Where the name comes from: a visible `label`, placed after the box, or exactly one of
+ * `aria-label` / `aria-labelledby` (a select-all box in a table header, say, with no visible text
+ * of its own).
  */
 export type CheckboxName =
-  | { label: Label; 'aria-label'?: never; 'aria-labelledby'?: never }
-  | { label?: never; 'aria-label': string; 'aria-labelledby'?: never }
-  | { label?: never; 'aria-labelledby': string; 'aria-label'?: never };
+  /** Named by a visible `label`. */
+  | {
+      /** The visible label, placed after the control. It names the control. */
+      label: Label;
+      'aria-label'?: never;
+      'aria-labelledby'?: never;
+    }
+  /** Named by `aria-label`, with no visible text of its own. */
+  | {
+      label?: never;
+      /** The control's name, when it shows no text of its own. */
+      'aria-label': string;
+      'aria-labelledby'?: never;
+    }
+  /** Named by visible text elsewhere on the page, through `aria-labelledby`. */
+  | {
+      label?: never;
+      /** The id of the element whose text names the control. */
+      'aria-labelledby': string;
+      'aria-label'?: never;
+    };
 
 export type CheckboxProps = Omit<
   NativeProps<'input'>,
@@ -58,7 +76,7 @@ export type CheckboxProps = Omit<
   value?: string;
   /**
    * Must be checked to submit, like a consent box. Inside a CheckboxGroup it is ignored: pass
-   * `required` to the group (L05 decision 12).
+   * `required` to the group.
    */
   required?: boolean;
   /** Use `indeterminate`; the native property carries the mixed state. */
@@ -69,12 +87,14 @@ export type CheckboxProps = Omit<
   CheckboxName;
 
 /**
- * The mixed state is controlled only (L05 decision 6): with `indeterminate`, the consumer owns
- * `checked` and clears `indeterminate` in `onCheckedChange` (decision 7). Without that, a box
- * could never leave the mixed state, because Checkbox re-applies the prop on every render.
+ * The mixed state is controlled only: with `indeterminate`, the consumer owns `checked` and clears
+ * `indeterminate` in `onCheckedChange`. Without that, a box could never leave the mixed state,
+ * because Checkbox re-applies the prop on every render.
  */
 type CheckboxMixed =
+  /** No mixed state: checked or not, controlled or uncontrolled. */
   | { indeterminate?: false }
+  /** Can show the mixed state: `indeterminate`, with `checked` and `onCheckedChange` controlled. */
   | {
       /**
        * Shows the mixed state ("partially checked") from the native property. A click clears it
@@ -90,7 +110,7 @@ type CheckboxMixed =
 const useIsomorphicLayoutEffect = typeof document === 'undefined' ? useEffect : useLayoutEffect;
 
 /**
- * A native `<input type="checkbox">` with its own label, description and error (L05). `className`
+ * A native `<input type="checkbox">` with its own label, description and error. `className`
  * and `style` go on the row (`.senui-checkbox`); every other native attribute, and the ref, go on
  * the input. See `Checkbox.a11y.ts` for its accessibility contract.
  *

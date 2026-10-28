@@ -57,7 +57,7 @@ describe('FormField with native constraint validation', () => {
     expect(name).toHaveAttribute('aria-invalid', 'false');
   });
 
-  test('on submit, the first invalid field takes focus and is described by its error', async () => {
+  test('on submit, the first invalid field takes focus and is described by its error (WCAG 3.3.1)', async () => {
     const { getByRole } = render(<NativeForm />);
     await userEvent.click(getByRole('button', { name: 'Send' }));
     const name = getByRole('textbox', { name: 'Name' }) as HTMLInputElement;

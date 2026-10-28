@@ -93,7 +93,7 @@ describe('EmptyState in a browser', () => {
     });
   });
 
-  test('no-results story: the status region exists first, empty and outside; typing updates it and keeps focus', async () => {
+  test('no-results story: the status region exists first, empty and outside; typing updates it and keeps focus (WCAG 4.1.3)', async () => {
     const { container } = render(<NoResults />);
     const status = screen.getByRole('status');
     // Before anything is typed: in the page, empty, and not inside an EmptyState.
@@ -158,7 +158,7 @@ describe('EmptyState in a browser', () => {
     expect(statusAtFocus).toBe('');
   });
 
-  test('the heading shows the focus ring when script focuses it after keyboard use', async () => {
+  test('the heading shows the focus ring when script focuses it after keyboard use (WCAG 2.4.3)', async () => {
     const { container } = render(<NoData />);
     await userEvent.keyboard('{Tab}');
     const heading = get(container, '.senui-empty-state__title');
