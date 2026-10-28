@@ -4,13 +4,13 @@ Single source of truth for **where the implementation is right now**. Overwritte
 `implement-module` skill at the end of every run. For history, see `log.md`; for status, see
 `docs/PROGRESS.md`.
 
-| Field         | Value                                                                                         |
-| ------------- | --------------------------------------------------------------------------------------------- |
-| Target app    | repo root (pnpm workspace: `packages/tokens`, `packages/react`, `apps/docs`)                  |
-| Active module | L09 — Docs & machine-readable manifest (in progress)                                          |
-| Sub-step      | PR 1 merged (#13); PR 2 built and verified, uncommitted on `feature/docs-L09-2`; Emil reviews |
-| Last verified | 2026-10-28: `pnpm check`; `pnpm test` tokens 32, react 952; gate 1378 passed                  |
-| Updated       | 2026-10-28                                                                                    |
+| Field         | Value                                                                                                 |
+| ------------- | ----------------------------------------------------------------------------------------------------- |
+| Target app    | repo root (pnpm workspace: `packages/tokens`, `packages/react`, `apps/docs`)                          |
+| Active module | L09 — Docs & machine-readable manifest (in progress)                                                  |
+| Sub-step      | PRs 1–2 merged (#13, #14); PR 3 built and verified, uncommitted on `feature/docs-L09-3`; Emil reviews |
+| Last verified | 2026-10-28: `pnpm check`; `pnpm test` tokens 32, react 952; gate 1480 passed, 0 failed                |
+| Updated       | 2026-10-28                                                                                            |
 
 ## Brief
 
@@ -29,23 +29,23 @@ every deviation: scope-decisions § L09. Claude builds and writes everything, in
 1. **Merged (#13):** the nightly removal, ADR-0019 (`language`), the contract cleanup,
    `ComponentDocs` and nine `.docs.ts` files, the published-text rules, the README as the usage
    source, CONVENTIONS rules 7 and 12.
-2. **Built, uncommitted (`feature/docs-L09-2`):** the manifest type, the generator in tsdown's
-   `build:before`, every output file in `exports`, props by axis, decision 5 in full (the gate as a
-   run, traced evidence, `UNTRACED` empty), the props JSDoc cleanup, six new tests, the
-   `pnpm/action-setup` v6 bump. Detail: scope-decisions § L09, "PR 2".
-3. **Storybook docs pages:**
-   - the template and blocks, and the docs theme;
-   - the gate on docs pages, run as pages;
-   - published-text rules on story JSDoc.
+2. **Merged (#14):** the manifest type, the generator in tsdown's `build:before`, every output
+   file in `exports`, props by axis, decision 5 in full, the props JSDoc cleanup, six new tests,
+   the `pnpm/action-setup` v6 bump.
+3. **Built, uncommitted (`feature/docs-L09-3`):** docs pages from one wording module, the docs
+   theme (light and dark, framed stories in WebKit), `staticDirs`, the gate on every docs page
+   (99 tests), published-text rules on story JSDoc, the budget wording. Detail: scope-decisions
+   § L09, "PR 3".
 4. **The GitHub Pages deploy:**
    - Pages source set to GitHub Actions, with Emil's OK;
    - unreleased builds stamped as unreleased.
 
 ## In-flight notes
 
-- For PR 3: story ids in the manifest must match the built `index.json` (a check, decision 8).
-- For PR 3: the docs theme in dark mode, including story iframes in WebKit; the gate seeing
-  `#storybook-docs` after `docsRendered`.
+- **Budget (Emil, 2026-10-28):** "Gate (all engines)" is disabled on GitHub. Firefox, WebKit and
+  React 18.3 are checked locally until further notice; don't trigger costly CI runs.
+- For PR 4: enabling Pages (`gh api -X POST repos/senakster/senui/pages -f build_type=workflow`)
+  needs Emil's OK; the deploy adds CI minutes on each push to `main`.
 - Exceptions: Dialog Fullscreen and LongContent, `color-contrast:incomplete`, expire 2027-04-27.
 - Open for TextInput (deferred): the Home/End contract row isn't true on macOS.
 - npm publishing comes after L10. Gaps: no npm login on this machine, no LICENSE in the packages,
@@ -54,7 +54,7 @@ every deviation: scope-decisions § L09. Claude builds and writes everything, in
 
 ## Next action
 
-1. Emil reviews PR 2: the props JSDoc rewrites in the nine components' `.tsx` files, the new and
-   retitled tests, and the gate's criterion mapping in `apps/docs/gate/checks.ts` (`git diff`).
-2. With Emil's OK, commit PR 2 and open it.
-3. Then PR 3, the Storybook docs pages, starting with its day-one probes.
+1. Emil reviews PR 3: the docs pages (`pnpm build`, then `pnpm --filter docs storybook`) and the
+   story-description rewrites (`git diff` on `*.stories.tsx`).
+2. With Emil's OK, commit PR 3 and open it.
+3. Then PR 4, the GitHub Pages deploy.

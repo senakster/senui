@@ -10,6 +10,7 @@
 import { execFileSync } from 'node:child_process';
 import { mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { dirname } from 'node:path';
+import ts from 'typescript';
 import { componentCss } from './docs/css.mjs';
 import {
   UNTRACED,
@@ -218,6 +219,14 @@ export async function generate(
       ),
     };
   }
+  // Storybook shows each story's JSDoc (or its `docs.description`) on the docs page, so the same
+  // rules apply to it.
+  for (const name of names) {
+    const file = `src/components/${name}/${name}.stories.tsx`;
+    for (const [where, text] of storyDescriptions(`${root}/${file}`)) {
+      checkText(`${file} ${where}`, text);
+    }
+  }
   for (const e of types.exports) checkText(`export ${e.name}`, e.description);
   checkText('gate', gate.tool);
   for (const check of gate.checks) checkText(`gate check '${check.name}'`, check.checks);
@@ -378,6 +387,57 @@ function serialiseArgs(value) {
   const out = {};
   for (const key of Object.keys(value).sort(byCodeUnit)) {
     if (value[key] !== undefined) out[key] = serialiseArgs(value[key]);
+  }
+  return out;
+}
+
+/**
+ * The text a stories file publishes on its docs page: the JSDoc of the meta and of every exported
+ * story, and any `docs.description.story` or `.component` string, by where it is.
+ *
+ * @param {string} path
+ * @returns {[string, string][]}
+ */
+export function storyDescriptions(path) {
+  const text = readFileSync(path, 'utf8');
+  const source = ts.createSourceFile(path, text, ts.ScriptTarget.Latest, true, ts.ScriptKind.TSX);
+  const out = [];
+  const jsDoc = (node) =>
+    (node.jsDoc ?? [])
+      .map((doc) =>
+        typeof doc.comment === 'string'
+          ? doc.comment
+          : (ts.getTextOfJSDocComment(doc.comment) ?? ''),
+      )
+      .join('\n\n')
+      .trim();
+  const descriptions = (node, where) => {
+    const visit = (n) => {
+      if (
+        ts.isPropertyAssignment(n) &&
+        ['story', 'component'].includes(n.name.getText(source)) &&
+        ts.isObjectLiteralExpression(n.parent) &&
+        ts.isPropertyAssignment(n.parent.parent) &&
+        n.parent.parent.name.getText(source) === 'description' &&
+        (ts.isStringLiteral(n.initializer) || ts.isNoSubstitutionTemplateLiteral(n.initializer))
+      ) {
+        out.push([`${where} docs.description.${n.name.getText(source)}`, n.initializer.text]);
+      }
+      ts.forEachChild(n, visit);
+    };
+    visit(node);
+  };
+  for (const statement of source.statements) {
+    if (!ts.isVariableStatement(statement)) continue;
+    for (const declaration of statement.declarationList.declarations) {
+      const name = declaration.name.getText(source);
+      const exported = statement.modifiers?.some((m) => m.kind === ts.SyntaxKind.ExportKeyword);
+      if (!exported && name !== 'meta') continue;
+      const where = name === 'meta' ? 'meta' : `story ${name}`;
+      const doc = jsDoc(statement);
+      if (doc) out.push([where, doc]);
+      if (declaration.initializer) descriptions(declaration.initializer, where);
+    }
   }
   return out;
 }

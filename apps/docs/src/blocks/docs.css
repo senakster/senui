@@ -1,0 +1,239 @@
+/* The docs pages (L09 "Docs-page rendering rules"). Docs-app styling only; not part of the library.
+
+   Every value is a senui token. Storybook's docs styles are unlayered emotion classes painted from
+   its own (light) theme, so the few overrides of Storybook's frame below are unlayered and carry an
+   id, which outranks a single emotion class. */
+
+/* The surface: Storybook's DocsWrapper paints its theme's white; the senui background and text
+   tokens follow the colour scheme instead (tokens.css sets `color-scheme: light dark` on :root). */
+#storybook-docs .sbdocs-wrapper {
+  background-color: var(--senui-color-bg-default);
+  color: var(--senui-color-fg-default);
+  padding-block: var(--senui-space-8);
+  padding-inline: var(--senui-space-4);
+}
+
+/* The MDX pages keep Storybook's typography, but not its theme's text colours, which assume a
+   white page. Story canvases (`.sb-unstyled`) and project blocks keep their own. */
+#storybook-docs
+  .sbdocs-content
+  :where(h1, h2, h3, h4, h5, h6, p, li, dt, dd, th, td, blockquote, a):not(
+    .sb-unstyled,
+    .sb-unstyled *
+  ) {
+  color: inherit;
+}
+
+#storybook-docs .sbdocs-content :where(a):not(.sb-unstyled, .sb-unstyled *) {
+  color: var(--senui-color-fg-accent);
+}
+
+#storybook-docs .sbdocs-content :where(h1, h2, h3):not(.sb-unstyled, .sb-unstyled *) {
+  border-color: var(--senui-color-border-default);
+}
+
+.docs-main {
+  display: block;
+}
+
+/* The project's docs page and blocks: everything inside the page, never inside a story canvas,
+   whose content is styled by the library alone. */
+@scope (.docs-page, .docs-mdx-block) to (.docs-canvas > *) {
+  :scope {
+    font-family: var(--senui-font-family-sans);
+    font-size: var(--senui-font-size-md);
+    line-height: var(--senui-font-line-height-normal);
+    color: var(--senui-color-fg-default);
+    overflow-wrap: break-word;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    margin-block: var(--senui-space-8) var(--senui-space-3);
+    font-weight: var(--senui-font-weight-bold);
+    line-height: var(--senui-font-line-height-tight);
+  }
+
+  h1 {
+    margin-block-start: 0;
+    font-size: calc(var(--senui-font-size-lg) * 1.6);
+  }
+
+  h2 {
+    padding-block-start: var(--senui-space-4);
+    font-size: calc(var(--senui-font-size-lg) * 1.25);
+    border-block-start: var(--senui-border-width-default) solid var(--senui-color-border-default);
+  }
+
+  h3 {
+    font-size: var(--senui-font-size-lg);
+  }
+
+  h4 {
+    font-size: var(--senui-font-size-md);
+  }
+
+  p,
+  ul,
+  dl {
+    margin-block: 0 var(--senui-space-3);
+  }
+
+  ul {
+    padding-inline-start: var(--senui-space-6);
+  }
+
+  li + li {
+    margin-block-start: var(--senui-space-1);
+  }
+
+  li > ul {
+    margin-block: var(--senui-space-1) 0;
+  }
+
+  code {
+    font-family: var(--senui-font-family-mono);
+    font-size: 0.9em;
+    overflow-wrap: anywhere;
+  }
+
+  a {
+    color: var(--senui-color-fg-accent);
+  }
+
+  a:focus-visible,
+  .docs-scroll:focus-visible,
+  .docs-canvas:focus-visible {
+    outline: var(--senui-focus-ring-width) solid var(--senui-color-focus-ring);
+    outline-offset: var(--senui-focus-ring-offset);
+  }
+
+  .docs-summary {
+    font-size: var(--senui-font-size-lg);
+  }
+
+  /* Wide content scrolls here and nowhere else: a focusable, named region (ScrollRegion.tsx). */
+  .docs-scroll {
+    max-inline-size: 100%;
+    overflow-x: auto;
+    margin-block-end: var(--senui-space-3);
+  }
+
+  /* Code blocks wrap instead of scrolling (CodeBlock in ScrollRegion.tsx). */
+  .docs-pre-wrap {
+    margin: 0 0 var(--senui-space-3);
+    padding: var(--senui-space-3);
+    white-space: pre-wrap;
+    background-color: var(--senui-color-bg-subtle);
+    border-radius: var(--senui-radius-md);
+  }
+
+  .docs-pre-wrap code {
+    font-size: var(--senui-font-size-sm);
+    overflow-wrap: anywhere;
+  }
+
+  .docs-table {
+    border-collapse: collapse;
+    inline-size: 100%;
+    font-size: var(--senui-font-size-sm);
+  }
+
+  .docs-table th,
+  .docs-table td {
+    padding: var(--senui-space-2) var(--senui-space-3);
+    text-align: start;
+    vertical-align: top;
+    border-block-end: var(--senui-border-width-default) solid var(--senui-color-border-default);
+  }
+
+  .docs-table thead th {
+    font-weight: var(--senui-font-weight-bold);
+    white-space: nowrap;
+  }
+
+  .docs-table tbody th {
+    font-weight: var(--senui-font-weight-regular);
+    white-space: nowrap;
+  }
+
+  .docs-table code {
+    overflow-wrap: normal;
+  }
+
+  .docs-table td:last-child {
+    min-inline-size: 20ch;
+  }
+
+  .docs-pairs > div {
+    padding-block: var(--senui-space-2);
+    border-block-end: var(--senui-border-width-default) solid var(--senui-color-border-default);
+  }
+
+  .docs-pairs dt {
+    font-weight: var(--senui-font-weight-bold);
+  }
+
+  .docs-pairs dd {
+    margin: var(--senui-space-1) 0 0;
+  }
+
+  .docs-story {
+    margin-block-end: var(--senui-space-6);
+  }
+
+  /* A story canvas is a named region, focusable while its story is wider than it (DocsStory). */
+  .docs-canvas {
+    padding: var(--senui-space-4);
+    border: var(--senui-border-width-default) solid var(--senui-color-border-default);
+    border-radius: var(--senui-radius-md);
+    overflow-x: auto;
+  }
+
+  .docs-canvas__frame {
+    display: block;
+    inline-size: 100%;
+    border: 0;
+  }
+
+  .docs-frame-free {
+    margin-block-start: var(--senui-space-8);
+    font-size: var(--senui-font-size-sm);
+  }
+
+  .docs-visually-hidden {
+    position: absolute;
+    inline-size: 1px;
+    block-size: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+}
+
+/* Inline code on the MDX pages (MdxCode), outside Storybook's theme. */
+.docs-mdx-code {
+  font-family: var(--senui-font-family-mono);
+  font-size: 0.9em;
+}
+
+/* Tab scrolls a stop into view with room for its focus ring, never flush with the viewport's
+   edge. Docs pages only: a story's own frame keeps the browser's default. */
+:root:has(#storybook-docs .docs-main) {
+  scroll-padding-block: var(--senui-space-8);
+}
+
+/* A modal story's placeholder (DocsStory): it sits in the canvas, outside the page's scope. */
+.docs-canvas__request {
+  display: grid;
+  gap: var(--senui-space-3);
+  justify-items: start;
+  font-family: var(--senui-font-family-sans);
+  color: var(--senui-color-fg-default);
+}
+
+.docs-canvas__request p {
+  margin: 0;
+}

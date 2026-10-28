@@ -35,10 +35,9 @@ export const Default: Story = {};
 
 export const Checked: Story = { args: { defaultChecked: true } };
 
-/** The mixed state, from the native property (never aria-checked). */
 /**
- * The mixed state, controlled (L05 decision 6): a click checks it and the story clears
- * `indeterminate` in `onCheckedChange`, as a consumer would (decision 7).
+ * The mixed state, from the native `indeterminate` property (never `aria-checked`), controlled: a
+ * click checks it and the story clears `indeterminate` in `onCheckedChange`, as a consumer would.
  */
 export const Indeterminate: Story = {
   render: function Render(args) {
@@ -127,8 +126,8 @@ export const FocusVisible: Story = {
 
 /**
  * Select all: the parent's checked and indeterminate states are computed by the consumer from its
- * rows (L05: select-all logic is the consumer's). The parent is named with `aria-label` here, as in
- * a table header with no visible text of its own.
+ * rows: the select-all logic is the consumer's, not Checkbox's. The parent is named with
+ * `aria-label` here, as in a table header with no visible text of its own.
  */
 export const SelectAll: Story = {
   parameters: { controls: { disable: true } },
@@ -187,7 +186,7 @@ export const Matrix: Story = {
 };
 
 /**
- * Matrix, for forced colours: the `forced-colors` tag tells L08's gate to screenshot it
+ * Matrix, for forced colours: the `forced-colors` tag tells the accessibility gate to screenshot it
  * with forced colours emulated. By hand: DevTools → Rendering → forced-colors: active. The box, the
  * check and the dash must stay visible in every state.
  */

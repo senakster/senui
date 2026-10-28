@@ -4,7 +4,8 @@ import { defineConfig, devices } from '@playwright/test';
 // Storybook first; this config only serves and checks what was built.
 //
 // Engines come from SENUI_GATE_BROWSERS (comma-separated chromium, firefox, webkit), Chromium by
-// default: PRs run Chromium, pushes to main run all three (L08 decision 11).
+// default: PRs run Chromium. All three run locally, or in gate-full.yml when it is enabled (it is
+// disabled for budget reasons; L08 decision 11).
 const ENGINES = {
   chromium: 'Desktop Chrome',
   firefox: 'Desktop Firefox',
@@ -21,6 +22,10 @@ const PORT = 6107;
 export default defineConfig({
   testDir: './gate',
   fullyParallel: true,
+  // CI's runner has 4 vCPUs and Playwright defaults to half. The docs pages (L09) pushed the gate
+  // step past its 15-minute timeout on 2 workers; 4 keeps it within the 10-minute budget (Emil,
+  // 2026-10-28). Locally the default stays.
+  ...(process.env.CI ? { workers: 4 } : {}),
   // L08 decision 7: one baseline per story and scheme, with no platform in the name, because they
   // are generated and compared only in the pinned Linux container. CI never writes a missing one.
   snapshotPathTemplate: '{testDir}/__screenshots__/{arg}{ext}',

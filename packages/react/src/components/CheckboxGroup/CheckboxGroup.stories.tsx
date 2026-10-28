@@ -45,7 +45,7 @@ export const Disabled: Story = { args: { disabled: true, defaultValue: ['news'] 
 
 /**
  * A required group in a form: with nothing checked, the submit is blocked, focus moves to the first
- * box, and the group shows the `required` message (L05 decisions 12 and 13).
+ * box, and the group shows the `required` message.
  */
 export const RequiredSubmit: Story = {
   args: { required: 'Choose at least one topic.' },
@@ -69,7 +69,7 @@ export const RequiredSubmit: Story = {
   },
 };
 
-/** For forced colours: L08's gate screenshots it with forced colours emulated. */
+/** For forced colours: the accessibility gate screenshots it with forced colours emulated. */
 export const ForcedColors: Story = {
   args: { error: 'Choose at least one topic.', defaultValue: ['news'] },
   tags: ['forced-colors'],

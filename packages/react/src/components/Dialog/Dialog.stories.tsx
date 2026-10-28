@@ -95,7 +95,7 @@ export const WithFooter: Story = {
   },
 };
 
-/** A footer action that is working: Save keeps focus and width while loading (Button, L03). */
+/** A footer action that is working: Save keeps focus and width while loading, as Button does. */
 export const FooterLoading: Story = {
   args: {
     defaultOpen: true,
@@ -107,7 +107,7 @@ export const FooterLoading: Story = {
 export const Small: Story = { args: { defaultOpen: true, size: 'sm' } };
 export const Large: Story = { args: { defaultOpen: true, size: 'lg' } };
 
-/** Fills the viewport. Choose it from your own breakpoint (L06 decision 21). */
+/** Fills the viewport. Choose it from your own breakpoint. */
 export const Fullscreen: Story = {
   args: { defaultOpen: true, size: 'fullscreen' },
   // L08 gate: axe can't compute the sticky title's contrast here (apps/docs/gate/exceptions.json).
@@ -183,7 +183,7 @@ export const NoTitleNoCloseButton: Story = {
   },
 };
 
-/** Keyboard open: the dialog shows a focus ring on its border (L06 decision 10, scope deviation 11). */
+/** Keyboard open: the dialog shows a focus ring on its border. */
 export const FocusVisible: Story = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
@@ -197,7 +197,7 @@ export const FocusVisible: Story = {
 /**
  * A form: `initialFocus="first"` puts focus in the first field, and the footer's submit buttons
  * belong to the form through `form=`. A `method="dialog"` submit closes it with the button's value
- * as `details.returnValue`; native validation and FormField's errors run first (L04).
+ * as `details.returnValue`; native validation and FormField's errors run first.
  */
 export const Form: Story = {
   parameters: { controls: { disable: true } },
@@ -253,8 +253,8 @@ export const Form: Story = {
 
 /**
  * Recipe: unsaved changes. A controlled owner refuses the close and asks inside the dialog, rather
- * than relying on blocking Esc, which browsers allow only once without a fresh user action
- * (L06 decision 3). A second Esc then arrives as `'forced'`: the dialog has closed, so accept it.
+ * than relying on blocking Esc, which browsers allow only once without a fresh user action. A
+ * second Esc then arrives as `'forced'`: the dialog has closed, so accept it.
  */
 export const UnsavedChangesRecipe: Story = {
   parameters: { controls: { disable: true } },
@@ -379,7 +379,7 @@ export const ForcedColors: Story = {
     docs: {
       description: {
         story:
-          'Screenshot with forced colours emulated by the L08 gate. To check by hand: DevTools → Rendering → forced-colors: active, then open with the keyboard to see the ring.',
+          'Screenshot with forced colours emulated by the accessibility gate. To check by hand: DevTools → Rendering → forced-colors: active, then open with the keyboard to see the ring.',
       },
     },
   },

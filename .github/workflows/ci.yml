@@ -60,12 +60,13 @@ jobs:
         run: pnpm test
       - if: steps.changes.outputs.code != 'false'
         run: pnpm --filter docs build-storybook
-      # L08: the a11y gate over the built Storybook, in Chromium. Every push to main runs all three
-      # engines (gate-full.yml). Budget (Emil, 2026-10-27): 10 min, from 8 min 41 s on the PR that
-      # finished L08. A step over 10 min is reviewed; the timeout only stops a hang.
+      # L08: the a11y gate over the built Storybook, in Chromium. The three-engine workflow
+      # (gate-full.yml) is disabled for budget reasons; Firefox and WebKit are checked locally.
+      # Budget (Emil, 2026-10-28): 15 min, raised from 10 when the L09 docs pages took the step to
+      # 13 min 56 s. A step over 15 min is reviewed; the timeout only stops a hang.
       - if: steps.changes.outputs.code != 'false'
         run: pnpm --filter docs exec playwright test
-        timeout-minutes: 15
+        timeout-minutes: 25
       - if: failure()
         uses: actions/upload-artifact@v4
         with:

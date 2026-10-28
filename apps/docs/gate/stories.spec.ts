@@ -1,9 +1,14 @@
 // L08: the gate's own bookkeeping. Runs once, in the first engine only.
+import { existsSync, readFileSync } from 'node:fs';
+import { fileURLToPath } from 'node:url';
 import { expect, test } from '@playwright/test';
+import { loadDocs } from './docs.js';
 import { exceptionErrors, exceptionFor } from './exceptions.js';
 import { contractFor, loadStories } from './stories.js';
 
 const stories = loadStories();
+/** The package's generated manifest, as the site serves it (main.ts copies it at build time). */
+const MANIFEST = fileURLToPath(new URL('../storybook-static/components.json', import.meta.url));
 
 test.describe('gate bookkeeping', () => {
   test.skip(({ browserName }) => browserName !== 'chromium', 'Static: one engine is enough');
@@ -28,6 +33,33 @@ test.describe('gate bookkeeping', () => {
       });
     }
     expect(missing).toEqual([]);
+  });
+
+  // L09 decision 8: the manifest's story ids are informative, and computed by the package's
+  // generator from Storybook's id rules; this checks them against the real, built index.
+  test("every story the package's manifest names is in the built Storybook", () => {
+    const manifest = JSON.parse(readFileSync(MANIFEST, 'utf8')) as {
+      components: Record<string, { stories: { id: string }[] }>;
+    };
+    const built = new Set(stories.map((story) => story.id));
+    const missing = Object.entries(manifest.components).flatMap(([name, component]) =>
+      component.stories.filter((story) => !built.has(story.id)).map((s) => `${name}: ${s.id}`),
+    );
+    expect(missing).toEqual([]);
+  });
+
+  // L09 decision 9: each component has a docs page, which docs.spec.ts checks as a page.
+  test('every component has a docs page', () => {
+    const pages = new Set(loadDocs().map((docs) => docs.title));
+    const missing = [...new Set(stories.map((story) => story.title))].filter((t) => !pages.has(t));
+    expect(missing).toEqual([]);
+  });
+
+  // L09 "Storybook's own manifest": development only, never deployed (decision 1).
+  test('the built site contains no Storybook manifest (storybook-static/manifests/)', () => {
+    expect(
+      existsSync(fileURLToPath(new URL('../storybook-static/manifests', import.meta.url))),
+    ).toBe(false);
   });
 
   // Decision 4, `forcedColors` rows: a component that keeps states visible by border or system

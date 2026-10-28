@@ -5,6 +5,7 @@
     "tsdown.config.ts",
     "vitest.commands.ts",
     "vitest.config.ts",
-    "vitest.setup.ts"
+    "vitest.setup.ts",
+    "scripts/docs/wording.d.mts"
   ]
 }

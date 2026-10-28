@@ -115,7 +115,9 @@ export function gateRun(gateDir, list, root, errors) {
     id: GATE_RUN_ID,
     method: 'automated',
     tool: `the accessibility gate: Playwright over the built Storybook, styled by the package's built CSS, with axe-core ${axe.version}`,
-    when: 'CI runs it on every pull request (Chromium) and on every push to the default branch (Chromium, Firefox and WebKit).',
+    // Firefox and WebKit run only on demand while the three-engine workflow is off (budget, scope
+    // decisions § L08); say so, not what the workflow file would do if enabled.
+    when: 'CI runs it on every pull request, in Chromium. Firefox and WebKit runs are made on demand, not on every change.',
     checks,
   };
 }

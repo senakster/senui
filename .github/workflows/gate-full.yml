@@ -1,8 +1,9 @@
 name: Gate (all engines)
 
-# L08 decision 11: pull requests run the gate in Chromium (ci.yml); every push to main runs Chromium,
-# Firefox and WebKit, so an engine difference surfaces with the change that caused it, before a
-# release. No scheduled run (Emil, 2026-10-27); start one by hand from the Actions tab.
+# L08 decision 11: pull requests run the gate in Chromium (ci.yml); this workflow runs Chromium,
+# Firefox and WebKit. It is disabled on GitHub for budget reasons (Emil, 2026-10-28): the three
+# engines and React 18.3 are checked locally until it is re-enabled, when it runs on every push to
+# main. No scheduled run (Emil, 2026-10-27).
 # Decision 9a: the same runs test the package against the lowest React its peer range admits.
 on:
   push:

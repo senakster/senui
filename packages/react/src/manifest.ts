@@ -33,7 +33,7 @@ export interface Manifest {
   readonly tokens: ManifestTokens;
   readonly css: ManifestCss;
   /**
-   * The accessibility gate, one automated run over every story of every component. Claims cite it
+   * The accessibility gate, one automated run over every story and every docs page. Claims cite it
    * by its `id` in `wcagEvidence`.
    */
   readonly gate: ManifestGateRun;

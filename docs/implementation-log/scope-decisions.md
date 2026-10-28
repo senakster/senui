@@ -1112,6 +1112,21 @@ PR 4 merged as #11.
 - **CI for docs-only changes:** a fast path (see L00, cross-module notes); this record's own PR ran in full, because it edits the workflows.
 - **No nightly run (Emil, 2026-10-27):** `gate-full.yml` loses its schedule, a deviation from decision 11. Every push to `main` still runs the three engines and React 18.3, and a run can be started by hand (`workflow_dispatch`). Re-include it when a dependency (a browser in the pinned image, a React patch) changes without a push to `main`.
 
+### After done: the three-engine workflow is disabled (2026-10-28)
+
+- **The deviation:** "Gate (all engines)" (`gate-full.yml`: the gate in Firefox and WebKit, and
+  the React 18.3 job) is disabled on GitHub. This deviates from decisions 11 and 9a.
+- **Emil's words:** "disabling due to budget concerns. checks done locally and manually until
+  further notice."
+- **What CI runs now:** pull requests and pushes to `main` run only the Chromium `verify` job.
+- **How it surfaced:** the disabled workflow left #13 and #14 without the three-engine run, found
+  while checking their merges.
+- **What says so:** the published gate run (L09's generator) says Firefox and WebKit runs are made
+  on demand, and the workflow comments, `playwright.config.ts` and CONVENTIONS rule 10 say the
+  same.
+- **Re-include when:** Emil says the budget allows it. Then run `gh workflow enable
+gate-full.yml` and update the published wording in `scripts/docs/evidence.mjs`.
+
 ## L09 — Docs & machine-readable manifest
 
 Plan written in the planner on 2026-10-28 with Emil:
@@ -1276,3 +1291,105 @@ Each failed for its own reason, and everything was restored from backups:
 - `pnpm test`: tokens 32, react 952;
 - `pnpm test:gate`: 1,378 passed, 122 skipped;
 - two builds byte-identical, including reordered program files and a CRLF read.
+
+### PR 3 (2026-10-28): Storybook docs pages
+
+- **Day-one probes, settled:**
+  - Storybook 10.6.2 emits `docsRendered` (the docs entry's id) once a docs page's React tree has
+    rendered; inline stories render after it, each with `storyRendered`. A docs entry opens alone
+    at `iframe.html?viewMode=docs&id=<id>`.
+  - Storybook's DocsWrapper paints its theme's white. An id-qualified override gives it
+    `--senui-color-bg-default`/`-fg-default`; tokens.css already sets `color-scheme: light dark`.
+    Measured: light `oklch(0.99 0.003 260)`, dark `oklch(0.16 0.012 260)`.
+  - Framed stories (WebKit included) take the page's scheme: the frame reads its parent's
+    scheme (same origin) and sets `color-scheme` on its own root, following changes.
+  - Every story id in `components.json` was already in the built `index.json` (113 of 113).
+- **Built:**
+  - `scripts/docs/wording.mjs`: every sentence of the published docs, as functions of the
+    manifest, used by both `render.mjs` (Markdown) and the docs blocks (HTML). The Markdown output
+    was byte-identical before and after the move, except one deliberate change: the gate's run now
+    reads "on every story and every docs page".
+  - `apps/docs/src/blocks/`: the docs-page template (`ComponentPage`), Props per axis and branch,
+    Accessibility, `DocsStory`, `DocsContainer` (`<main>`), `Inline` (inline code, links, quoted
+    speech marked with `lang`), `ScrollRegion`, and docs.css (`@scope` to the page, never into a
+    story canvas). Read from `@senakster/senui/components.json`, so in development an edit shows
+    after `pnpm build`.
+  - preview: `autodocs` everywhere, the template, the container, MDX code components, and a
+    decorator that sets `headingLevel`/`titleLevel` to 4 on docs pages only.
+  - main: `staticDirs` maps exactly the five generated paths to the site root in production
+    builds, and throws, naming what's missing, when dist lacks one. `componentsManifest` is on in
+    development only.
+  - Gate: `docs.spec.ts` (axe at 1280 and 320 px in both schemes with page rules on, outline,
+    reflow, tab walk, state, colour scheme), six rows in `checks.ts`, and three bookkeeping tests
+    (manifest story ids in `index.json`, a docs page per component, no `storybook-static/manifests`).
+  - Story JSDoc: the build applies the published-text rules to every story's and meta's JSDoc
+    and to `docs.description` strings. 30 findings in nine stories files were rewritten (private
+    references, review notes, a name, Markdown lists); meaning kept.
+
+#### Deviations from the plan
+
+1. **A Styling section** sits between Props and Accessibility on the docs page, as it does in
+   `docs/*.md`, so the two keep one order.
+2. **The primary story has an `Example` heading** and every story its name as an `<h3>`, so a
+   story's own heading is always an `<h4>`: one override level for every story.
+3. **Code blocks wrap instead of scrolling.** A line of code is one element: scrolled out of view,
+   axe reports its contrast incomplete, and MDX blocks have no name a region could use. Data tables
+   and over-wide story canvases scroll inside focusable, named regions; a canvas is in the tab
+   order only while its story overflows it.
+4. **Modal stories load on request.** A framed story that opens a modal dialog pulls focus and the
+   page's scroll position into its frame on load, so `inline: false` stories show a "Show the
+   <name> story" button that loads the frame. `fullscreen` stories (EmptyState's InPage, which has
+   its own `<h1>`) load in a frame at once. Frames use `embed=true`, Storybook's switch for no
+   play function.
+5. **Axe at 320 px re-checks scrolled-out contrast.** Text scrolled out of view in a table region
+   reads "partially obscured"; the gate scrolls each such element into view and checks it alone,
+   failing on anything still incomplete or failing.
+6. **Docs-page tab walk credits 1.4.11, 2.4.7, 2.4.11 and 4.1.2**, like the story walk; outline,
+   state and colour-scheme checks credit no criterion.
+7. Inline stories that hard-code their headings (EmptyState's InCard, InTableCell) keep them: an
+   `<h2>` under the story's `<h3>` passes `heading-order`; only args can be overridden.
+
+#### Probes
+
+Each failed for its own reason, and everything was restored from backups:
+
+- no `<main>`: `landmark-one-main`, `region`, and the outline check;
+- a second `<h1>`: the outline check (axe's `page-has-heading-one` only checks presence);
+- a skipped level (h2 → h4): the outline check and `heading-order`;
+- a table wrapper without `tabindex`: the reflow check and `scrollable-region-focusable`;
+- a manifest story id that isn't in `index.json`: the bookkeeping test;
+- `dist/llms.txt` missing: `build-storybook` fails, naming it;
+- the story JSDoc check, before the cleanup: 30 findings in nine files.
+
+#### Verified
+
+- `pnpm check`; `pnpm test`: tokens 32, react 952;
+- `pnpm test:gate`, first run: 1,479 passed, 122 skipped, 1 failed. `axe, dark ›
+components-emptystate--title-only` timed out waiting for the story to render, with no error. It
+  passed on a re-run, with every docs-page and EmptyState test (134 passed).
+- `pnpm test:gate`, full run after the branch moved onto `main` and the budget wording was
+  corrected: 1,480 passed, 122 skipped, 0 failed (10.8 min).
+- 99 new docs-page tests over 11 docs entries, and 3 new bookkeeping tests. No gate exception was
+  added.
+- Also in this PR: the published gate run, the workflow comments and CONVENTIONS rule 10 say Firefox
+  and WebKit run on demand, because the three-engine workflow is disabled for budget reasons
+  (§ L08, "After done").
+
+#### The gate's time budget (2026-10-28, after #15's first CI run)
+
+- **The cause.** On CI's default 2 Playwright workers, the 99 docs-page tests pushed the gate step
+  past its 15-minute timeout. 1,483 tests had passed and none had failed when it was stopped.
+- **Workers (Emil: "4 workers in CI, then measure").** The runner has 4 vCPUs, so CI now runs 4
+  workers; local runs keep Playwright's default. The step then passed in 13 min 56 s, still over
+  the 10-minute budget, so the runner's CPU isn't the limit.
+- **Emil: "try cheaper checks and raise budget and timeout."**
+  - The four docs-page axe runs (light and dark, 1280 and 320 px) now share one page load per docs
+    page, with the scheme and width switched in place. Axe is injected once per page.
+  - At 320 px, the contrast re-check is batched: every scrolled-out element visible at one scroll
+    position is checked in a single axe run, not one run per element.
+  - Locally the docs tests went from 490 s to 400 s of test time; the axe part from about 246 s to
+    156 s.
+  - Probe: a dark-only contrast break in the docs CSS fails in dark at both widths and never in
+    light. Restored and rebuilt.
+  - **Budget:** the gate step is now held to 15 minutes, up from L08's 10, with a 25-minute
+    timeout against hangs.

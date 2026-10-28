@@ -108,7 +108,7 @@ export const FocusVisible: Story = {
   },
 };
 
-/** The action is working: it keeps focus and width while loading (Button, L03). */
+/** The action is working: it keeps focus and width while loading, as Button does. */
 export const ActionLoading: Story = {
   args: { defaultOpen: true },
   render: (args) => <Demo {...args} loading />,
@@ -136,7 +136,7 @@ export const ForcedColors: Story = {
     docs: {
       description: {
         story:
-          'Screenshot with forced colours emulated by the L08 gate. To check by hand: DevTools → Rendering → forced-colors: active.',
+          'Screenshot with forced colours emulated by the accessibility gate. To check by hand: DevTools → Rendering → forced-colors: active.',
       },
     },
   },

@@ -343,9 +343,10 @@ on a thrown error or a console warning;
 markup in the browser and fails on any mismatch. The `ssr` project writes the markup to
 `.ssr-fixtures/`, stamped with the run's id, and runs in an earlier group, so run both together
 (`vitest run`, or `--project ssr --project browser`): the hydration test refuses markup from another
-run. Every push to `main` repeats the unit, `ssr` and browser projects under React 18.3, the
-lowest version the peer range admits (`gate-full.yml`), and each project asserts the version it
-rendered with. That covers runtime only: the type tests still use React 19's types.
+run. `gate-full.yml` repeats the unit, `ssr` and browser projects under React 18.3, the lowest
+version the peer range admits, and each project asserts the version it rendered with. That
+workflow is disabled for budget reasons, so run it locally before a release: swap in React 18.3
+as its `react-18` job does, and set `SENUI_EXPECT_REACT=18.3.1`. That covers runtime only: the type tests still use React 19's types.
 
 ## 11. Prop names and defaults
 
@@ -384,6 +385,9 @@ export const docs = defineComponentDocs<ButtonProps, typeof stories>()({ compone
 - `composition` records what changes inside another component (a Checkbox in a CheckboxGroup
   ignores `checked` and needs `value`).
 - The text follows rule 7's rules for published strings.
+- So does every story's JSDoc, the stories meta's JSDoc and any `docs.description` string: the
+  docs page shows them under each story. The docs build fails on a private reference or Markdown
+  beyond inline code in any of them.
 
 **Enforced by:** the type and
 [`component-docs.test-d.ts`](src/internal/docs/component-docs.test-d.ts) (stories, components and
@@ -418,6 +422,17 @@ What it checks, on every story, from the component's contract:
 - forced colours (Chromium): the ring and boundary checks again with forced colours on, and a
   screenshot, in light and dark, of every story tagged `forced-colors`. A component whose
   `forcedColors` is `border` or `system-colour` needs at least one such story.
+
+Every docs page (each component's autodocs page and each MDX page) is checked as a page (L09
+decision 9): axe with the page-level rules on, at 1280 and 320 px in light and dark; one `<main>`
+and one `<h1>`, with headings that never skip a level, live stories included; no sideways scroll
+at 320 px except inside a focusable, named region; a tab walk to the end of the page; nothing
+focused, modal or inert after render; and a surface that follows the colour scheme. The page's
+story canvases are left to the stories' own checks. A docs page renders a story's heading one
+level below the story's name (`headingLevel` and `titleLevel` are overridden there), never runs a
+play function, and shows a story that opens a modal dialog (`docs.story.inline: false`) in a frame
+the reader asks for. The bookkeeping also checks that every story id in `components.json` is in
+the built `index.json`, and that the build contains no Storybook manifest.
 
 Screenshot baselines are Linux pixels: they are generated and compared only in the pinned
 Playwright container CI uses, and the screenshot tests skip anywhere else. After a deliberate

@@ -76,6 +76,14 @@ export default defineConfig(
     },
   },
   {
+    // L09: on docs pages, content wider than the page scrolls inside a named region that is in the
+    // tab order, so a keyboard user can scroll it (WCAG 2.1.1). The docs gate checks every one.
+    files: ['apps/docs/src/blocks/**/*.tsx'],
+    rules: {
+      'jsx-a11y/no-noninteractive-tabindex': ['error', { tags: [], roles: ['region'] }],
+    },
+  },
+  {
     // Claude Code workflow scripts run in the workflow runtime, which provides these globals.
     files: ['.claude/workflows/**/*.js'],
     languageOptions: {
