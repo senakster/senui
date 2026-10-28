@@ -15,11 +15,18 @@ Status legend — plan: `plan-ready` · `not-planned` (plan not written yet upst
 | L06 | Dialog                            | L06-dialog                    | plan-ready  | done           | 2026-10-21   |
 | L07 | EmptyState                        | L07-empty-state               | plan-ready  | done           | 2026-10-27   |
 | L08 | Test & a11y gate                  | L08-test-and-a11y-gate        | plan-ready  | done           | 2026-10-27   |
-| L09 | Docs & machine-readable manifest  | —                             | not-planned | not-started    | 2026-10-15   |
+| L09 | Docs & machine-readable manifest  | L09-docs-and-manifest         | plan-ready  | in-progress    | 2026-10-28   |
 | L10 | Release, versioning & deprecation | —                             | not-planned | not-started    | 2026-10-15   |
 | L11 | Motion                            | —                             | not-planned | not-started    | 2026-10-15   |
 
 ## Changelog
+
+- **2026-10-28** — L09 in progress: plan synced; PR 1 of 4 (data foundations) built, awaiting Emil's review.
+  - ADR-0019: screen-reader runs and quoting announcements record their language.
+  - The nine contracts no longer cite private plans, reviews or names in published strings.
+  - Nine typed `.docs.ts` files (usage guidance), checked for summary, claims, examples and published text; a missing one fails `pnpm check`.
+  - The README is the usage source; the nightly gate run is gone.
+  - **Verified:** `pnpm check`; `pnpm test`: tokens 32, react 919.
 
 - **2026-10-27** — L08 done. PR 4 merged as #11.
   - **On `main`:** the three-engine gate passed (3,918 tests, 33 min 46 s), and the first `react-18` CI run passed (886/886 on React 18.3.1).

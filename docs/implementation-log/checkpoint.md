@@ -4,36 +4,68 @@ Single source of truth for **where the implementation is right now**. Overwritte
 `implement-module` skill at the end of every run. For history, see `log.md`; for status, see
 `docs/PROGRESS.md`.
 
-| Field         | Value                                                                                |
-| ------------- | ------------------------------------------------------------------------------------ |
-| Target app    | repo root (pnpm workspace: `packages/tokens`, `packages/react`, `apps/docs`)         |
-| Active module | none: L08 done; L09 (Docs & machine-readable manifest) is not planned yet            |
-| Sub-step      | L08 merged in four PRs (#8–#11); its completion record is on `docs/l08-done`         |
-| Last verified | 2026-10-27, `main`: CI; three-engine gate 3,918 passed; `react-18` 886/886 on 18.3.1 |
-| Updated       | 2026-10-27                                                                           |
+| Field         | Value                                                                           |
+| ------------- | ------------------------------------------------------------------------------- |
+| Target app    | repo root (pnpm workspace: `packages/tokens`, `packages/react`, `apps/docs`)    |
+| Active module | L09 — Docs & machine-readable manifest (in progress)                            |
+| Sub-step      | PR 1 of 4 built and verified, uncommitted on `feature/docs-L09-1`; Emil reviews |
+| Last verified | 2026-10-28: `pnpm check`; `pnpm test` tokens 32, react 919                      |
+| Updated       | 2026-10-28                                                                      |
 
 ## Brief
 
-No module in flight. L00–L08 are done. L09 needs a plan before it can start: write it in the
-planner (`docs/library_catalogue/`), then re-sync `.catalogue/` here (implement-module skill,
-"Re-syncing a library project").
+L09 generates the docs from typed sources:
+
+- a docs page per component in the published Storybook;
+- `components.json`, `llms.txt`, `llms-full.txt` and `docs/<component>.md`, in the npm package
+  and on the site.
+
+Plan: `.catalogue/library_catalogue/L09-docs-and-manifest.md` (synced 2026-10-28). Scope, and
+every deviation: scope-decisions § L09. Claude builds and writes everything, including the
+`.docs.ts` guidance, and Emil reviews.
+
+**Four PRs (Emil):**
+
+1. **Built, uncommitted:**
+   - the nightly removal;
+   - ADR-0019 (`language`);
+   - the contract cleanup;
+   - `ComponentDocs` and nine `.docs.ts` files;
+   - the published-text rules;
+   - the README as the usage source;
+   - CONVENTIONS rules 7 and 12.
+2. **The generator:**
+   - the manifest and its mirror types;
+   - props by axis and branch, and forbidden props;
+   - `components.json`, `llms.txt`, `llms-full.txt`, `docs/*.md`, and the README as
+     `dist/USAGE.md`;
+   - the files in `exports`, generated in tsdown's `build:before`;
+   - determinism;
+   - the data checks, including published-text rules on props JSDoc, which needs cleaning up;
+   - the union-alias rule in CONVENTIONS rule 3.
+3. **Storybook docs pages:**
+   - the template and blocks, and the docs theme;
+   - the gate on docs pages, run as pages;
+   - published-text rules on story JSDoc.
+4. **The GitHub Pages deploy:**
+   - Pages source set to GitHub Actions, with Emil's OK;
+   - unreleased builds stamped as unreleased.
 
 ## In-flight notes
 
-- **PR gate budget (L08, Emil):** the gate step in `ci.yml` is held to 10 min (8 min 41 s on #11);
-  it has a 15-minute step timeout against hangs. A PR whose gate step goes over 10 min is reviewed.
-- `main`'s three-engine gate takes ~34 min; `react-18` takes ~2 min.
+- Day-one probes for PR 2: tsdown's publint against `build:before`; Vite's module runner loading the
+  data files; props by axis.
+- For PR 3: the docs theme in dark mode, including story iframes in WebKit; the gate seeing
+  `#storybook-docs` after `docsRendered`.
 - Exceptions: Dialog Fullscreen and LongContent, `color-contrast:incomplete`, expire 2027-04-27.
-- Open for TextInput (Emil deferred it): the Home/End contract row isn't true on macOS
-  (scope-decisions § L04, cross-module notes).
-- The Docker CLI warning in container steps is the runner's own `docker exec` reading
-  `HOME: /root`; it's harmless.
-- **Storybook on GitHub Pages (Emil, 2026-10-26): comes with L09.** On a push to `main`, the CI `verify` job uploads the Storybook it builds as a Pages artifact, and a `deploy-storybook` job (`needs: verify`) publishes it to `https://senakster.github.io/senui/`. Claude enables Pages with `gh api -X POST repos/senakster/senui/pages -f build_type=workflow` once merged (Emil's OK).
-- **npm publishing (Emil, 2026-10-26):** after L07 to L10; L10 builds the pipeline first. Gaps: no npm login on this machine, no LICENSE in the packages, no `repository`/`homepage`/`bugs`.
-- **L09:** the docs generator must handle `semantics.name: 'none'`; it can reuse `gate/stories.ts`'s story-to-contract mapping.
-- Untested readers: JAWS, VoiceOver and TalkBack. `react@19.3.1` exclusion in `pnpm-workspace.yaml` can go once that release has aged. Still open from L03: hover/active stories; the squash-only repository setting.
+- Open for TextInput (deferred): the Home/End contract row isn't true on macOS.
+- npm publishing comes after L10. Gaps: no npm login on this machine, no LICENSE in the packages,
+  no `repository`/`homepage`/`bugs`.
+- Untested readers: JAWS, VoiceOver and TalkBack.
 
 ## Next action
 
-1. Merge `docs/l08-done` (the L08 completion record and the gate step's timeout).
-2. Plan L09 in the planner with Emil, then sync it here and run `/modular-web:implement-module`.
+1. Emil reviews PR 1's content: the nine `.docs.ts` files and the contract rewrites (the agent's
+   old→new list is in the session, and `git diff` shows it).
+2. With Emil's OK, commit PR 1 and open it.
+3. Then PR 2, the generator, starting with its three day-one probes.

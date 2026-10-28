@@ -1,15 +1,14 @@
 name: Gate (all engines)
 
-# L08 decision 11: pull requests run the gate in Chromium (ci.yml); main and a nightly run cover
-# Chromium, Firefox and WebKit, so an engine difference surfaces within a day, before a release.
+# L08 decision 11: pull requests run the gate in Chromium (ci.yml); every push to main runs Chromium,
+# Firefox and WebKit, so an engine difference surfaces with the change that caused it, before a
+# release. No scheduled run (Emil, 2026-10-27); start one by hand from the Actions tab.
 # Decision 9a: the same runs test the package against the lowest React its peer range admits.
 on:
   push:
     branches: [main]
-    # Docs-only changes can't change a result (see ci.yml); the nightly run still covers main.
+    # Docs-only changes can't change a result (see ci.yml).
     paths-ignore: ['docs/**', '**/*.md']
-  schedule:
-    - cron: '17 3 * * *'
   workflow_dispatch:
 
 permissions:

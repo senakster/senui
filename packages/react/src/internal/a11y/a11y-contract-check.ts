@@ -1,6 +1,9 @@
 import { RESPONSIBILITIES, type A11yContract, type IsoDate } from './a11y-contract.js';
 import { WCAG22, type WcagCriterion } from './wcag.js';
 
+/** A BCP 47 language tag's shape: a 2–3 letter language, then optional subtags (`da`, `en-GB`). */
+const BCP47 = /^[a-z]{2,3}(-[A-Za-z0-9]{2,8})*$/;
+
 /**
  * senui policy, not W3C data: the criteria every focusable component must address in its
  * contract. Keyboard operation, visible and unobscured focus, target size, non-text contrast, and
@@ -41,6 +44,23 @@ export function contractErrors(dir: string, contract: A11yContract, today: strin
   for (const run of contract.testedWith) {
     if (!isValidDate(run.date)) errors.push(`testedWith: '${run.date}' is not a YYYY-MM-DD date`);
     else if (run.date > today) errors.push(`testedWith: ${run.date} is in the future`);
+  }
+
+  // ADR-0019: quoted speech says its language, which must be a language the contract was heard in.
+  const heardIn = new Set<string>();
+  for (const run of contract.testedWith) {
+    if (run.method !== 'screen reader') continue;
+    if (!BCP47.test(run.language)) errors.push(`testedWith: '${run.language}' is not a BCP 47 tag`);
+    heardIn.add(run.language);
+  }
+  for (const { when, announces, language } of contract.announcements) {
+    if (language === undefined) {
+      // Quotes inside inline code are code (`role="status"`), not speech.
+      if (announces.replace(/`[^`]*`/g, '').includes('"'))
+        errors.push(`announcements '${when}': quotes speech, so it needs \`language\``);
+    } else if (!heardIn.has(language)) {
+      errors.push(`announcements '${when}': language '${language}' matches no screen-reader run`);
+    }
   }
 
   const methods = new Set(contract.testedWith.map((run) => run.method));

@@ -39,6 +39,7 @@ export const a11y = defineA11yContract<TextInputProps>()({
       owner: 'component',
       announces:
         '"Search, edit" (Narrator in English, Chrome; Default story). Inside a FormField the description and error follow, e.g. "Email, edit, Please fill out this field."; required and invalid are read when set (exact wording not transcribed).',
+      language: 'en',
     },
   ],
   requiredProps: [
@@ -132,8 +133,9 @@ export const a11y = defineA11yContract<TextInputProps>()({
     {
       // Narrator in English on a Danish system.
       method: 'screen reader',
-      at: 'Narrator (English)',
+      at: 'Narrator',
       atVersion: 'Windows 11 26H2 (build 26300.9711)',
+      language: 'en',
       browser: 'Chrome',
       browserVersion: '155.0.8059.40',
       os: 'Windows 11 Pro 26H2 (build 26300.9711)',
@@ -144,7 +146,7 @@ export const a11y = defineA11yContract<TextInputProps>()({
     {
       method: 'forced colours',
       detail:
-        'Chrome 155.0.8059.40, ForcedColors story (Emil): every size and the invalid (thicker border) and disabled (GrayText) states distinguishable. Read-only was not at first (fill alone, found in review); with a dashed border in forced colours, re-checked by Emil on 2026-10-19 and distinguishable.',
+        'Chrome 155.0.8059.40, ForcedColors story: every size and the invalid (thicker border) and disabled (GrayText) states distinguishable. Read-only was not at first (fill alone); with a dashed border in forced colours, re-checked on 2026-10-19 and distinguishable.',
       result: 'pass',
       date: '2026-10-19',
     },

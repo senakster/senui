@@ -106,8 +106,7 @@ This file is **parsed** into the decision index, so its shape matters:
   - **Pull requests:** `ci.yml`'s `verify` lists the changed files. When every one is under
     `docs/` or ends in `.md`, it runs only `pnpm format:check` and skips the check, tests, Storybook
     build and gate, and still reports.
-  - **Pushes to `main`:** `ci.yml` and `gate-full.yml` ignore the same paths; the nightly gate
-    still covers `main`.
+  - **Pushes to `main`:** `ci.yml` and `gate-full.yml` ignore the same paths.
   - **Probed** locally with seven file lists. A workflow file, `apps/docs/`, or a mix with code
     runs everything, and an empty diff runs everything too. The docs-only path itself is unproven
     in CI until the first docs-only PR.
@@ -1111,3 +1110,89 @@ PR 4 merged as #11.
   - the 18.3 job covers runtime, not types (PR 4, deviation 3).
 - **Open, not L08's:** TextInput's Home/End row on macOS (see L04, cross-module notes).
 - **CI for docs-only changes:** a fast path (see L00, cross-module notes); this record's own PR ran in full, because it edits the workflows.
+- **No nightly run (Emil, 2026-10-27):** `gate-full.yml` loses its schedule, a deviation from decision 11. Every push to `main` still runs the three engines and React 18.3, and a run can be started by hand (`workflow_dispatch`). Re-include it when a dependency (a browser in the pinned image, a React patch) changes without a push to `main`.
+
+## L09 — Docs & machine-readable manifest
+
+Plan written in the planner on 2026-10-28 with Emil:
+
+- Emil's calls: the manifest source, where it is published, typed `.docs.ts`, how unreleased site
+  builds are marked, enum growth, the run language, and composition rules.
+- Review: `component-api-reviewer`, `wcag-auditor` and `modern-web-curator` read it against this
+  repo (about 70 findings, all accepted, two moved to Out of scope).
+- Synced the same day. No ADR contradicts the plan; ADR-0017's forecast (`essentialMotion`
+  published with the contract) is decision 5.
+
+Sizing at the start (step 2b):
+
+- 9 components, 19 entry exports;
+- 50 lines of published contract strings that cite private planning references, review notes or
+  names, in all nine contracts;
+- 10 screen-reader runs that need `language`;
+- no `.docs.ts` files.
+
+The entry exports every component's props type. A one-line grep first suggested three were missing: they sit in multi-line `export type { … }` blocks.
+
+| Deliverable / criterion                            | Decision                                                                                                                                                                                                                                                                                                                                                                                                             | Reason                                                                                       | Re-include when                                                                   |
+| -------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------- |
+| Everything in the plan                             | in, Claude builds and Emil reviews                                                                                                                                                                                                                                                                                                                                                                                   | Harness work                                                                                 | —                                                                                 |
+| `<Name>.docs.ts` and `USAGE.md` (plan decision 11) | in: Claude drafts all of them; Emil reviews                                                                                                                                                                                                                                                                                                                                                                          | Emil, 2026-10-28                                                                             | —                                                                                 |
+| Component-folder edits                             | in: `.docs.ts` files, contract cleanup and `language`,. Each is listed here                                                                                                                                                                                                                                                                                                                                          | The module's inputs live there; Emil's choice above                                          | —                                                                                 |
+| Removing the nightly gate run                      | in, PR 1 (commit `ff1e616`)                                                                                                                                                                                                                                                                                                                                                                                          | Emil, 2026-10-27: it missed #12's merge; folded into L09 rather than a separate PR           | —                                                                                 |
+| Delivery                                           | in: four PRs. <ol><li>Data foundations: nightly removal, the `language` ADR and field, the contract cleanup, `ComponentDocs`, 9 `.docs.ts` files, `USAGE.md`</li><li>Generator: the manifest and mirror types, props by axis, `components.json`/`llms.txt`/`docs/*.md`, `exports`, determinism and data checks</li><li>Storybook docs pages: template, blocks, theme, gate</li><li>The GitHub Pages deploy</li></ol> | Emil, 2026-10-28: each green and reviewable alone; the content Emil reviews most comes first | —                                                                                 |
+| Gating Storybook's manager frame                   | out (plan)                                                                                                                                                                                                                                                                                                                                                                                                           | Emil, 2026-10-28                                                                             | A reader reports a navigation barrier, or a Storybook upgrade regresses its frame |
+| API diff check                                     | out → L10 (plan)                                                                                                                                                                                                                                                                                                                                                                                                     | Needs a published baseline                                                                   | L10                                                                               |
+
+### PR 1 (2026-10-28): data foundations
+
+- **The nightly gate run is removed** (commit `ff1e616`, cherry-picked).
+- **ADR-0019** (Emil): screen-reader runs record their `language`. Emil extended it while it was
+  still uncommitted: an announcement that quotes speech gives its language too, because Button
+  has an English and a Danish run. Double quotes mark verbatim speech only; a quote inside inline
+  code is code. Checkbox's run is Danish (Emil: the same session as Switch and CheckboxGroup).
+- **The nine contracts:**
+  - every screen-reader run and every quoting announcement has a `language`;
+  - glosses are unquoted (`"til" means on`);
+  - published strings no longer cite module plans, reviews or people. No `Lnn decision` reference
+    had a public ADR, so each was dropped and the fact kept;
+  - examples that were never heard are unquoted ("for example, Item deleted");
+  - CheckboxGroup's relationship note describes the reading order instead of quoting Danish speech
+    in a field that has no `language`;
+  - an agent drafted the rewrite, and Claude reviewed it and restored two code spans.
+- **`ComponentDocs`** (`src/internal/docs/component-docs.ts`), with type tests, and nine `.docs.ts`
+  files drafted by Claude, for Emil's review.
+- **Published-text rules** for contracts and `.docs.ts`, in `published-text.ts`: no private
+  references, no Markdown beyond inline code, no accessibility claims in `summary` or
+  `description`. A missing `.docs.ts` fails `check:components`.
+- **CONVENTIONS:** rule 7 gains the language and quoting rules and the published-text rules; new
+  rule 12 covers `.docs.ts`. CLAUDE.md lists ADR-0019.
+
+#### Deviations from the plan
+
+1. **No separate `USAGE.md` source.** The package README already is the usage guide, and npm
+   shows it, so writing `USAGE.md` too would put every fact in two places (principle 8). The
+   README stays the source. It gains server rendering, the conformance wording and "What senui
+   doesn't do for your page". PR 2's generator publishes it as `dist/USAGE.md` for `llms.txt`.
+2. **`examples` for EmptyState** include NoResults and DeletedLastItem, as the WCAG review
+   proposed: neither has a play function. A first probe said NoResults had one; an awk listing
+   had pinned the play function to the wrong story (rule 34: the probe was wrong, not the check).
+
+#### Cross-module notes for later PRs
+
+- **PR 2:** props JSDoc is published too (decision 8), and several components' JSDoc cites
+  `Lnn decision N`. Apply the published-text rules to it, and clean it up.
+- **PR 3:** Storybook shows each story's JSDoc on the docs page. Story descriptions cite plans and
+  names (EmptyState's DeletedLastItem), so the rules apply to them too.
+
+#### Probes
+
+Each failed for its own reason, and everything was restored:
+
+- a missing `Button.docs.ts` fails `check:components`;
+- `(L03 decision 6)` added to a Button contract string fails "publishes only public text";
+- an English quote with its `language` removed fails "is a valid contract";
+- an example with a play function (FocusVisible) fails the docs test.
+
+#### Verified
+
+`pnpm check`; `pnpm test`: tokens 32, react 919.

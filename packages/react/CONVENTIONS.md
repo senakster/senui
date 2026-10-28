@@ -16,6 +16,7 @@ src/components/Button/
   Button.tsx          the component, exported as `Button`
   Button.css          its styles, inside @layer senui.components
   Button.a11y.ts      its accessibility contract, exported as `a11y`
+  Button.docs.ts      its usage guidance, exported as `docs` (rule 12)
   Button.test.tsx          behaviour and axe tests, in jsdom
   Button.browser.test.tsx  what needs a real browser: layout, computed styles, real focus
   Button.test-d.tsx        type tests
@@ -255,9 +256,15 @@ fact.
 - A WCAG claim names a 2.2 criterion (its level comes from the table), says whether the component
   `meets` it alone or `enables` the app to meet it, and lists the test methods behind it.
 - `testedWith` needs an automated run and a screen-reader run, plus a keyboard run for a focusable
-  component. A screen-reader run names the assistive technology, browser, OS, versions and the
-  package version tested. Product names in this data are compatibility facts and are written out
-  (scope decision, L02).
+  component. A screen-reader run names the assistive technology, browser, OS, versions, the
+  package version tested and the `language` of the reader's speech (BCP 47, ADR-0019). Product
+  names in this data are compatibility facts and are written out (scope decision, L02).
+- In `announces`, double quotes mark verbatim speech and nothing else; write a gloss unquoted
+  (`"til" means on`). An announcement that quotes speech gives its `language`, one of the
+  contract's screen-reader runs, so the published docs can mark the quote with it (ADR-0019).
+- Every string is published as written (L09), so it cites only public ADRs (`ADR-0014`) and WCAG
+  criteria, never module plans, reviews or people, and uses no Markdown but inline code. Record
+  review history in the implementation log instead.
 - A focusable component addresses 2.1.1, 2.4.7, 2.4.11, 2.5.8, 1.4.11 and 4.1.2, and lists
   `RESPONSIBILITIES.keepFocusRing`; one named by its content also lists
   `RESPONSIBILITIES.labelInName` (WCAG 2.5.3).
@@ -319,7 +326,7 @@ on a thrown error or a console warning;
 markup in the browser and fails on any mismatch. The `ssr` project writes the markup to
 `.ssr-fixtures/`, stamped with the run's id, and runs in an earlier group, so run both together
 (`vitest run`, or `--project ssr --project browser`): the hydration test refuses markup from another
-run. The `main` and nightly runs repeat the unit, `ssr` and browser projects under React 18.3, the
+run. Every push to `main` repeats the unit, `ssr` and browser projects under React 18.3, the
 lowest version the peer range admits (`gate-full.yml`), and each project asserts the version it
 rendered with. That covers runtime only: the type tests still use React 19's types.
 
@@ -335,6 +342,38 @@ rendered with. That covers runtime only: the type tests still use React 19's typ
   return early and call `preventDefault()`, so an `aria-disabled` submit button can't submit its form.
 
 **Enforced by:** `component-api-reviewer`, and each component's behaviour tests for the disabled guard.
+
+## 12. Every component has usage guidance
+
+`<Name>.docs.ts` says when to use the component and when not to, as data (L09 decision 3). It feeds
+the docs page, `components.json` and `llms.txt`:
+
+```ts
+import type { ButtonProps } from './Button.js';
+import type * as stories from './Button.stories.js';
+
+export const docs = defineComponentDocs<ButtonProps, typeof stories>()({ component: 'Button', … });
+```
+
+- Import the props and the stories with `import type` only: the docs generator loads this file.
+- `summary` is one sentence of at most 160 characters: what the component is for.
+- `summary` and `description` make no accessibility claims ("accessible", "WCAG", "screen reader",
+  "announces"). Claims live in the contract only, so they can't drift apart. Don't restate the
+  contract's responsibilities either; the docs show them next to the guidance.
+- Each `dontUseWhen` names what to use instead: another component, a native element with a note
+  (navigation is an `<a href>`, not a Button), an ARIA pattern, or nothing, with the reason.
+- `examples` are story names, and never a story that needs its play function: docs pages don't run
+  one.
+- `composition` records what changes inside another component (a Checkbox in a CheckboxGroup
+  ignores `checked` and needs `value`).
+- The text follows rule 7's rules for published strings.
+
+**Enforced by:** the type and
+[`component-docs.test-d.ts`](src/internal/docs/component-docs.test-d.ts) (stories, components and
+props that exist; a component can't name itself);
+[`component-docs.test.ts`](src/internal/docs/component-docs.test.ts) (summary, claims, published
+text, examples); and `scripts/check-a11y-contracts.mjs` in `pnpm check`, which fails a component
+without one.
 
 ## The a11y gate (L08)
 

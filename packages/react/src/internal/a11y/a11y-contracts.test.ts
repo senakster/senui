@@ -7,6 +7,7 @@ import {
   type WcagClaim,
   type WcagCriterion,
 } from './a11y-contract.js';
+import { publishedStrings, publishedTextErrors } from '../docs/published-text.js';
 import { contractErrors } from './a11y-contract-check.js';
 
 // Every component's contract and component module. Vite resolves the globs at build time, so a new
@@ -33,6 +34,14 @@ describe('every component', () => {
   test.each(Object.entries(contracts))('%s is a valid contract', (path, contract) => {
     expect(contract, `${path} must export \`a11y\``).toBeDefined();
     expect(contractErrors(dirOf(path), contract, today)).toEqual([]);
+  });
+
+  // L09 decision 8: every string is published verbatim, so none may cite private plans or reviews.
+  test.each(Object.entries(contracts))('%s publishes only public text', (_path, contract) => {
+    const errors = publishedStrings(contract).flatMap(([at, text]) =>
+      publishedTextErrors(at, text),
+    );
+    expect(errors).toEqual([]);
   });
 
   test.each(Object.entries(modules))('%s sets displayName', (path, module) => {
@@ -95,6 +104,7 @@ const valid = defineA11yContract<{ children: string; 'aria-label'?: string }>()(
       method: 'screen reader',
       at: 'reader',
       atVersion: '1',
+      language: 'en',
       browser: 'browser',
       browserVersion: '1',
       os: 'os',
@@ -129,6 +139,31 @@ describe('contractErrors', () => {
         'keyboard is empty, but the component takes focus',
       ]),
     );
+  });
+
+  // ADR-0019: quoted speech says its language, and that language was heard in a screen-reader run.
+  test('a quote needs a language, one the contract was heard in', () => {
+    const quoting = { when: 'On focus', mechanism: 'focus', owner: 'component' } as const;
+    expect(errorsFor({ announcements: [{ ...quoting, announces: '"Save, button"' }] })).toContain(
+      "announcements 'On focus': quotes speech, so it needs `language`",
+    );
+    expect(
+      errorsFor({ announcements: [{ ...quoting, announces: '"Gem, knap"', language: 'da' }] }),
+    ).toContain("announcements 'On focus': language 'da' matches no screen-reader run");
+    expect(
+      errorsFor({ announcements: [{ ...quoting, announces: '"Save, button"', language: 'en' }] }),
+    ).toEqual([]);
+    // Quotes inside inline code are code, not speech.
+    expect(
+      errorsFor({ announcements: [{ ...quoting, announces: 'Your `role="status"` region.' }] }),
+    ).toEqual([]);
+  });
+
+  test('a screen-reader run’s language is a BCP 47 tag', () => {
+    const [automated, keyboard, reader] = valid.testedWith;
+    expect(
+      errorsFor({ testedWith: [automated, keyboard, { ...reader, language: 'Danish' }] }),
+    ).toContain("testedWith: 'Danish' is not a BCP 47 tag");
   });
 
   test('dates must be real and not in the future', () => {

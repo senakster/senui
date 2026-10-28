@@ -1,6 +1,7 @@
 // L02 decision 7: every component ships a typed a11y contract. This checks presence and form; the
 // contract's content is checked by packages/react/src/internal/a11y/a11y-contracts.test.ts. Fails if:
 // - a component directory has no <Name>.a11y.ts exporting `a11y = defineA11yContract<…>()(…)`;
+// - a component directory has no <Name>.docs.ts exporting `docs = defineComponentDocs<…>()(…)` (L09);
 // - the package entry exports anything other than a component or an allow-listed public type file.
 // Warns (doesn't fail) when a component's source changed after its last manual a11y run.
 import { execFileSync } from 'node:child_process';
@@ -36,6 +37,20 @@ for (const name of dirs) {
   } else {
     const stale = staleness(name, source);
     if (stale) warnings.push(stale);
+  }
+
+  // L09 decision 3: usage guidance, typed and checked like the contract.
+  const docs = join(COMPONENTS, name, `${name}.docs.ts`);
+  if (!existsSync(docs)) {
+    errors.push(`${name}: missing ${docs}`);
+  } else if (
+    !/\bexport\s+const\s+docs\s*=\s*defineComponentDocs</.test(
+      stripComments(readFileSync(docs, 'utf8')),
+    )
+  ) {
+    errors.push(
+      `${name}: ${docs} must \`export const docs = defineComponentDocs<${name}Props, typeof stories>()({ … })\``,
+    );
   }
 }
 

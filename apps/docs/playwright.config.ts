@@ -4,7 +4,7 @@ import { defineConfig, devices } from '@playwright/test';
 // Storybook first; this config only serves and checks what was built.
 //
 // Engines come from SENUI_GATE_BROWSERS (comma-separated chromium, firefox, webkit), Chromium by
-// default: PRs run Chromium, main and nightly run all three (L08 decision 11).
+// default: PRs run Chromium, pushes to main run all three (L08 decision 11).
 const ENGINES = {
   chromium: 'Desktop Chrome',
   firefox: 'Desktop Firefox',
