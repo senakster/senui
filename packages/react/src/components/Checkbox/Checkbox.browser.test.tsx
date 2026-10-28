@@ -144,7 +144,7 @@ describe('L05 review fixes', () => {
     expect(control).toBeChecked();
   });
 
-  test('a required consent box: submit marks and focuses it; checking it clears that', async () => {
+  test('a required consent box: submit marks and focuses it; checking it clears that (WCAG 3.3.1)', async () => {
     const { getByRole } = render(submitForm(<Checkbox label="I accept the terms" required />));
     await userEvent.click(getByRole('button', { name: 'Send' }));
     const box = getByRole('checkbox') as HTMLInputElement;
@@ -187,7 +187,7 @@ describe('L05 review fixes', () => {
 });
 
 describe('CheckboxGroup required submit (L05 decisions 12 and 13)', () => {
-  test('blocks the submit, focuses the first box, and shows the message on the group', async () => {
+  test('blocks the submit, focuses the first box, and shows the message on the group (WCAG 3.3.1)', async () => {
     const { getByRole } = render(
       <form
         onSubmit={(event) => {

@@ -31,7 +31,7 @@ describe('FormField', () => {
   });
 
   describe('description and error wiring (L04 decision 1)', () => {
-    test('aria-describedby has the description, and the error only while one is set', () => {
+    test('aria-describedby has the description, and the error only while one is set (WCAG 3.3.1)', () => {
       const { rerender } = render(<Field description="We reply here." />);
       const input = screen.getByRole('textbox');
       const description = screen.getByText('We reply here.');
@@ -48,7 +48,7 @@ describe('FormField', () => {
       expect(ids(input, 'aria-describedby')).toEqual([description.id]);
     });
 
-    test('aria-invalid is "false" when valid, never absent (ADR-0013)', () => {
+    test('aria-invalid is "false" when valid, never absent (ADR-0013; WCAG 3.3.1)', () => {
       const { rerender } = render(<Field />);
       const input = screen.getByRole('textbox');
       expect(input).toHaveAttribute('aria-invalid', 'false');
@@ -68,7 +68,18 @@ describe('FormField', () => {
       expect(ids(screen.getByRole('textbox'), 'aria-describedby')).toHaveLength(2);
     });
 
-    test('the error node is always rendered, and is a live region only with announce', () => {
+    test('with announce, the live region exists, empty, before the error arrives in it (WCAG 4.1.3)', () => {
+      const { container, rerender } = render(<Field announce="polite" />);
+      const region = container.querySelector('.senui-form-field__error');
+      expect(region).toHaveAttribute('aria-live', 'polite');
+      expect(region).toBeEmptyDOMElement();
+      rerender(<Field announce="polite" error="Enter an email address." />);
+      // The same node: a live region rendered with its message would not be announced.
+      expect(container.querySelector('.senui-form-field__error')).toBe(region);
+      expect(region).toHaveTextContent('Enter an email address.');
+    });
+
+    test('the error node is always rendered, and is a live region only with announce (WCAG 4.1.3)', () => {
       const { container, rerender } = render(<Field />);
       const errorNode = container.querySelector('.senui-form-field__error');
       expect(errorNode).toBeEmptyDOMElement();

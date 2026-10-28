@@ -6,7 +6,7 @@ import { useComposedRefs } from '../../internal/dom/refs.js';
 
 /**
  * The heading's level. Required, with no default, because an empty state sits in your page's outline
- * and any default is wrong somewhere. No `1`: the page keeps its own `<h1>` (L07 decision 1).
+ * and any default is wrong somewhere. No `1`: the page keeps its own `<h1>`.
  */
 export type EmptyStateHeadingLevel = 2 | 3 | 4 | 5 | 6;
 
@@ -34,28 +34,30 @@ export type EmptyStateProps = Omit<NativeProps<'div'>, Withheld> & {
    */
   description?: ReactNode;
   /**
-   * A decorative picture or icon, hidden from assistive technology and inert (L07 decision 4): it
-   * can't be focused or clicked. Put its meaning in `title` or `description`, and links in `actions`.
+   * A decorative picture or icon, hidden from assistive technology and inert: it can't be focused
+   * or clicked. Put its meaning in `title` or `description`, and links in `actions`.
    * Fitted into a square box sized by `--senui-empty-state-illustration-size-*`; an SVG drawn in
    * `currentColor` takes the theme's colour.
    */
   illustration?: ReactNode;
   /**
-   * Up to two actions, primary first: your own Buttons or links, as one element or a fragment (L07
-   * decision 6). Not text: a label alone renders nothing to activate. For a conditional action, pass
+   * Up to two actions, primary first: your own Buttons or links, as one element or a fragment.
+   * Not text: a label alone renders nothing to activate. For a conditional action, pass
    * `undefined` rather than `false`.
    */
   actions?: ReactElement | undefined;
   /**
    * The heading element. It has `tabindex="-1"`, so you can move focus to it, for example after the
-   * last item was deleted and no action is rendered (L07 decision 8). EmptyState never moves focus.
+   * last item was deleted and no action is rendered. EmptyState never moves focus.
    */
   headingRef?: Ref<HTMLHeadingElement>;
   /** The root is a plain `<div>` with no name. The heading is what a screen-reader user finds. */
   'aria-label'?: never;
+  /** The root is a plain `<div>` with no name. The heading is what a screen-reader user finds. */
   'aria-labelledby'?: never;
   /** Never read on an unnamed, unfocusable `<div>`: put it in `description`. */
   'aria-describedby'?: never;
+  /** Never read on an unnamed, unfocusable `<div>`: put it in `description`. */
   'aria-description'?: never;
   /** Prohibited on an element with no role (ARIA 1.2). */
   'aria-roledescription'?: never;
@@ -65,10 +67,10 @@ export type EmptyStateProps = Omit<NativeProps<'div'>, Withheld> & {
 
 /**
  * Says there is nothing here, why, and what you can do: a heading, a description, a decorative
- * illustration and your actions. A plain `<div>` with no role and no live region (L07 decisions 3
- * and 7). It adapts to the width of its container, compact below 30rem and stacked above, so it
- * takes the full inline size of its parent: give a shrink-to-fit parent a width, and put inline
- * margin on a wrapper (L07 decision 10). `className`, native attributes and the ref go on the root.
+ * illustration and your actions. A plain `<div>` with no role and no live region. It adapts to the
+ * width of its container, compact below 30rem and stacked above, so it takes the full inline size
+ * of its parent: give a shrink-to-fit parent a width, and put inline margin on a wrapper.
+ * `className`, native attributes and the ref go on the root.
  * See `EmptyState.a11y.ts` for its accessibility contract, including what your app must announce.
  *
  * ```tsx

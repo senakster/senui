@@ -3,7 +3,7 @@ import { describe, expectTypeOf, test } from 'vitest';
 import { EmptyState, type EmptyStateHeadingLevel, type EmptyStateProps } from './EmptyState.js';
 
 describe('EmptyState types', () => {
-  test('title is required, and never null or false (L07 decision 2)', () => {
+  test('title is required, and never null or false (WCAG 2.4.6)', () => {
     void (<EmptyState headingLevel={2} title="No projects yet" />);
     void (<EmptyState headingLevel={2} title={<span lang="da">Ingen projekter</span>} />);
     // @ts-expect-error -- no title

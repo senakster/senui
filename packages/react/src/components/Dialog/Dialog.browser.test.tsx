@@ -246,7 +246,53 @@ describe('Dialog in a browser', () => {
     expect(dialog.matches(':modal')).toBe(true);
   });
 
-  test('Escape: closes it and focus returns to the trigger', async () => {
+  test('focus moves in on open, the page behind is inert, and focus returns to the opener on close (WCAG 2.4.3)', async () => {
+    render(<Opener />);
+    const opener = screen.getByRole('button', { name: 'Open' });
+    const dialog = await open();
+    await expect.poll(() => dialog.contains(document.activeElement)).toBe(true);
+    // Behind a modal dialog the page is inert: focus can't land on it, even by script.
+    opener.focus();
+    expect(document.activeElement).not.toBe(opener);
+    screen.getByRole('button', { name: 'Close' }).click();
+    await closed(dialog);
+    await expect.poll(() => document.activeElement).toBe(opener);
+  });
+
+  test('with the close button hidden, Esc still closes it (WCAG 2.1.2)', async () => {
+    function NoCloseButton() {
+      const [open, setOpen] = useState(false);
+      return (
+        <>
+          <Button
+            onClick={() => {
+              setOpen(true);
+            }}
+          >
+            Open
+          </Button>
+          <Dialog
+            title="Edit profile"
+            hideCloseButton
+            cancelLabel="Cancel"
+            open={open}
+            onOpenChange={(next) => {
+              setOpen(next);
+            }}
+          >
+            Body
+          </Dialog>
+        </>
+      );
+    }
+    render(<NoCloseButton />);
+    const dialog = await open();
+    expect(screen.queryByRole('button', { name: 'Close' })).toBeNull();
+    await userEvent.keyboard('{Escape}');
+    await closed(dialog);
+  });
+
+  test('Escape: closes it and focus returns to the trigger (WCAG 2.1.2, 2.4.3)', async () => {
     const onOpenChange = vi.fn();
     render(<Opener onOpenChange={onOpenChange} />);
     const dialog = await open();

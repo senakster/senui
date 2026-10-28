@@ -4,13 +4,13 @@ Single source of truth for **where the implementation is right now**. Overwritte
 `implement-module` skill at the end of every run. For history, see `log.md`; for status, see
 `docs/PROGRESS.md`.
 
-| Field         | Value                                                                           |
-| ------------- | ------------------------------------------------------------------------------- |
-| Target app    | repo root (pnpm workspace: `packages/tokens`, `packages/react`, `apps/docs`)    |
-| Active module | L09 — Docs & machine-readable manifest (in progress)                            |
-| Sub-step      | PR 1 of 4 built and verified, uncommitted on `feature/docs-L09-1`; Emil reviews |
-| Last verified | 2026-10-28: `pnpm check`; `pnpm test` tokens 32, react 919                      |
-| Updated       | 2026-10-28                                                                      |
+| Field         | Value                                                                                         |
+| ------------- | --------------------------------------------------------------------------------------------- |
+| Target app    | repo root (pnpm workspace: `packages/tokens`, `packages/react`, `apps/docs`)                  |
+| Active module | L09 — Docs & machine-readable manifest (in progress)                                          |
+| Sub-step      | PR 1 merged (#13); PR 2 built and verified, uncommitted on `feature/docs-L09-2`; Emil reviews |
+| Last verified | 2026-10-28: `pnpm check`; `pnpm test` tokens 32, react 952; gate 1378 passed                  |
+| Updated       | 2026-10-28                                                                                    |
 
 ## Brief
 
@@ -26,23 +26,13 @@ every deviation: scope-decisions § L09. Claude builds and writes everything, in
 
 **Four PRs (Emil):**
 
-1. **Built, uncommitted:**
-   - the nightly removal;
-   - ADR-0019 (`language`);
-   - the contract cleanup;
-   - `ComponentDocs` and nine `.docs.ts` files;
-   - the published-text rules;
-   - the README as the usage source;
-   - CONVENTIONS rules 7 and 12.
-2. **The generator:**
-   - the manifest and its mirror types;
-   - props by axis and branch, and forbidden props;
-   - `components.json`, `llms.txt`, `llms-full.txt`, `docs/*.md`, and the README as
-     `dist/USAGE.md`;
-   - the files in `exports`, generated in tsdown's `build:before`;
-   - determinism;
-   - the data checks, including published-text rules on props JSDoc, which needs cleaning up;
-   - the union-alias rule in CONVENTIONS rule 3.
+1. **Merged (#13):** the nightly removal, ADR-0019 (`language`), the contract cleanup,
+   `ComponentDocs` and nine `.docs.ts` files, the published-text rules, the README as the usage
+   source, CONVENTIONS rules 7 and 12.
+2. **Built, uncommitted (`feature/docs-L09-2`):** the manifest type, the generator in tsdown's
+   `build:before`, every output file in `exports`, props by axis, decision 5 in full (the gate as a
+   run, traced evidence, `UNTRACED` empty), the props JSDoc cleanup, six new tests, the
+   `pnpm/action-setup` v6 bump. Detail: scope-decisions § L09, "PR 2".
 3. **Storybook docs pages:**
    - the template and blocks, and the docs theme;
    - the gate on docs pages, run as pages;
@@ -53,19 +43,18 @@ every deviation: scope-decisions § L09. Claude builds and writes everything, in
 
 ## In-flight notes
 
-- Day-one probes for PR 2: tsdown's publint against `build:before`; Vite's module runner loading the
-  data files; props by axis.
+- For PR 3: story ids in the manifest must match the built `index.json` (a check, decision 8).
 - For PR 3: the docs theme in dark mode, including story iframes in WebKit; the gate seeing
   `#storybook-docs` after `docsRendered`.
 - Exceptions: Dialog Fullscreen and LongContent, `color-contrast:incomplete`, expire 2027-04-27.
 - Open for TextInput (deferred): the Home/End contract row isn't true on macOS.
 - npm publishing comes after L10. Gaps: no npm login on this machine, no LICENSE in the packages,
-  no `repository`/`homepage`/`bugs`.
+  no `bugs` (`homepage` and `repository` arrived in PR 2).
 - Untested readers: JAWS, VoiceOver and TalkBack.
 
 ## Next action
 
-1. Emil reviews PR 1's content: the nine `.docs.ts` files and the contract rewrites (the agent's
-   old→new list is in the session, and `git diff` shows it).
-2. With Emil's OK, commit PR 1 and open it.
-3. Then PR 2, the generator, starting with its three day-one probes.
+1. Emil reviews PR 2: the props JSDoc rewrites in the nine components' `.tsx` files, the new and
+   retitled tests, and the gate's criterion mapping in `apps/docs/gate/checks.ts` (`git diff`).
+2. With Emil's OK, commit PR 2 and open it.
+3. Then PR 3, the Storybook docs pages, starting with its day-one probes.

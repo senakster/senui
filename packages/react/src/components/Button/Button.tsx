@@ -11,21 +11,30 @@ type Label = Exclude<ReactNode, null | undefined | boolean>;
 
 /**
  * A button shows either a visible label (children) or, icon-only, an `icon` with exactly one of
- * `aria-label` / `aria-labelledby` (CONVENTIONS rule 3, L03 decision 6). An empty string still
- * type-checks; the development name check warns about it.
+ * `aria-label` / `aria-labelledby`. An empty string still type-checks; the development name check
+ * warns about it.
  */
 type ButtonContent =
-  | { icon?: never; children: Label }
+  /** A visible label, which names the button. */
+  | {
+      icon?: never;
+      /** The visible label, which names the button. */
+      children: Label;
+    }
+  /** Icon-only, named by `aria-label`. */
   | {
       /** The icon shown instead of a label. Button hides it from assistive technology. */
       icon: ReactElement;
       children?: never;
+      /** The button's name, since the icon has no text. */
       'aria-label': string;
       'aria-labelledby'?: never;
     }
+  /** Icon-only, named by visible text elsewhere on the page, through `aria-labelledby`. */
   | {
       icon: ReactElement;
       children?: never;
+      /** The id of the element whose text names the button. */
       'aria-labelledby': string;
       'aria-label'?: never;
     };

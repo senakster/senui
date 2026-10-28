@@ -11,7 +11,7 @@ import { join } from 'node:path';
 const SRC = 'packages/react/src';
 const COMPONENTS = join(SRC, 'components');
 // Non-component modules the entry may export. Each is public API (CONVENTIONS.md, "Public surface").
-const PUBLIC_MODULES = ['./types.js'];
+const PUBLIC_MODULES = ['./types.js', './manifest.js'];
 const errors = [];
 const warnings = [];
 

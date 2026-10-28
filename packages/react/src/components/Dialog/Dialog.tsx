@@ -24,31 +24,48 @@ type Content = Exclude<ReactNode, null | undefined | boolean>;
 
 /**
  * A dialog is named by a visible `title`, or, with no visible heading, by exactly one of
- * `aria-label` / `aria-labelledby` (L06 decision 6). Never both.
+ * `aria-label` / `aria-labelledby`. Never both.
  */
 export type DialogName =
+  /** Named by a visible `title`. */
   | {
       /** The visible heading. Names the dialog through `aria-labelledby`. */
       title: Content;
-      /** The heading's level. Defaults to 2: a modal is its own context (L06 decision 7). */
+      /** The heading's level. Defaults to 2: a modal is its own context. */
       titleLevel?: DialogHeadingLevel;
       'aria-label'?: never;
       'aria-labelledby'?: never;
     }
-  | { 'aria-label': string; title?: never; titleLevel?: never; 'aria-labelledby'?: never }
-  | { 'aria-labelledby': string; title?: never; titleLevel?: never; 'aria-label'?: never };
+  /** No `title`: named by `aria-label`. */
+  | {
+      /** The dialog's name, when it shows no heading. */
+      'aria-label': string;
+      title?: never;
+      titleLevel?: never;
+      'aria-labelledby'?: never;
+    }
+  /** No `title`: named by an element's text, through `aria-labelledby`. */
+  | {
+      /** The id of the element whose text names the dialog. */
+      'aria-labelledby': string;
+      title?: never;
+      titleLevel?: never;
+      'aria-label'?: never;
+    };
 
 /**
- * The close button is there by default, with a required name (L06 decision 14). Hiding it requires
- * another visible way out: a Cancel, footer actions, or a backdrop click. Esc alone isn't enough
- * on a touch screen with no keyboard or back gesture (review).
+ * The close button is there by default, with a required name. Hiding it requires another visible
+ * way out: a Cancel, footer actions, or a backdrop click. Esc alone isn't enough on a touch screen
+ * with no keyboard or back gesture.
  */
 type DialogCloseButton =
+  /** The close button shows, named by `closeLabel`. */
   | {
       /** The close button's accessible name. No English default: pass it translated. */
       closeLabel: string;
       hideCloseButton?: false;
     }
+  /** No close button, so the dialog needs another visible way out. */
   | ({
       /** Hide the close button. Pair it with `cancelLabel`, `footer` or `dismiss="any"`. */
       hideCloseButton: true;
@@ -57,9 +74,10 @@ type DialogCloseButton =
 
 /**
  * Controlled (`open` with a required `onOpenChange`) or uncontrolled (`defaultOpen`), never both.
- * Controlled without `onOpenChange`, every close request would do nothing (review).
+ * Controlled without `onOpenChange`, every close request would do nothing.
  */
 export type DialogOpenState =
+  /** Controlled: `open`, with a required `onOpenChange`. */
   | {
       /** Controlled open state. */
       open: boolean;
@@ -70,6 +88,7 @@ export type DialogOpenState =
       onOpenChange: (open: boolean, details: DialogOpenChangeDetails) => void;
       defaultOpen?: never;
     }
+  /** Uncontrolled: `defaultOpen`, and an optional `onOpenChange`. */
   | {
       open?: never;
       /** Uncontrolled initial state. Defaults to `false`. */
@@ -81,9 +100,10 @@ export type DialogOpenState =
 export type DialogProps = DialogNativeProps & {
   /**
    * A short description, read when the dialog opens (`aria-describedby`). Never the whole body:
-   * screen readers read a description in full, again on re-entry (L06 decision 8).
+   * screen readers read a description in full, again on re-entry.
    */
   description?: ReactNode;
+  /** The dialog's body. */
   children?: ReactNode;
   /**
    * Renders a Cancel button first in the footer, which closes the dialog (`onOpenChange` reason
@@ -95,11 +115,11 @@ export type DialogProps = DialogNativeProps & {
    * the dialog themselves, by setting `open` to false once their work is done.
    */
   footer?: ReactNode;
-  /** Defaults to `'md'`. `'fullscreen'` fills the viewport; choose it from your own breakpoint (L06 decision 21). */
+  /** Defaults to `'md'`. `'fullscreen'` fills the viewport; choose it from your own breakpoint. */
   size?: DialogSize;
   /**
    * `'closerequest'` (default): Esc and the platform's back gesture close it, a backdrop click
-   * doesn't. `'any'`: a backdrop click closes it too (L06 decision 4).
+   * doesn't. `'any'`: a backdrop click closes it too.
    */
   dismiss?: DialogDismiss;
   /**
@@ -120,15 +140,16 @@ export type DialogProps = DialogNativeProps & {
   tabIndex?: never;
   /** Use `onOpenChange`: every close request arrives there, with its reason. */
   onCancel?: never;
+  /** Use `onOpenChange`: every close request arrives there, with its reason. */
   onClose?: never;
 } & DialogName &
   DialogCloseButton &
   DialogOpenState;
 
 /**
- * A modal dialog: a native `<dialog>` opened with `showModal()` (L06 decision 1), so the page
- * behind it is inert and focus stays inside without a focus trap. Esc closes it; while it is
- * open, the page doesn't scroll (ADR-0014). The content renders only while it is open.
+ * A modal dialog: a native `<dialog>` opened with `showModal()`, so the page behind it is inert
+ * and focus stays inside without a focus trap. Esc closes it; while it is open, the page doesn't
+ * scroll (ADR-0014). The content renders only while it is open.
  * `className`, `style`, native attributes and the ref go on the `<dialog>`.
  * See `Dialog.a11y.ts` for its accessibility contract.
  *

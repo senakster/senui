@@ -660,3 +660,35 @@ Entry format: date — module · Did · Verified · Scope decisions · Plan adju
 - **Verified:** `pnpm check`; `pnpm test`: tokens 32, react 919. Four probes on real files.
 - **Next:** Emil reviews the nine `.docs.ts` files and the contract rewrites. Then commit PR 1 and
   open it. Then PR 2, the generator.
+
+## 2026-10-28 — L09 PR 2: the generator
+
+- **Context:**
+  - PR 1 merged as #13.
+  - The plugin update re-synced: L06 gained a note; no requirement changed.
+  - Branch `feature/docs-L09-2` from `main`.
+- **Built:** by an agent from Claude's brief, then reviewed by Claude in three rounds:
+  - the manifest type;
+  - the generator in `build:before`, with all outputs and `exports`;
+  - the data checks;
+  - the props JSDoc cleanup and branch summaries;
+  - decision 5 in full;
+  - the 12 untraced claims traced, as 6 new tests and retitled existing ones.
+
+  Plus the `pnpm/action-setup` v6 bump.
+
+- **Emil's calls:**
+  - fold the action bump into PR 2;
+  - finish decision 5 in PR 2;
+  - trace the untraced claims now, rather than ship them flagged.
+- **Verified:**
+  - `pnpm check`;
+  - `pnpm test`: tokens 32, react 952;
+  - `pnpm test:gate`: 1,378 passed, 122 skipped;
+  - deterministic builds.
+- **Next:** Emil reviews PR 2. In particular:
+  - the props JSDoc rewrites;
+  - the new tests;
+  - the gate's criterion mapping in `apps/docs/gate/checks.ts`.
+
+  Then commit and open it, then PR 3 (docs pages).
