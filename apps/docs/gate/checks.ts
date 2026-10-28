@@ -127,7 +127,7 @@ export const GATE_CHECKS: readonly GateCheck[] = [
   },
   // L09 decision 9: every docs page (each component's and each MDX page), checked as a page.
   {
-    title: 'docs page axe, ',
+    title: 'docs page axe, light and dark, 1280 and 320 px: ',
     spec: 'docs.spec.ts',
     checks:
       "axe-core on every docs page, at 1280 and 320 px in light and dark colour schemes, with the page-level rules on and rendered contrast; the page's story canvases are left to the stories' own checks",
