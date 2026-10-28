@@ -95,9 +95,13 @@ export async function generate(
   const cited = citingTests(`${src}/components`, names);
 
   const released = env.SENUI_RELEASE === '1';
-  const version = released
-    ? pkg.version
-    : `${pkg.version}-main.${git(root, 'rev-parse', '--short=7', 'HEAD') ?? 'unknown'}`;
+  const sha = git(root, 'rev-parse', '--short=7', 'HEAD');
+  // In CI, git must work: without it the site says `-main.unknown` and every run's "changed since"
+  // goes blank. That shipped once, when the container's git refused a checkout it doesn't own.
+  if (!released && !sha && env.CI) {
+    errors.push('git: no commit found (in a container, mark the checkout as a safe.directory)');
+  }
+  const version = released ? pkg.version : `${pkg.version}-main.${sha ?? 'unknown'}`;
   const site = String(pkg.homepage ?? '').replace(/\/?$/, '/');
   if (!/^https:\/\//.test(site)) errors.push('package.json: `homepage` must be the docs site URL');
   const shallow = git(root, 'rev-parse', '--is-shallow-repository') !== 'false';

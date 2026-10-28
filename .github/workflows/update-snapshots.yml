@@ -26,6 +26,8 @@ jobs:
       SENUI_GATE_CONTAINER: '1'
     steps:
       - uses: actions/checkout@v5
+      # The container runs as root over a checkout it doesn't own: mark it safe for git (L09 docs).
+      - run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
       - uses: pnpm/action-setup@v6
       - uses: actions/setup-node@v5
         with:

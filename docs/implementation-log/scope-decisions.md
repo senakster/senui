@@ -1420,3 +1420,22 @@ components-emptystate--title-only` timed out waiting for the story to render, wi
 - The deploy itself can only be verified on `main` after merge. Check that the run deploys, and
   that `https://senakster.github.io/senui/llms.txt` and `…/components.json` are served (acceptance
   criterion, "Site and propagation").
+
+#### After the first deploy (2026-10-28)
+
+- **How #16 merged:** stacked on #15, it merged into `feature/docs-L09-3` 42 seconds after #15
+  merged. GitHub retargets a stacked PR only when its base branch is deleted, and the repository
+  doesn't delete merged branches. The same change was re-landed on `main` as #17.
+- **The live site** serves the Storybook, `llms.txt`, `llms-full.txt`, `components.json`,
+  `USAGE.md` and `docs/*.md` under `/senui/`, each with the right content type. It does not serve
+  Storybook's own `manifests/components.json` (404).
+- **Defect:** the stamp read `0.0.0-main.unknown`.
+  - **Cause:** the container runs as root over a checkout git won't touch, and `ci.yml` only marked
+    it `safe.directory` on pull requests. Every git call in a push build failed silently, which also
+    left every run's `sourceChangedSince` blank on the site.
+  - **Fix:** a `safe.directory` step after every container checkout (`ci.yml`, both `gate-full.yml`
+    jobs, `update-snapshots.yml`). Under `CI`, the generator now fails the build when git can't
+    read the commit; locally it still falls back, for builds from a tarball.
+  - **Probe:** `GIT_DIR` pointed nowhere, with `CI=1`, fails the build. The first version of the
+    guard compared with `null` while the helper returns `undefined`, so it could never fire; the
+    probe caught it (rule 34).
