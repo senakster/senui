@@ -6,6 +6,8 @@ interface Stop {
   name: string;
   problems: string[];
   backendNodeId?: number;
+  /** Focus is inside a framed story: another document, checked by the story's own entry. */
+  frame?: true;
 }
 
 /** Checks the element that has focus now. Null when focus has left the document or is on <body>. */
@@ -18,6 +20,7 @@ function checkStop(page: Page, checkRing: boolean): Promise<Stop | null> {
     const m = window.__senuiMeasure;
     const el = document.activeElement;
     if (!el || el === document.body || el === document.documentElement) return null;
+    if (el.tagName === 'IFRAME') return { name: m.describe(el), problems: [], frame: true };
     const problems: string[] = [];
     if (!el.matches(':focus-visible')) problems.push('focus is not :focus-visible');
     if (el.closest('[aria-hidden="true"], [inert]'))
@@ -140,19 +143,49 @@ async function accessibleName(page: Page): Promise<string | null> {
   return typeof value === 'string' ? value : '';
 }
 
-export async function walk(page: Page, browserName: string, checkRing: boolean): Promise<string[]> {
+export interface WalkOptions {
+  /** Tab presses before the walk stops: a story has a few stops, a docs page hundreds. */
+  readonly maxPresses?: number;
+  /**
+   * Docs pages (L09 decision 9): the walk must leave the document within `maxPresses`, and Tab
+   * must not stay inside one framed story for `frameLimit` presses (a keyboard trap). Stops inside
+   * a framed story are its own document's, checked by the story's own entry.
+   */
+  readonly mustFinish?: boolean;
+  readonly frameLimit?: number;
+}
+
+export async function walk(
+  page: Page,
+  browserName: string,
+  checkRing: boolean,
+  { maxPresses = 40, mustFinish = false, frameLimit = 60 }: WalkOptions = {},
+): Promise<string[]> {
   const failures: string[] = [];
   const visited = new Set<string>();
+  let inFrame = 0;
+  let finished = false;
   // A story may already have put focus somewhere (a play function, a dialog opening): first stop.
   let stop = await checkStop(page, checkRing);
-  for (let presses = 0; presses < 40; presses += 1) {
-    if (stop) {
+  for (let presses = 0; presses < maxPresses; presses += 1) {
+    if (stop?.frame) {
+      inFrame += 1;
+      if (inFrame > frameLimit) {
+        failures.push(`${stop.name}: Tab stays inside the framed story`);
+        finished = true;
+        break;
+      }
+    } else if (stop) {
+      inFrame = 0;
       const key = await page.evaluate(() => {
         const el = document.activeElement as Element & { __senuiStop?: string };
         el.__senuiStop ??= String(Math.random());
         return el.__senuiStop;
       });
-      if (visited.has(key)) break; // a modal wraps focus: the walk is done
+      if (visited.has(key)) {
+        finished = true;
+        break; // a modal wraps focus: the walk is done
+      }
       visited.add(key);
       for (const problem of stop.problems) failures.push(`${stop.name}: ${problem}`);
       if (browserName === 'chromium') {
@@ -160,10 +193,14 @@ export async function walk(page: Page, browserName: string, checkRing: boolean):
         if (name !== null && name.trim() === '') failures.push(`${stop.name}: no accessible name`);
       }
     } else if (presses > 0) {
+      finished = true;
       break; // focus left the document
     }
     await page.keyboard.press('Tab');
     stop = await checkStop(page, checkRing);
+  }
+  if (mustFinish && !finished) {
+    failures.push(`the walk didn't leave the page in ${String(maxPresses)} presses`);
   }
   return failures;
 }

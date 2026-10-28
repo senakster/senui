@@ -80,8 +80,8 @@ export const Matrix: Story = {
 };
 
 /**
- * Matrix, for forced colours: L08's gate screenshots it with forced colours emulated. By hand:
- * DevTools → Rendering → forced-colors: active. The thumb must stay visible, on and off.
+ * Matrix, for forced colours: the accessibility gate screenshots it with forced colours emulated.
+ * By hand: DevTools → Rendering → forced-colors: active. The thumb must stay visible, on and off.
  */
 export const ForcedColors: Story = {
   ...Matrix,

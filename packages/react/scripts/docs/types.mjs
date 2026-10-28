@@ -8,14 +8,8 @@ import { readdirSync, readFileSync } from 'node:fs';
 import ts from 'typescript';
 import { byCodeUnit, cleanDoc, collapse, slash } from './util.mjs';
 
-/**
- * Display names for recurring non-exported aliases, by their expanded text. Used by the Markdown
- * renderer only; the manifest keeps the type.
- */
-export const TYPE_DISPLAY = {
-  'Exclude<ReactNode, boolean | null | undefined>':
-    'visible content: anything React renders except null, undefined or a boolean',
-};
+/** Display names for recurring non-exported aliases live with the rest of the docs' wording. */
+export { TYPE_DISPLAY } from './wording.mjs';
 
 /**
  * @param {string} root The package root, with `/` separators.

@@ -5,15 +5,23 @@
    rule, and their `code` colour made the dark column dark-on-dark. Everything Storybook styled for
    us is therefore styled here, from tokens.
 
-   The tables also carry `data-theme="light"`. Storybook's docs page is always light, but tokens.css
-   lets the page root follow the OS, so with the OS in dark mode, unthemed cells got dark-theme
-   (light grey) text on Storybook's white page. Each Dark cell overrides back to dark inside it. */
+   The tables also carry `data-theme="light"`, so the Light column and the names stay light while
+   the docs page follows the colour scheme (L09); each Dark cell overrides back to dark inside it. */
 .docs-tokens {
   border-collapse: collapse;
   inline-size: 100%;
   font-family: var(--senui-font-family-sans);
   font-size: var(--senui-font-size-sm);
   line-height: var(--senui-font-line-height-normal);
+}
+
+.docs-tokens caption {
+  /* A caption sits outside the table box, so it paints the table's (light) surface itself. */
+  background-color: var(--senui-color-bg-default);
+  padding-inline: var(--senui-space-3);
+  padding-block: var(--senui-space-2);
+  text-align: start;
+  font-weight: var(--senui-font-weight-bold);
 }
 
 .docs-tokens th,

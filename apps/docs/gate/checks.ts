@@ -32,7 +32,7 @@ export const AXE_TAGS = [
   'best-practice',
 ] as const;
 
-/** Page-level rules, off: a story is a component, not a page. */
+/** Page-level rules, off for stories: a story is a component, not a page. Docs pages turn them on. */
 export const PAGE_RULES = ['region', 'landmark-one-main', 'page-has-heading-one'] as const;
 
 export const GATE_CHECKS: readonly GateCheck[] = [
@@ -122,7 +122,50 @@ export const GATE_CHECKS: readonly GateCheck[] = [
     title: 'gate bookkeeping',
     spec: 'stories.spec.ts',
     checks:
-      'exceptions are tagged, dated and unexpired, every story is tested, and every component has a contract and the stories its contract needs',
+      "exceptions are tagged, dated and unexpired, every story is tested, every component has a contract, the stories its contract needs and a docs page, every story the package's manifest names is in the built site, and the site contains no Storybook manifest",
+    criteria: [],
+  },
+  // L09 decision 9: every docs page (each component's and each MDX page), checked as a page.
+  {
+    title: 'docs page axe, ',
+    spec: 'docs.spec.ts',
+    checks:
+      "axe-core on every docs page, at 1280 and 320 px in light and dark colour schemes, with the page-level rules on and rendered contrast; the page's story canvases are left to the stories' own checks",
+    criteria: 'axe',
+  },
+  {
+    title: 'docs page outline: ',
+    spec: 'docs.spec.ts',
+    checks:
+      'every docs page has one main landmark holding its content and one h1, and its headings never skip a level, with the live stories in the outline',
+    criteria: [],
+  },
+  {
+    title: 'docs page reflow at 320 px: ',
+    spec: 'docs.spec.ts',
+    checks:
+      'at 320 px wide no docs page scrolls sideways, and only a focusable, named region (a code block, a table, a wide story) scrolls inside it',
+    criteria: ['1.4.10'],
+  },
+  {
+    title: 'docs page tab walk: ',
+    spec: 'docs.spec.ts',
+    checks:
+      'Tab through every docs page to its end: each stop has keyboard focus, is named, is not covered, and has a real focus ring of at least 3:1, and Tab never stays inside a framed story',
+    criteria: ['1.4.11', '2.4.7', '2.4.11', '4.1.2'],
+  },
+  {
+    title: 'docs page state: ',
+    spec: 'docs.spec.ts',
+    checks:
+      'after a docs page renders, nothing has focus, no modal dialog is open, nothing outside a story is inert, and no framed story runs its play function',
+    criteria: [],
+  },
+  {
+    title: 'docs page colour scheme: ',
+    spec: 'docs.spec.ts',
+    checks:
+      "every docs page's surface changes between light and dark, and each framed story takes the page's colour scheme",
     criteria: [],
   },
 ];

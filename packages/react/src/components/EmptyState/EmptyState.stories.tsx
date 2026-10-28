@@ -68,7 +68,7 @@ export const TitleOnly: Story = {
   args: { description: undefined, illustration: undefined, actions: undefined },
 };
 
-/** First use: a primary action and a secondary link, primary first (L07 decision 6). */
+/** First use: a primary action and a secondary link, primary first. */
 export const FirstUse: Story = {
   args: {
     title: 'Create your first project',
@@ -83,8 +83,8 @@ export const FirstUse: Story = {
 };
 
 /**
- * Error-recovery copy. Not a variant and not an alert (L07 decision 11): the words say what went
- * wrong, and the action recovers.
+ * Error-recovery copy. Not a variant and not an alert: the words say what went wrong, and the
+ * action recovers.
  */
 export const ErrorRecovery: Story = {
   args: {
@@ -101,7 +101,7 @@ const WIDE_PICTURE = `data:image/svg+xml,${encodeURIComponent(
 
 /**
  * Illustrations that aren't a bare square SVG: a wide `<img>` and an icon component that wraps its
- * SVG in a `<span>`. Both fit the box (review).
+ * SVG in a `<span>`. Both fit the box.
  */
 export const IllustrationShapes: Story = {
   parameters: { controls: { disable: true } },
@@ -154,7 +154,7 @@ const STATUS_DEBOUNCE_MS = 1000;
 /**
  * No results for a filter. The `role="status"` region is in the page before anything is typed,
  * outside EmptyState, and its text is updated with the result once the user has stopped typing for
- * a second; EmptyState itself announces nothing (L07 decision 7). Focus stays in the input.
+ * a second; EmptyState itself announces nothing. Focus stays in the input.
  */
 export const NoResults: Story = {
   parameters: { controls: { disable: true } },
@@ -231,12 +231,11 @@ export const NoResults: Story = {
 
 /**
  * The last item is deleted, so the button that had focus is gone. The app moves focus to the empty
- * state's first action, not to `<body>` (L07 decision 8), and says what happened in its status
- * region.
+ * state's first action, not to `<body>`, and says what happened in its status region.
  *
- * This story and NoResults have no play function: Storybook runs it when the story opens, so a
- * manual keyboard or screen-reader run would start from the end state (found in Emil's NVDA run,
- * 2026-10-26). `EmptyState.browser.test.tsx` drives both with real keys.
+ * This story and NoResults have no play function: Storybook runs one when the story opens, so a
+ * manual keyboard or screen-reader run would start from the end state.
+ * `EmptyState.browser.test.tsx` drives both with real keys.
  */
 export const DeletedLastItem: Story = {
   parameters: { controls: { disable: true } },
@@ -357,7 +356,7 @@ export const InCard: Story = {
 
 /**
  * In an auto-layout table cell. The cell is shrink-to-fit, so it gets an explicit width; without
- * one, EmptyState's inline-size containment would collapse it to zero (L07 decision 10).
+ * one, EmptyState's inline-size containment would collapse it to zero.
  */
 export const InTableCell: Story = {
   parameters: { controls: { disable: true } },
@@ -395,11 +394,10 @@ export const InTableCell: Story = {
 };
 
 /**
- * Compact and stacked side by side.
- * - the `forced-colors` tag tells L08's Playwright gate to screenshot this story with
- *   forced colours emulated, in light and dark schemes.
- * - By hand: DevTools → Rendering → "Emulate CSS media feature forced-colors: active". The text and
- *   illustration take the system colours.
+ * Compact and stacked side by side. The `forced-colors` tag tells the accessibility gate to
+ * screenshot this story with forced colours emulated, in light and dark schemes. By hand: DevTools
+ * → Rendering → "Emulate CSS media feature forced-colors: active". The text and illustration take
+ * the system colours.
  */
 export const ForcedColors: Story = {
   tags: ['forced-colors'],
@@ -408,7 +406,7 @@ export const ForcedColors: Story = {
     docs: {
       description: {
         story:
-          'Screenshot with forced colours emulated by the L08 gate. To check by hand: DevTools → Rendering → forced-colors: active.',
+          'Screenshot with forced colours emulated by the accessibility gate. To check by hand: DevTools → Rendering → forced-colors: active.',
       },
     },
   },

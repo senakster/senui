@@ -16,9 +16,10 @@ function Value({ token, theme }: { token: Token; theme: 'light' | 'dark' }) {
   );
 }
 
-function Table({ rows }: { rows: [string, Token][] }) {
+function Table({ caption, rows }: { caption: string; rows: [string, Token][] }) {
   return (
     <table className="docs-tokens sb-unstyled" data-theme="light">
+      <caption>{caption}</caption>
       <thead>
         <tr>
           <th scope="col">Custom property</th>
@@ -50,7 +51,10 @@ export function TokenTables() {
       {groups.map((group) => (
         <section key={group}>
           <h2>{group}</h2>
-          <Table rows={all.filter(([key]) => key.split('.')[0] === group)} />
+          <Table
+            caption={`The ${group} tokens, in light and dark`}
+            rows={all.filter(([key]) => key.split('.')[0] === group)}
+          />
         </section>
       ))}
     </>
@@ -63,6 +67,7 @@ export function ReducedMotionTable() {
   if (rows.length === 0) return <p>No token changes under reduced motion yet.</p>;
   return (
     <table className="docs-tokens sb-unstyled" data-theme="light">
+      <caption>Tokens that change under reduced motion</caption>
       <thead>
         <tr>
           <th scope="col">Custom property</th>

@@ -121,8 +121,8 @@ export const NativeValidation: Story = {
 };
 
 /**
- * The submit pattern for your own validation (L04 decision 3): set `error`s, let React render them,
- * then focus the first invalid field, which reads its label, description and error together.
+ * The submit pattern for your own validation: set `error`s, let React render them, then focus the
+ * first invalid field, which reads its label, description and error together.
  */
 export const SubmitWithErrors: Story = {
   render: function Render() {
@@ -207,7 +207,10 @@ export const AnnounceOnChange: Story = {
   },
 };
 
-/** Every state together, for forced colours. L08's gate screenshots it with forced colours emulated. */
+/**
+ * Every state together, for forced colours. The accessibility gate screenshots it with forced
+ * colours emulated.
+ */
 export const ForcedColors: Story = {
   render: () => (
     <div style={{ display: 'grid', gap: '1rem' }}>

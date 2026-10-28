@@ -130,7 +130,7 @@ export const Matrix: Story = {
 };
 
 /**
- * Matrix, for forced colours: the `forced-colors` tag tells L08's gate to screenshot it
+ * Matrix, for forced colours: the `forced-colors` tag tells the accessibility gate to screenshot it
  * with forced colours emulated. By hand: DevTools → Rendering → forced-colors: active. Invalid must
  * stay distinguishable by its thicker border, disabled by GrayText.
  */

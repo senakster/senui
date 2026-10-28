@@ -692,3 +692,32 @@ Entry format: date — module · Did · Verified · Scope decisions · Plan adju
   - the gate's criterion mapping in `apps/docs/gate/checks.ts`.
 
   Then commit and open it, then PR 3 (docs pages).
+
+## 2026-10-28 — L09 PR 3: Storybook docs pages
+
+- **Context:**
+  - PR 2 merged as #14.
+  - "Gate (all engines)" turned out to be disabled on GitHub, so #13 and #14 merged without it.
+    Emil: "disabling due to budget concerns. checks done locally and manually until further
+    notice." Recorded under L08 ("After done"), and in memory.
+  - PR 3's branch was stacked on PR 2. After the squash merge it moved onto `main` with a soft
+    reset; the trees were identical.
+- **Built** (by an agent from Claude's brief, reviewed):
+  - docs pages for every component, in the plan's order, from one wording module shared with the
+    Markdown;
+  - a docs theme on senui tokens, with framed stories following the scheme in WebKit;
+  - `staticDirs` for the generated files; Storybook's own manifest in development only;
+  - the gate on every docs page: 99 tests, plus 3 bookkeeping tests;
+  - published-text rules on story JSDoc, and 30 story descriptions cleaned.
+
+  Claude then corrected every claim that the three-engine run happens on push.
+
+- **Verified:**
+  - `pnpm check`;
+  - `pnpm test`: tokens 32, react 952;
+  - full `pnpm test:gate`: 1,480 passed, 122 skipped, 0 failed.
+
+  The first run's one timeout didn't recur.
+
+- **Next:** Emil reviews PR 3, especially the docs pages (`pnpm --filter docs storybook` after
+  `pnpm build`) and the story rewrites. Then commit and open it. Then PR 4, the Pages deploy.
