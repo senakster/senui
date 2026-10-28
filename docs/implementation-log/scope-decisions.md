@@ -1439,3 +1439,49 @@ components-emptystate--title-only` timed out waiting for the story to render, wi
   - **Probe:** `GIT_DIR` pointed nowhere, with `CI=1`, fails the build. The first version of the
     guard compared with `null` while the helper returns `undefined`, so it could never fire; the
     probe caught it (rule 34).
+- **After #18 on `main`:** CI passed, including the Chromium gate. The site stamps
+  `0.0.0-main.98527e4` with `released: false` in `llms.txt` and `components.json`, and every run's
+  `sourceChangedSince` is filled in ("Component changed since this run" on the site).
+
+### Done (2026-10-28)
+
+All four PRs merged: #13, #14, #15, #17 (the re-landed #16), plus the stamp fix, #18.
+
+- **Acceptance criteria:** all met. The evidence for each:
+  - **Build:** `pnpm build` writes the five outputs and publint passes. Determinism is
+    `manifest.test.ts` ("is deterministic, whatever the program order or line endings").
+  - **Props and exports:** `manifest.test.ts` covers the export list, axes, Checkbox's
+    `aria-invalid` and unexported identifiers. The missing-JSDoc probe is from PR 2. **New probe:**
+    a fourth `DialogOpenState` branch took Dialog's and AlertDialog's axis from 2 to 3 branches,
+    with no other change.
+  - **Accessibility content:** `manifest.test.ts` covers the levels, the preamble, "observed",
+    run versions and Known issues. "Changed since this run" is live on the site, for real runs.
+    **New probes:**
+    - Button's built docs page (9 claims, both Meets and Enables), `docs/button.md` and
+      `llms-full.txt` carry each claim line identically. Checked by a script against the served
+      Storybook.
+    - The live Button page marks its quoted speech with `lang`: four spans, `en` and `da`.
+  - **Published strings:** the PR 1 probe, and `component-docs.test.ts` for the "accessible"
+    claim.
+  - **Usage guidance:**
+    - the missing `.docs.ts` probe (PR 1);
+    - `component-docs.test-d.ts` for story and component references and native alternatives;
+    - `manifest.test.ts` and the page's "Inside other components" for Checkbox's composition rule.
+  - **Links:** `manifest.test.ts` covers the links, `llms-full.txt` and the order of each page;
+    PR 3's bookkeeping test covers story ids.
+  - **Docs pages:** `docs.spec.ts` and the PR 3 probes. CI's gate on #18's push passed.
+  - **Site and propagation:** live checks after #18. Storybook's `manifests/components.json`
+    returns 404. **New probe:** one build with a marker in each of Button's contract, a prop's
+    JSDoc and its `.docs.ts`. Each marker reached `components.json`, `llms-full.txt`,
+    `docs/button.md` and the built docs page.
+- **One narrowing:** `llms.txt` holds links and one-line summaries only (decision 6), so of the
+  three sources only the `.docs.ts` summary appears in it. Contract and JSDoc changes reach the
+  files it links to.
+- **Every probe was restored** with `git checkout`, then `dist` and Storybook were rebuilt clean.
+- **Open, not L09's:**
+  - `check:components` warns that all nine components changed after their last manual run, from
+    L09's JSDoc and contract text edits. Turning that warning into a release error is L10's.
+    Whether to re-run the readers before then is Emil's call.
+  - TextInput's Home/End row on macOS (L04).
+  - npm publishing gaps (LICENSE, `bugs`) → L10.
+- **Verified:** `pnpm check`; `pnpm test`: tokens 32, react 952. CI on `main` (98527e4) passed.

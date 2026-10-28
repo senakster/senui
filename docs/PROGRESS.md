@@ -15,11 +15,18 @@ Status legend — plan: `plan-ready` · `not-planned` (plan not written yet upst
 | L06 | Dialog                            | L06-dialog                    | plan-ready  | done           | 2026-10-21   |
 | L07 | EmptyState                        | L07-empty-state               | plan-ready  | done           | 2026-10-27   |
 | L08 | Test & a11y gate                  | L08-test-and-a11y-gate        | plan-ready  | done           | 2026-10-27   |
-| L09 | Docs & machine-readable manifest  | L09-docs-and-manifest         | plan-ready  | in-progress    | 2026-10-28   |
+| L09 | Docs & machine-readable manifest  | L09-docs-and-manifest         | plan-ready  | done           | 2026-10-28   |
 | L10 | Release, versioning & deprecation | —                             | not-planned | not-started    | 2026-10-15   |
 | L11 | Motion                            | —                             | not-planned | not-started    | 2026-10-15   |
 
 ## Changelog
+
+- **2026-10-28** — L09 done. All four PRs merged (#13, #14, #15, #17), plus #18, so the site stamps the commit.
+  - **Live:** `https://senakster.github.io/senui/` serves the Storybook, `llms.txt`, `llms-full.txt`, `components.json`, `USAGE.md` and `docs/*.md`, stamped `0.0.0-main.98527e4`, unreleased.
+  - **Acceptance criteria:** all met. Each is matched to its test or probe in scope-decisions § L09, "Done". New probes at close: one added branch adds one branch; claims are identical on the page, in `.md` and in `llms-full.txt`; each of the three sources propagates; quoted speech carries `lang`.
+  - **Narrowing:** `llms.txt` holds summaries only, so contract and JSDoc changes reach the files it links to, not `llms.txt` itself.
+  - **Open:** all nine components warn that their source changed after their last manual run (L09's text edits).
+  - **Verified:** `pnpm check`; `pnpm test`: tokens 32, react 952; CI on `main`.
 
 - **2026-10-28** — L09 in progress: plan synced; PR 1 of 4 (data foundations) built, awaiting Emil's review.
   - ADR-0019: screen-reader runs and quoting announcements record their language.

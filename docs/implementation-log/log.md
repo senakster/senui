@@ -728,3 +728,15 @@ Entry format: date — module · Did · Verified · Scope decisions · Plan adju
 - **Built:** upload in `verify` and a `deploy-storybook` job on pushes to `main`; CI concurrency that never cancels a run on `main`; the docs-only classifier fixed so `.md` under `packages/` and `apps/` is code.
 - **Verified:** workflows parse; `pnpm format:check`. The deploy is checked on `main` after merge.
 - **Next:** merge #15 and PR 4. Check the deploy and the served `llms.txt` and `components.json`. Then walk the acceptance criteria and mark L09 done.
+
+## 2026-10-28 — L09 done
+
+- **Context:** #15, #17 (the re-landed #16) and #18 merged. CI on `main` passed at 98527e4, and the site stamps `0.0.0-main.98527e4`, unreleased, with `sourceChangedSince` filled in.
+- **Done:** walked every acceptance criterion against its test, recorded probe or live check. Four had no recorded evidence, so each got a probe, restored afterwards:
+  - one branch added to `DialogOpenState` adds one branch;
+  - Button's 9 claims (Meets and Enables) match on the docs page, in `docs/button.md` and in `llms-full.txt`;
+  - a marker in each of a contract, a prop's JSDoc and a `.docs.ts` reaches the manifest, `llms-full.txt`, the page and the built docs page;
+  - the live Button page marks its quoted speech with `lang` (`en`, `da`).
+- **Narrowing:** `llms.txt` holds summaries only, so only `.docs.ts` changes appear in it.
+- **Verified:** `pnpm check`; `pnpm test`: tokens 32, react 952; `build-storybook`.
+- **Next:** L10 (Release, versioning & deprecation) has no plan yet. Write it in the planner first.
