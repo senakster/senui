@@ -9,7 +9,7 @@ on:
   push:
     branches: [main]
     # Docs-only changes can't change a result (see ci.yml).
-    paths-ignore: ['docs/**', '**/*.md']
+    paths-ignore: ['docs/**', '*.md', '.changeset/**']
   workflow_dispatch:
 
 permissions:
