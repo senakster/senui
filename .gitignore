@@ -19,3 +19,6 @@ packages/tokens/src/generated/
 # L08 gate (Playwright) output.
 apps/docs/test-results/
 apps/docs/playwright-report/
+
+# Copied from the root LICENSE by each package's prepack (L10)
+packages/*/LICENSE

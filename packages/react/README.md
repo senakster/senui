@@ -11,7 +11,9 @@ contract for each component.
 pnpm add @senakster/senui @senakster/senui-tokens
 ```
 
-`react` and `react-dom` 18.3 or 19 are peer dependencies.
+`@senakster/senui-tokens`, `react` and `react-dom` (18.3 or 19) are peer dependencies. You
+install the tokens yourself because you load their CSS yourself, so your app has exactly one copy,
+and your package manager warns when its major doesn't match.
 
 ## Load the CSS
 

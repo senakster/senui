@@ -1506,3 +1506,109 @@ All four PRs merged: #13, #14, #15, #17 (the re-landed #16), plus the stamp fix,
   - TextInput's Home/End row on macOS (L04).
   - npm publishing gaps (LICENSE, `bugs`) → L10.
 - **Verified:** `pnpm check`; `pnpm test`: tokens 32, react 952. CI on `main` (98527e4) passed.
+
+## L10 — Release, versioning & deprecation
+
+Plan written in the planner on 2026-10-28 with Emil:
+
+- **Review:** `component-api-reviewer`, `wcag-auditor` and `server-boundary-enforcer`, about 30
+  findings, all adopted.
+- **Synced** the same day.
+- **Found by the review:** an L06 defect, `Dialog.css` without `Button.css`. Fixed in #20, recorded
+  under L06.
+
+Starting state (step 2b, 2026-10-28):
+
+- **npm:** no npm token anywhere; only the Pages deploy has `id-token: write`.
+- **Build:** a single-file `dist/index.js`; tokens is a regular `workspace:^` dependency.
+- **`gate-full.yml`:** disabled by hand.
+- **Repository settings:** merge commits and rebase merges are still allowed, merged branches
+  aren't deleted, and Actions can't open pull requests.
+- **The `main` ruleset is already active** (id 25892694), identical to `.github/rulesets/main.json`.
+  The plan assumed it had never been applied; `.github/rulesets/README.md` still says so.
+
+| Deliverable / criterion                       | Decision                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        | Reason                                                                                       | Re-include when                                                             |
+| --------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------- |
+| Everything in the plan                        | in, Claude builds and Emil reviews                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              | Harness work                                                                                 | —                                                                           |
+| Delivery                                      | in: five PRs. <ol><li>Package and build: preserved modules, the tree-shaking probe and CSS-import check, tokens as a peer, LICENSE, the tokens package's fields, `attw` (ADR), the tarball check</li><li>API diff and deprecation data</li><li>`sourceHash`: ADR, stamping, backfill, stale wording</li><li>The `changesets` job, the changeset text check, changelog and migration pages</li><li>The release pipeline: `release.yml`, the reusable gate, the `npm` environment, repository settings, the 1.0.0 changesets, then Emil's first publish</li></ol> | Emil, 2026-10-28                                                                             | —                                                                           |
+| `sourceHash` backfill in the nine contracts   | in: the script writes the hashes, each file is listed here, and Emil reviews the diff                                                                                                                                                                                                                                                                                                                                                                                                                                                                           | Emil, 2026-10-28 (as in L09)                                                                 | —                                                                           |
+| Repository settings and the `npm` environment | in, PR 5 only: no GitHub setting changes before the release pipeline lands                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      | Emil, 2026-10-28                                                                             | —                                                                           |
+| "A failing gate stops the publish" probe      | changed: locally, plus a stubbed fast gate job in CI. The three-engine run isn't spent on a probe                                                                                                                                                                                                                                                                                                                                                                                                                                                               | Emil, 2026-10-28 (CI budget). The real reusable call is first exercised by the 1.0.0 release | A release's gate passes when it shouldn't, or the budget allows a probe run |
+
+### PR 1 (2026-10-28): package and build
+
+- **Day-one probes, settled:**
+  - **tsdown 0.23.1 `unbundle`** keeps one file per module: `dist` mirrors `src` (24 JS modules),
+    `index.js` stays where `exports` points, and publint and the docs generator pass unchanged.
+  - **Reading a bundle's module list:** Vite's build API with `write: false` gives each chunk's
+    modules and their rendered length. `dist`'s own import graph is the value-import graph,
+    because the build strips type-only imports, so "what a component renders" needs no TypeScript
+    pass.
+  - **attw on an ESM-only package:** the code entries and `components.json` resolve under
+    `node16` and `bundler`. The CSS, `.txt` and `.md` subpaths always read as unresolvable,
+    because TypeScript never imports them, so they are excluded by name. Wildcard subpaths aren't
+    analysed.
+  - **Changesets and a peer dependent:** at `1.x`, a tokens minor leaves the components package
+    alone (correct), but a tokens **major** bumps it only a **patch** (`1.0.1`), rewriting its peer
+    range to `^2`. That is the break the review warned about, and Changesets doesn't prevent it. The
+    check that a tokens major forces a components major moves to PR 2, with the API diff
+    (acceptance criterion "A tokens major forces a components major").
+- **Built:**
+  - `tsdown.config.ts`: `unbundle: true`.
+  - `scripts/check-tree-shaking.mjs`: per component, a Vite production bundle of an app importing
+    only it. It fails on any other component module the component doesn't render, and on a
+    stylesheet that doesn't load (directly or through its imports) the stylesheet of a component it
+    renders.
+  - Tokens as a peer dependency of the components package (and a dev dependency). The generator
+    reads the manifest's tokens range from `peerDependencies` and fails the build without one; the
+    README says why.
+  - `scripts/copy-license.mjs` as each package's `prepack`; the copies are gitignored. `bugs` on
+    both packages; `homepage` and `repository` (with `directory`) on the tokens package.
+  - `scripts/check-pack.mjs`: `pnpm pack` per package, then the tarball's file list against
+    allowed and required patterns, no `workspace:` range in the packed `package.json`, the tokens
+    peer at `^<tokens version>`, and attw on the same tarball.
+  - **ADR-0020:** `@arethetypeswrong/cli` 0.18.5, with `publint` kept.
+  - Both checks run in `check:components`, so in `pnpm check` (it builds first). CLAUDE.md's
+    Verification section says so. `pnpm check` took 60 s locally with them.
+
+#### Deviations from the plan
+
+1. **The CSS check asks for coverage, not equality.** The plan said each stylesheet's `@import`s
+   equal the stylesheets of the components it renders. `AlertDialog.css` imports `Dialog.css`
+   although AlertDialog's JS never reaches `Dialog.js`: its dialog styles live there, because the
+   shared `ModalDialog` renders `.senui-dialog`. So the check fails only on a missing stylesheet;
+   extra imports stay allowed and are published as `cssIncludes`.
+2. **The side-effect probe is "no `sideEffects` field"**, not "a top-level side effect in one
+   component". With `sideEffects: ["**/*.css"]`, a bundler drops an unused component module
+   whatever it contains, so the plan's probe could never fail (rule 34). Dropping the field is the
+   realistic regression.
+3. **Pack check, not `npm pack --dry-run`.** Only `pnpm pack` rewrites `workspace:` ranges and runs
+   the same `prepack`, so it's the one that shows what publishes.
+4. **attw runs in `pnpm check`**, not only in the release gate: one pack and one attw run per
+   package, and a broken `exports` entry is caught when it is written.
+
+#### Probes
+
+Each failed for its own reason, and everything was restored:
+
+- **A single-file `dist`** (`unbundle: false`): the first version of the tree-shaking check found
+  no component modules and **passed** (rule 34). It now takes the component list from `src` and
+  fails, naming all nine.
+- **No `sideEffects` field:** 70 leaks (importing AlertDialog bundles Checkbox, and so on).
+- **`Dialog.css` without its `Button.css` import:** fails for Dialog and AlertDialog. This branch
+  is cut from `main`, before #20, so the check found the L06 defect on its own.
+- **A stray file in `dist`:** the pack check names it.
+- **Tokens back as a regular dependency:** the pack check fails twice (peer missing, and a
+  dependency where a peer belongs).
+- **`dist/index.d.ts` removed:** attw reports "No types" for `node16` and `bundler`.
+
+#### Verified
+
+With #20's `Dialog.css` line applied (it isn't on `main` yet):
+
+- `pnpm check`;
+- `pnpm test`: tokens 32, react 952;
+- `build-storybook`: the docs app still resolves the tokens through its own dependency.
+
+Without that line, `pnpm check` fails in `check-tree-shaking`, which is correct. This PR merges
+after #20.

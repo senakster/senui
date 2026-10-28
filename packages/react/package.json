@@ -9,6 +9,7 @@
     "url": "git+https://github.com/senakster/senui.git",
     "directory": "packages/react"
   },
+  "bugs": "https://github.com/senakster/senui/issues",
   "type": "module",
   "sideEffects": [
     "**/*.css"
@@ -29,14 +30,17 @@
   },
   "scripts": {
     "build": "tsdown",
+    "prepack": "node ../../scripts/copy-license.mjs",
     "typecheck": "tsc --noEmit",
     "test": "vitest run"
   },
   "peerDependencies": {
+    "@senakster/senui-tokens": "workspace:^",
     "react": "^18.3 || ^19",
     "react-dom": "^18.3 || ^19"
   },
   "devDependencies": {
+    "@senakster/senui-tokens": "workspace:^",
     "@storybook/react-vite": "10.6.2",
     "@testing-library/jest-dom": "7.0.1",
     "@testing-library/react": "16.3.3",
@@ -55,8 +59,5 @@
     "typescript": "6.0.3",
     "vite": "8.3.4",
     "vitest": "5.0.4"
-  },
-  "dependencies": {
-    "@senakster/senui-tokens": "workspace:^"
   }
 }

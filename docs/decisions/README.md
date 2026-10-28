@@ -27,6 +27,7 @@ ADR that supersedes it. Every ADR names what was rejected and what the choice co
 | [0017](0017-contract-essential-motion.md)          | Contracts declare essential motion                                                                               | Accepted                         |
 | [0018](0018-no-dir-pseudo-class.md)                | Component CSS mirrors with logical properties, never `:dir()`                                                    | Accepted                         |
 | [0019](0019-screen-reader-run-language.md)         | Screen-reader runs record their language                                                                         | Accepted                         |
+| [0020](0020-attw-publish-check.md)                 | Published types are checked with attw                                                                            | Accepted                         |
 
 ## Template
 
