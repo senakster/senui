@@ -1,20 +1,24 @@
 name: CI
 
-# Docs-only changes (everything under docs/, and any .md file) can't change a test result. On a pull
-# request, `verify` must still report (it is a required check), so it runs and skips its heavy steps;
-# on main they skip the workflow, since the pull request already checked their formatting.
+# Docs-only changes (the repo's docs/, a top-level .md file, a changeset) can't change a test result
+# or the site. On a pull request, `verify` must still report (it is a required check), so it runs and
+# skips its heavy steps; on main they skip the workflow, since the pull request already checked their
+# formatting. A .md file under packages/ or apps/ is code: the package README is the published
+# USAGE.md (L09).
 on:
   pull_request:
   push:
     branches: [main]
-    paths-ignore: ['docs/**', '**/*.md']
+    paths-ignore: ['docs/**', '*.md', '.changeset/**']
 
 permissions:
   contents: read
 
+# A newer pull-request run replaces an older one; on main every run finishes, so a deploy is never
+# cancelled half-way.
 concurrency:
   group: ci-${{ github.ref }}
-  cancel-in-progress: true
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
   verify:
@@ -41,7 +45,7 @@ jobs:
           git config --global --add safe.directory "$GITHUB_WORKSPACE"
           files=$(git diff --name-only "$BASE" HEAD)
           echo "$files"
-          if [ -n "$files" ] && ! echo "$files" | grep -qvE '^docs/|\.md$'; then
+          if [ -n "$files" ] && ! echo "$files" | grep -qvE '^docs/|^[^/]+\.md$|^\.changeset/'; then
             echo "code=false" >> "$GITHUB_OUTPUT"
           else
             echo "code=true" >> "$GITHUB_OUTPUT"
@@ -73,3 +77,29 @@ jobs:
           name: gate-results
           path: apps/docs/test-results/
           retention-days: 7
+      # L09 decision 10: the site is the Storybook the gate just checked, from main only. It carries
+      # senui's own manifest at its root, never Storybook's (that one is development-only).
+      - if: github.event_name == 'push'
+        run: test ! -e apps/docs/storybook-static/manifests
+      - if: github.event_name == 'push'
+        uses: actions/upload-pages-artifact@v5
+        with:
+          path: apps/docs/storybook-static
+
+  deploy-storybook:
+    if: github.event_name == 'push'
+    needs: verify
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    # One deploy at a time, and a later push waits rather than cancelling one in progress.
+    concurrency:
+      group: pages
+      cancel-in-progress: false
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v5

@@ -1393,3 +1393,30 @@ components-emptystate--title-only` timed out waiting for the story to render, wi
     light. Restored and rebuilt.
   - **Budget:** the gate step is now held to 15 minutes, up from L08's 10, with a 25-minute
     timeout against hangs.
+
+### PR 4 (2026-10-28): the GitHub Pages deploy
+
+- **Emil, 2026-10-28:** "deploy storybook now". The deploy goes ahead despite the CI budget limit;
+  it adds one short job per push to `main`.
+- **Pages** is enabled with GitHub Actions as its source, at `https://senakster.github.io/senui/`.
+  That is the `homepage` the generator already uses for story links.
+- **`ci.yml`, pushes to `main` only:**
+  - after the gate, `verify` fails if Storybook's own `manifests/` folder is in the build, then
+    uploads `apps/docs/storybook-static` (`actions/upload-pages-artifact@v5`);
+  - a `deploy-storybook` job (`needs: verify`) publishes it with `actions/deploy-pages@v5`,
+    which runs on Node 24. It has `pages: write` and `id-token: write`, the `github-pages`
+    environment, and its own `pages` concurrency group, which never cancels a deploy in progress.
+- **CI concurrency:** a newer pull-request run cancels an older one; runs on `main` always finish.
+- **The docs-only classifier** (the `changes` step and both workflows' `paths-ignore`): only the
+  repo's `docs/`, top-level `.md` files and `.changeset/` count as docs-only now. Any `.md` under
+  `packages/` or `apps/` is code, because the package README is the published `USAGE.md` (a PR 3
+  review finding missed in PR 2). Probed locally with nine file lists.
+- **The unreleased stamp:** built from `main`, the site's `components.json` and `llms.txt` say the
+  build is unreleased (`0.0.0-main.<sha>`, `released: false`), from PR 2's generator.
+
+#### Verified
+
+- Workflows parse, and `pnpm format:check` passes.
+- The deploy itself can only be verified on `main` after merge. Check that the run deploys, and
+  that `https://senakster.github.io/senui/llms.txt` and `…/components.json` are served (acceptance
+  criterion, "Site and propagation").

@@ -721,3 +721,10 @@ Entry format: date — module · Did · Verified · Scope decisions · Plan adju
 
 - **Next:** Emil reviews PR 3, especially the docs pages (`pnpm --filter docs storybook` after
   `pnpm build`) and the story rewrites. Then commit and open it. Then PR 4, the Pages deploy.
+
+## 2026-10-28 — L09 PR 4: GitHub Pages deploy
+
+- **Emil:** deploy the Storybook now. Pages enabled (Actions source) at `https://senakster.github.io/senui/`.
+- **Built:** upload in `verify` and a `deploy-storybook` job on pushes to `main`; CI concurrency that never cancels a run on `main`; the docs-only classifier fixed so `.md` under `packages/` and `apps/` is code.
+- **Verified:** workflows parse; `pnpm format:check`. The deploy is checked on `main` after merge.
+- **Next:** merge #15 and PR 4. Check the deploy and the served `llms.txt` and `components.json`. Then walk the acceptance criteria and mark L09 done.
