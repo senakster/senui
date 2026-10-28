@@ -45,9 +45,13 @@
       "target": ".catalogue/library_catalogue/L09-docs-and-manifest.md",
       "sha256": "8ca445279a5ae75dd140bb1d608f69288d640d1d105b276a7569b47db57b35e9"
     },
+    "library_catalogue/L10-release-and-versioning.md": {
+      "target": ".catalogue/library_catalogue/L10-release-and-versioning.md",
+      "sha256": "370c2727e0884ecba1e0a0f7a88289a55c13fc3b51046ec6b9de180fafa87141"
+    },
     "library_catalogue/PLAN.md": {
       "target": ".catalogue/library_catalogue/PLAN.md",
-      "sha256": "b2408bb22495aec05658c214878410f27e71d71cfad9186b631b14667d9b5a73"
+      "sha256": "0acf9eba3d67fae23895bfe45bbdb0dac92a69a56a1e19f2f281a4673139e4d6"
     }
   }
 }

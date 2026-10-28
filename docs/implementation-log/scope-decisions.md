@@ -699,6 +699,27 @@ none, so there are no `OVERRIDES.md` rows. Applied:
 - **L02:** `packages/react/src/internal/` is grouped by concern (`a11y/`, `dev/`, `dialog/`, `dom/`, `field/`, `state/`, `testing/`) with a README (Emil, 2026-10-20; its own commit). Side effect: `check-a11y-contracts` now warns that Button, FormField and TextInput changed after their last manual runs, although only their import paths did. The warning keys on commit dates. A fix (ignoring commits that touch only imports) is L08 or tooling work.
 - **L08:** custom browser commands (`packages/react/vitest.commands.ts`: backdrop wheel and click, reduced-motion emulation) are the first use of Playwright beyond Vitest's API. The a11y gate can reuse them.
 
+### Defect found after done (2026-10-28, by the L10 plan review)
+
+- **The defect:** `internal/dialog/ModalDialog` renders `Button` (the close button and the footer's
+  Cancel), but `Dialog.css` didn't import `Button.css`.
+  - **Who it hit:** a consumer who loaded per-component CSS (`tokens.css` plus `styles/Dialog.css`
+    or `styles/AlertDialog.css`) got browser-default buttons, 21 px tall, under the 24 px target
+    minimum (WCAG 2.5.8).
+  - **Who it didn't:** consumers of `styles.css` and the gate, which loads the whole stylesheet.
+- **Why nothing caught it:** every check loaded `styles.css`. The generator's `cssIncludes` is
+  derived from the stylesheet's own `@import`s, so it can't notice a missing one.
+- **Fix (Emil):** `@import '../Button/Button.css';` at the top of `Dialog.css`.
+  - **Probe:** Chromium, `tokens.css` plus one Dialog stylesheet. The built file gives a 32 px
+    button with token padding, radius and colour. A copy without the import gives the 21 px
+    default.
+  - **The first version** misspelled the file (`Buttton.css`); `check-dist-css` failed it, as it
+    should.
+- **No patch changeset:** nothing is published yet. The pending `add-dialog` changeset now says
+  `styles/Dialog.css` brings Button's styles.
+- **The guard:** L10 decision 11 compares each stylesheet's `@import`s with the components its JS
+  renders, and reverting this line is one of its probes.
+
 ## L07 — EmptyState
 
 Plan synced 2026-10-20 and current at the start (2026-10-26). No ADR supersedes any of its 12

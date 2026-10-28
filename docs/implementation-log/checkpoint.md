@@ -7,7 +7,7 @@ Single source of truth for **where the implementation is right now**. Overwritte
 | Field         | Value                                                                        |
 | ------------- | ---------------------------------------------------------------------------- |
 | Target app    | repo root (pnpm workspace: `packages/tokens`, `packages/react`, `apps/docs`) |
-| Active module | none. L09 done; L10 (Release, versioning & deprecation) is `not-planned`     |
+| Active module | none. L09 done; L10 (Release, versioning & deprecation) is `plan-ready`      |
 | Sub-step      | —                                                                            |
 | Last verified | 2026-10-28: `pnpm check`; `pnpm test` tokens 32, react 952; CI on `main`     |
 | Updated       | 2026-10-28                                                                   |
@@ -33,5 +33,5 @@ each push to `main`. Its builds are stamped unreleased (`0.0.0-main.<sha>`).
 
 ## Next action
 
-1. Write the L10 plan in the planner with Emil, then sync it here.
-2. Then `/modular-web:implement-module` for L10.
+1. Merge the L06 `Dialog.css` fix (probed; recorded under L06).
+2. L10 (plan-ready, synced 2026-10-28): agree scope and delivery with Emil, then build.

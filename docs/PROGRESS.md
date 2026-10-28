@@ -16,10 +16,21 @@ Status legend — plan: `plan-ready` · `not-planned` (plan not written yet upst
 | L07 | EmptyState                        | L07-empty-state               | plan-ready  | done           | 2026-10-27   |
 | L08 | Test & a11y gate                  | L08-test-and-a11y-gate        | plan-ready  | done           | 2026-10-27   |
 | L09 | Docs & machine-readable manifest  | L09-docs-and-manifest         | plan-ready  | done           | 2026-10-28   |
-| L10 | Release, versioning & deprecation | —                             | not-planned | not-started    | 2026-10-15   |
+| L10 | Release, versioning & deprecation | L10-release-and-versioning    | plan-ready  | not-started    | 2026-10-28   |
 | L11 | Motion                            | —                             | not-planned | not-started    | 2026-10-15   |
 
 ## Changelog
+
+- **2026-10-28** — L10 plan-ready and synced. It was written in the planner with Emil and reviewed by `component-api-reviewer`, `wcag-auditor` and `server-boundary-enforcer`; about 30 findings, all adopted.
+  - **Emil's calls:**
+    - trusted publishing, with 1.0.0 published by hand and without provenance;
+    - tokens as a peer dependency;
+    - the full gate in the release job;
+    - preserved modules with a tree-shaking probe, and no byte cap;
+    - a `sourceHash` per manual run;
+    - the `main` ruleset;
+    - no manual re-runs before 1.0.0.
+  - **Found by the review, and fixed (Emil):** `Dialog.css` didn't import `Button.css`, so per-component Dialog CSS left its buttons at browser defaults, 21 px tall. Now 32 px, probed in Chromium. Recorded under L06 in scope-decisions.
 
 - **2026-10-28** — L09 done. All four PRs merged (#13, #14, #15, #17), plus #18, so the site stamps the commit.
   - **Live:** `https://senakster.github.io/senui/` serves the Storybook, `llms.txt`, `llms-full.txt`, `components.json`, `USAGE.md` and `docs/*.md`, stamped `0.0.0-main.98527e4`, unreleased.
