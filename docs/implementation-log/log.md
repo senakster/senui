@@ -764,3 +764,11 @@ Entry format: date — module · Did · Verified · Scope decisions · Plan adju
 - **Review:** `wcag-auditor`, eight findings: five fixed (stamping only same-day runs, unquoted announcements, composition both ways, expiry cap, wording), three recorded.
 - **Verified:** `pnpm check`; `pnpm test`: tokens 32, react 955, scripts 30; the docs-page gate on all 11 pages in Chromium.
 - **Next:** merge PR 3, then PR 4 (changesets job, changelog pages).
+
+## 2026-10-29 — L10 PR 4: changesets job, changelog pages
+
+- **Built:** `check-changesets.mjs` (text rules in `pnpm check`; `--require` in the new light `changesets.yml`), the changelog parser and `Changelog` block, one gated page per package with an explicit `<h1>` check, the migration-page convention, `CHANGELOG.md` linked from `llms.txt` once it exists. The three list-shaped changesets became paragraphs. PR 2 review edge B fixed. Six `OVERRIDES.md` rows (Emil: as reasoned).
+- **Found:** the changelog block sat outside the docs styles and scrolled sideways at 320 px; fixed.
+- **Review:** `wcag-auditor` and `modern-web-curator`, eleven findings: nine fixed, two recorded.
+- **Verified:** `pnpm check`; `pnpm test`: tokens 32, react 955, scripts 45; the docs-page gate on all 13 pages (78) and on the fixture probe (18); the `--require` probes.
+- **Next:** merge PR 4, then PR 5 (release pipeline, repository settings with Emil's OK, the 1.0.0 changesets, stale-run exceptions, the first publish).

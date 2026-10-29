@@ -8,7 +8,7 @@
 // text, an identifier a consumer can't import, a WCAG claim whose automated evidence tests nothing
 // about it) are errors that fail the build.
 import { execFileSync } from 'node:child_process';
-import { mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { dirname } from 'node:path';
 import ts from 'typescript';
 import { componentCss } from './docs/css.mjs';
@@ -318,7 +318,14 @@ export async function generate(
   const usage = readFileSync(`${root}/README.md`, 'utf8').replace(/\r\n?/g, '\n');
   const files = new Map();
   files.set('components.json', `${JSON.stringify(manifest, null, 2)}\n`);
-  files.set('llms.txt', llmsTxt(manifest));
+  // L10 decision 8: the changelog Changesets writes at release, beside the files that link it, so
+  // the link resolves in the package and on the site. Before the first release there is none.
+  const changelogPath = `${root}/CHANGELOG.md`;
+  const changelog = existsSync(changelogPath)
+    ? readFileSync(changelogPath, 'utf8').replace(/\r\n?/g, '\n')
+    : undefined;
+  if (changelog) files.set('CHANGELOG.md', changelog);
+  files.set('llms.txt', llmsTxt(manifest, { changelog: changelog !== undefined }));
   files.set('llms-full.txt', llmsFullTxt(manifest, usage));
   files.set('USAGE.md', usage);
   for (const name of names) {

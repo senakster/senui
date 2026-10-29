@@ -6,6 +6,7 @@
     "vitest.commands.ts",
     "vitest.config.ts",
     "vitest.setup.ts",
-    "scripts/docs/wording.d.mts"
+    "scripts/docs/wording.d.mts",
+    "scripts/docs/changelog.d.mts"
   ]
 }

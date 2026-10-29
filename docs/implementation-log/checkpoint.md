@@ -8,8 +8,8 @@ Single source of truth for **where the implementation is right now**. Overwritte
 | ------------- | -------------------------------------------------------------------------------- |
 | Target app    | repo root (pnpm workspace: `packages/tokens`, `packages/react`, `apps/docs`)     |
 | Active module | L10 (Release, versioning & deprecation), `in-progress`                           |
-| Sub-step      | PR 3 of 5 (`sourceHash`, stale runs) open; PRs 1 and 2 merged                    |
-| Last verified | 2026-10-29: `pnpm check`; `pnpm test` 32 + 955 + 30; docs-page gate on all pages |
+| Sub-step      | PR 4 of 5 (changesets job, changelog pages) open; PRs 1 to 3 merged              |
+| Last verified | 2026-10-29: `pnpm check`; `pnpm test` 32 + 955 + 45; docs-page gate on all pages |
 | Updated       | 2026-10-29                                                                       |
 
 ## Brief
@@ -20,12 +20,18 @@ each push to `main`. L10 is delivered in five PRs (Emil):
 1. Package and build: `unbundle`, tree-shaking and pack checks, tokens as a peer (#21, merged).
 2. API diff check, deprecation data, and the guard that a tokens major forces a components major
    (#22, merged).
-3. `sourceHash`: ADR-0022 amending L02, `a11y:stamp`, backfill into the nine contracts (each listed
-   in scope-decisions) (this PR).
-4. Changesets job, changeset text check, changelog and migration pages.
-5. Release pipeline (`release.yml`, reusable `gate-full`, `check-a11y-contracts.mjs --release`),
-   the `npm` environment and every repository setting (with Emil's OK), the 1.0.0 changesets, a
-   `stale-run` exception for each stale component, then Emil's manual first publish.
+3. `sourceHash`: ADR-0022 amending L02, `a11y:stamp`, backfill into the nine contracts (#23,
+   merged).
+4. Changesets job, changeset text check, changelog and migration pages (this PR).
+5. **Release pipeline:**
+   - `release.yml` and the reusable `gate-full`;
+   - `check-a11y-contracts.mjs --release`, and dispatching `ci.yml` and `changesets.yml` on the
+     Version packages branch;
+   - the `npm` environment and every repository setting, with Emil's OK: squash-only,
+     delete-on-merge, Actions may open pull requests, the `no-release` label, and `changesets` as a
+     required check;
+   - the 1.0.0 changesets and a `stale-run` exception for each stale component;
+   - then Emil's manual first publish, and deleting the API diff baseline.
 
 ## In-flight notes
 
@@ -35,10 +41,12 @@ each push to `main`. L10 is delivered in five PRs (Emil):
 - **No manual a11y re-runs before 1.0.0** (Emil). Eight components are stale (all but
   EmptyState); PR 5 adds their exceptions, pinned to the fingerprints at that point.
 - **After a manual run:** `pnpm a11y:stamp <Name>` the same day; older runs need `--date`.
+- **The `no-release` label doesn't exist yet** (PR 5). Until then a pull request that changes
+  `packages/*/src` without a changeset shows a red `changesets` check, which isn't required yet.
 - **API diff baseline:** committed in `scripts/api-diff/baseline/` until both packages are on npm;
   the release PR deletes it after 1.0.0. Rewrite it only with `--write-baseline` on `main`.
-- **Semantic tokens have no deprecation mark** (PR 2 review finding 6, recorded): the first
-  removal of one needs an `api-exceptions.json` entry, or the L01 pipeline gains DTCG `$deprecated`.
+- **Semantic tokens have no deprecation mark** (`OVERRIDES.md`): the first removal of one needs an
+  `api-exceptions.json` entry, or the L01 pipeline gains DTCG `$deprecated`.
 - **Ruleset:** live since 2026-10-26 and matches `.github/rulesets/main.json`. The repo-level
   squash-only and delete-merged-branches settings are still off: PR 5.
 - Exceptions: Dialog Fullscreen and LongContent, `color-contrast:incomplete`, expire 2027-04-27.
@@ -49,6 +57,6 @@ each push to `main`. L10 is delivered in five PRs (Emil):
 
 ## Next action
 
-1. Merge PR 3. Emil: `OVERRIDES.md` rows, in his words, for the review findings recorded and not
-   fixed in PR 2 (6–8) and PR 3 (6–8).
-2. PR 4: changesets job, changeset text check, changelog and migration pages.
+1. Merge PR 4.
+2. PR 5: the release pipeline and settings above; agree the settings changes with Emil before
+   applying them.

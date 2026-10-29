@@ -1917,3 +1917,108 @@ Recorded, not fixed:
 
 Also out: CODEOWNERS and a `reviewedBy` field on exceptions. With one maintainer, the review is
 the pull request.
+
+### PR 4 (2026-10-29): changesets job, changeset text, changelog pages
+
+- **Built:**
+  - `scripts/changesets.mjs` reads pending changesets from the files; the API diff now uses it too.
+  - `scripts/check-changesets.mjs` (in `pnpm check`) checks each changeset:
+    - it names a published package with a real bump, and has text;
+    - its text is published text: the CONVENTIONS rule 7 checks, plus no block Markdown at all
+      (numbered or `+` lists, quotes, code blocks);
+    - each migration page is named and titled where the changelog links it.
+  - **`--require <base>`, in the new `changesets.yml` workflow:** a pull request that changes a
+    package's `src` (not tests or stories) or its `exports` needs a changeset of its own, or the
+    `no-release` label.
+  - **The changelog pages:**
+    - `Changelog/senui` and `Changelog/senui-tokens`, gated as docs pages, with an explicit `<h1>`
+      check ("`<package>` changelog");
+    - rendered by `Changelog.tsx` from `CHANGELOG.md` (parsed by `scripts/docs/changelog.mjs`) and
+      the pending changesets as Unreleased;
+    - designed empty states: "Nothing unreleased." and "No release yet.";
+    - a fixed link to a major's migration page.
+  - **`CHANGELOG.md` in the package and on the site:** once Changesets writes it, the generator
+    copies it into `dist` and `llms.txt` links it.
+  - `.changeset/README.md` and CONTRIBUTING (changesets, `no-release`, the CI job).
+  - The three changesets that used lists are now paragraphs, with their wording unchanged.
+  - **PR 2 review, edge B, fixed:** a prop that some branch of another axis accepts now counts in a
+    context, not only one that every branch accepts. A new branch no longer takes a prop away.
+  - **`OVERRIDES.md`:** six rows for the review findings Emil accepted as reasoned (PR 2: 6, 7,
+    8A; PR 3: 2 in part, 7, 8).
+
+#### Deviations from the plan
+
+1. **The changesets job is its own workflow** (`changesets.yml`), not a job in `ci.yml`. The
+   acceptance criterion says adding the label passes without re-running `verify`, and the label
+   events have to trigger the job, so they can't share `ci.yml`'s triggers.
+2. **Tests, type tests and stories under `src` need no changeset.** They don't change what a
+   package ships, and the plan's "changes `packages/*/src`" would have required a label on every
+   test-only pull request.
+3. **The text rules are reused, not copied:** `publishedTextErrors` (CONVENTIONS rule 7), plus the
+   block Markdown it doesn't name. The check imports the `.ts` module directly, using Node 24's type
+   stripping, so the light job needs no install.
+4. **Migration pages follow a naming convention** (`migrations/<package>-<major>.mdx`, titled
+   `Changelog/Migrating to <package> <major>.0.0`), checked by `check-changesets.mjs`, so the
+   changelog's link can't point nowhere. None exist before 2.0.0.
+5. **The `no-release` label isn't created here.** Creating it is a repository setting, and those
+   all go in PR 5 (Emil).
+
+#### Probes
+
+- **`--require`, on a throwaway branch:**
+  - a `Button.css` change with no changeset fails, naming the file;
+  - with `NO_RELEASE=true` it passes, and with a changeset it passes;
+  - a test-only change needs nothing;
+  - a new `exports` entry fails.
+- **The text check:** the three list-shaped changesets failed before they were rewritten. Its tests
+  cover a private reference, a name, a heading, `-`, `+` and numbered lists, a quote, a code block
+  and a link.
+- **The changelog pages, with the fixture** (`apps/docs/gate/fixtures/changelog/CHANGELOG.md`:
+  three versions, dependency updates, a multi-paragraph changeset, an entry without a commit) as
+  `CHANGELOG.md`, the pending changesets set aside, and a 2.0.0 migration page:
+  - the docs-page gate passed on all three pages (18 checks);
+  - the senui page showed "Nothing unreleased.", the versions as `<h2>` and the bump types as
+    `<h3>`;
+  - the migration link pointed at the migration page's real id.
+
+  The first gate run found the senui page scrolling sideways at 320 px: the block wasn't under the
+  docs styles (`docs-page sb-unstyled`). Fixed.
+
+- **`llms.txt`:** with a `CHANGELOG.md` it links it, `dist/CHANGELOG.md` exists and the pack check
+  passes; without one, there is no link.
+
+#### Verified
+
+- `pnpm check`.
+- `pnpm test`: tokens 32, react 955, scripts 45.
+- `build-storybook`, and the docs-page gate over all 13 docs pages in Chromium (78 passed).
+
+#### Review (`wcag-auditor` and `modern-web-curator`, read-only)
+
+Eleven findings in all. Nine were fixed, each re-probed (the fixture probe passed the gate again):
+
+- **Repeated bump headings:** every release repeats "Patch Changes". Each `<h3>` now ends with a
+  visually hidden "in <version>", so a screen reader's list of headings says which release it
+  belongs to.
+- **One named region per release:** that would bury the page's landmarks as the changelog grows.
+  The sections are now unnamed; the `<h2>`s are the way through.
+- **The commit hash came first,** where a reader spells it out before the words. It now follows the
+  text: "(commit `1a2b3c4`)".
+- **"No release yet." had no heading.** It is now under a "Released" `<h2>`.
+- **A deleted changeset counted as one.** The check now counts only added or edited changeset files
+  (`--diff-filter=AM`). Probed: a source change with a deleted changeset fails.
+- **The base could be stale on a label re-run.** The job now diffs the pull request's merge commit
+  against its first parent (`--require HEAD^1`, `fetch-depth: 2`). Probed on a real merge commit.
+- **Hand-rolled docs ids:** the migration link now uses Storybook's own `sanitize`, not a copy of
+  its rules.
+- **Double compile:** the migration pages are globbed raw, so their MDX isn't compiled twice.
+- **The parser's format:** a comment now names the generator it reads and why a GitHub-linking one
+  is ruled out.
+
+Recorded, not fixed:
+
+- **A jump list of versions at the top of a long changelog.** **Revisit when** the changelog is
+  long enough that moving heading by heading gets slow (several majors).
+- **A note in `published-text.ts`** that it must stay import-free for type stripping. That file is
+  under `src`, so the note would need a changeset or the `no-release` label, which PR 5 creates. It
+  sits beside the import in `check-changesets.mjs` instead.

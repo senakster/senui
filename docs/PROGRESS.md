@@ -21,6 +21,7 @@ Status legend — plan: `plan-ready` · `not-planned` (plan not written yet upst
 
 ## Changelog
 
+- **2026-10-29** — L10 PR 4 of 5: a light `changesets` job (a pull request that changes what a package ships needs a changeset or the `no-release` label), changeset text checked as published text, and a gated changelog page per package with an Unreleased section and migration links. Six override rows for review findings accepted as reasoned.
 - **2026-10-29** — L10 PR 3 of 5: manual a11y runs carry `sourceHash` (ADR-0022), a fingerprint of the code, styles, token values and quoted speech they tested, backfilled from the commit that first recorded each run. Eight of nine components are stale, for real behaviour changes; EmptyState is current. Stale warns on pull requests and fails at release without a pinned exception.
 - **2026-10-29** — L10 PR 2 of 5: the API diff (`pnpm check:api`, against npm `latest` or a committed baseline until the first publish), deprecation as data in `components.json` and the docs, and the check that a tokens major forces a components major (ADR-0021).
 - **2026-10-29** — L10 in progress, PR 1 of 5 (package and build): one file per module in `dist`, a tree-shaking check per component, tokens as a peer dependency, and a pack check with attw (ADR-0020). The `main` ruleset docs now say it's applied (live since 2026-10-26).

@@ -180,7 +180,8 @@ function intro(manifest) {
   ].join('\n\n');
 }
 
-export function llmsTxt(manifest) {
+/** `changelog`: whether the package has a `CHANGELOG.md` yet (from its first release on, L10). */
+export function llmsTxt(manifest, { changelog = false } = {}) {
   const names = Object.keys(manifest.components);
   return `${[
     intro(manifest),
@@ -188,6 +189,11 @@ export function llmsTxt(manifest) {
     list([
       '[Usage](USAGE.md): install, loading the CSS, theming, server rendering, and what the library leaves to your page',
       '[Manifest](components.json): every component as JSON: props by branch, CSS surface, stories and the whole accessibility contract. Its type is `Manifest`, exported from the package',
+      ...(changelog
+        ? [
+            '[Changelog](CHANGELOG.md): every release, newest first; breaking changes come only in a major, after a minor that deprecates what they remove',
+          ]
+        : []),
     ]),
     '## Components',
     list(
