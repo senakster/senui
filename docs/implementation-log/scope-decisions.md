@@ -1756,3 +1756,8 @@ Recorded, not fixed:
    - branch matching by prop-name overlap, on branches without a discriminant;
    - a new branch that lacks a prop every other branch of its axis had: that prop drops out of the
      other axes' contexts.
+
+The committed baseline's `dist/` folders were left out of the first push by `.gitignore`'s `dist/`
+rule, so CI found only the two `package.json` files; locally the files existed on disk and every
+check passed. `.gitignore` now re-includes `scripts/api-diff/baseline/*/dist/`, and the committed
+file list was compared with the files on disk.
