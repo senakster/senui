@@ -216,7 +216,7 @@ describe('the API diff', () => {
     assert.ok(verdict('pkg', differences, 'none').length > 0);
   });
 
-  test('adding an optional prop to a branch without a discriminant is only that prop', () => {
+  test('adding an optional prop to a branch without a discriminant is only that prop, added', () => {
     const { differences } = probe((m) => {
       m.components.Checkbox.axes[0].branches[0].props.push({
         name: 'mixedLabel',
@@ -225,9 +225,18 @@ describe('the API diff', () => {
         description: 'x',
       });
     });
-    assert.deepEqual(
-      differences.map((d) => [d.key, d.level]),
-      [['Checkbox › CheckboxMixed{indeterminate} › prop mixedLabel', 'minor']],
+    // The branch keeps its key; the prop is added there and, optional, to the other axis's
+    // contexts, which can combine with that branch.
+    assert.ok(
+      differences.some(
+        (d) => d.key === 'Checkbox › CheckboxMixed{indeterminate} › prop mixedLabel',
+      ),
+    );
+    assert.ok(
+      differences.every(
+        (d) => d.key.endsWith(' › prop mixedLabel') && d.change === 'added' && d.level === 'minor',
+      ),
+      JSON.stringify(differences),
     );
   });
 
@@ -259,6 +268,35 @@ describe('the API diff', () => {
       branch.differences.every((d) => d.level === 'minor'),
       JSON.stringify(branch.differences),
     );
+  });
+
+  test('a new branch without a prop its siblings all have takes nothing away (edge B)', () => {
+    const { differences, problems } = probe((m) => {
+      const state = m.components.Dialog.axes.find((a) => a.name === 'DialogOpenState');
+      state.branches.push({
+        summary: 'Uncontrolled, no callback.',
+        discriminant: ['uncontrolled'],
+        props: [{ name: 'uncontrolled', type: 'true', required: true, description: 'x' }],
+        notInBranch: [],
+        forbidden: [],
+      });
+    });
+    assert.ok(differences.length > 0);
+    assert.ok(
+      differences.every((d) => d.change === 'added' && d.level === 'minor'),
+      JSON.stringify(differences),
+    );
+    assert.deepEqual(problems, []);
+  });
+
+  test('moving a prop from the shared props into every branch of an axis is no change', () => {
+    const { differences } = probe((m) => {
+      const dialog = m.components.Dialog;
+      const size = prop(dialog.props, 'size');
+      dialog.props = dialog.props.filter((p) => p.name !== 'size');
+      for (const branch of dialog.axes[0].branches) branch.props.push(size);
+    });
+    assert.deepEqual(differences, []);
   });
 
   test('a component kept as a deprecated alias of its replacement is no removal', () => {

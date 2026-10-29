@@ -104,7 +104,8 @@ must be something Emil can defend.
 ## Verification
 
 `pnpm check` must pass before any module is marked done. It runs, in order: build + typecheck, lint
-(ESLint, then Stylelint on component CSS), `check:components` (every component has a typed
+(ESLint, then Stylelint on component CSS), `check:components` (every pending changeset names a
+package and is published text: paragraphs and inline code only; every component has a typed
 `*.a11y.ts` whose manual runs carry a `sourceHash`, with a warning for each stale run, an error at
 release; component CSS sits inside `@layer senui.components`; every `@import` in the built CSS
 resolves; importing one component bundles only the components it renders, and its stylesheet

@@ -113,9 +113,12 @@ that supersedes it. A new dependency needs an ADR naming the native alternative 
 
 1. Branch from `main` (`feature/<module>-<topic>`, `fix/<topic>`, `docs/<topic>`).
 2. Push and open a PR. Its title becomes the commit message on `main`, so write it as one.
-3. Wait for the `verify` check to pass, with the branch up to date with `main`, and resolve every
+3. If it changes what a package ships (its `src`, not tests or stories, or its `exports`), it
+   carries a changeset; if not, label it `no-release`. See
+   [`.changeset/README.md`](.changeset/README.md) for the bump and the text.
+4. Wait for the `verify` check to pass, with the branch up to date with `main`, and resolve every
    review conversation.
-4. **Squash and merge.** Nobody pushes to `main` directly or force-pushes it, admins included.
+5. **Squash and merge.** Nobody pushes to `main` directly or force-pushes it, admins included.
 
 GitHub enforces these rules through the `main` ruleset, kept in
 [`.github/rulesets/main.json`](.github/rulesets/main.json).
@@ -125,3 +128,8 @@ GitHub enforces these rules through the `main` ruleset, kept in
 Every pull request and every push to `main` runs `pnpm check`, installs Chromium, runs `pnpm test`,
 and builds Storybook ([`.github/workflows/ci.yml`](.github/workflows/ci.yml)). The job is called
 `verify`, and the ruleset requires that name.
+
+A second, light workflow, [`changesets.yml`](.github/workflows/changesets.yml), runs the
+`changesets` job on every pull request and again when its labels change: it fails a pull request
+that changes what a package ships without a changeset or the `no-release` label, and a changeset
+whose text breaks the published-text rules. Adding the label re-runs only that job, not `verify`.

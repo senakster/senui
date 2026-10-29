@@ -23,7 +23,9 @@ function generatedFiles(): { from: string; to: string }[] {
       `The site needs the package's generated docs, and ${missing.join(', ')} ${missing.length === 1 ? 'is' : 'are'} missing from ${DIST}. Run \`pnpm build\` first.`,
     );
   }
-  return GENERATED.map((path) => ({ from: `${DIST}${path}`, to: `/${path}` }));
+  // The changelog exists from the first release on (L10); `llms.txt` links it only then.
+  const optional = ['CHANGELOG.md'].filter((path) => existsSync(`${DIST}${path}`));
+  return [...GENERATED, ...optional].map((path) => ({ from: `${DIST}${path}`, to: `/${path}` }));
 }
 
 // Docs pages live here; component stories are colocated with their component in packages/react.

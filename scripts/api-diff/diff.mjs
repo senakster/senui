@@ -130,8 +130,8 @@ export function tokenFacts(tokensCss, pkg) {
 /**
  * Each way a component can be used, as one context per branch of each axis (or one context for a
  * component without axes). A context's props are the shared props, the branch's own, and those
- * every branch of each other axis accepts, so moving a prop between the shared props and every
- * branch of an axis changes no fact.
+ * some branch of each other axis accepts, so moving a prop between the shared props and every
+ * branch of an axis changes no fact, and neither does adding a branch.
  */
 function contexts(c, match) {
   const merge = (into, props) => {
@@ -153,7 +153,7 @@ function contexts(c, match) {
       merge(props, c.props);
       merge(props, branch.props);
       c.axes.forEach((other, o) => {
-        if (o !== a) merge(props, [...axisEverywhere(other).values()]);
+        if (o !== a) merge(props, [...axisAnywhere(other).values()]);
       });
       out.push({
         key: `${axis.name}${keys[a][b]}`,
@@ -170,12 +170,20 @@ function contexts(c, match) {
   return out;
 }
 
-/** Props every branch of an axis accepts; required only if every branch requires them. */
-function axisEverywhere(axis) {
+/**
+ * Props some branch of an axis accepts; required only if every branch requires them. Any branch,
+ * not every: a new branch without a prop its siblings all have doesn't take that prop away from
+ * the other axes' contexts (L10 PR 2 review, edge B). A prop really removed from a branch is still
+ * caught by that branch's own context, and by the compiler.
+ */
+function axisAnywhere(axis) {
   const out = new Map();
-  for (const p of axis.branches[0]?.props ?? []) {
-    const all = axis.branches.map((b) => b.props.find((q) => q.name === p.name));
-    if (all.every(Boolean)) out.set(p.name, { ...p, required: all.every((q) => q.required) });
+  for (const branch of axis.branches) {
+    for (const p of branch.props) {
+      if (out.has(p.name)) continue;
+      const all = axis.branches.map((b) => b.props.find((q) => q.name === p.name));
+      out.set(p.name, { ...p, required: all.every((q) => q?.required === true) });
+    }
   }
   return out;
 }

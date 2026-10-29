@@ -144,6 +144,8 @@ async function runAxe(
 }
 
 const docsEntries = loadDocs();
+/** A package's changelog page (`Changelog/senui`), not a migration note under it. */
+const CHANGELOG = /^Changelog\/(?!Migrating)/;
 
 // One page load per docs page: each scheme and width is applied in place (the docs surface follows
 // `color-scheme` live, and a resize reflows it), because loading the page and waiting for every
@@ -203,6 +205,12 @@ for (const docs of docsEntries) {
       failures.push(`${String(h1s.length)} <h1>s, not 1: ${h1s.map((h) => h.text).join(', ')}`);
     } else if (!docs.mdx && h1s[0]?.text !== pageName(docs)) {
       failures.push(`the <h1> reads "${h1s[0]?.text ?? ''}", not "${pageName(docs)}"`);
+    } else if (CHANGELOG.test(docs.title)) {
+      // L10 decision 8: a changelog page is titled after its package, not after Changesets' heading.
+      const expected = `@senakster/${pageName(docs)} changelog`;
+      if (h1s[0]?.text !== expected) {
+        failures.push(`the <h1> reads "${h1s[0]?.text ?? ''}", not "${expected}"`);
+      }
     }
     if (headings[0]?.level !== 1) failures.push('the first heading is not the <h1>');
     headings.forEach((h, i) => {
