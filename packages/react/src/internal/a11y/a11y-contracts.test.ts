@@ -99,7 +99,14 @@ const valid = defineA11yContract<{ children: string; 'aria-label'?: string }>()(
   ],
   testedWith: [
     { method: 'automated', tool: 'axe-core', date: '2026-10-01' },
-    { method: 'keyboard', browser: 'any', os: 'any', result: 'pass', date: '2026-10-01' },
+    {
+      method: 'keyboard',
+      browser: 'any',
+      os: 'any',
+      result: 'pass',
+      date: '2026-10-01',
+      sourceHash: '0123456789abcdef',
+    },
     {
       method: 'screen reader',
       at: 'reader',
@@ -111,6 +118,7 @@ const valid = defineA11yContract<{ children: string; 'aria-label'?: string }>()(
       packageVersion: '0.1.0',
       result: 'pass',
       date: '2026-10-02',
+      sourceHash: '0123456789abcdef',
     },
   ],
   knownIssues: [],

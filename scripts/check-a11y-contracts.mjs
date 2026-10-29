@@ -3,17 +3,24 @@
 // - a component directory has no <Name>.a11y.ts exporting `a11y = defineA11yContract<…>()(…)`;
 // - a component directory has no <Name>.docs.ts exporting `docs = defineComponentDocs<…>()(…)` (L09);
 // - the package entry exports anything other than a component or an allow-listed public type file.
-// Warns (doesn't fail) when a component's source changed after its last manual a11y run.
-import { execFileSync } from 'node:child_process';
+// - a manual run has no `sourceHash` (L10 decision 6).
+// Warns when a manual run is stale (the component changed since); with `--release` (the release
+// gate), that fails too, unless a pinned `stale-run` exception covers it.
 import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
+import { sourceHash, tokenValues, workingTree } from '../packages/react/scripts/source-hash.mjs';
+import { runsOf } from './a11y-stamp.mjs';
 
 const SRC = 'packages/react/src';
 const COMPONENTS = join(SRC, 'components');
+const EXCEPTIONS = 'apps/docs/gate/exceptions.json';
+const RELEASE = process.argv.includes('--release');
 // Non-component modules the entry may export. Each is public API (CONVENTIONS.md, "Public surface").
 const PUBLIC_MODULES = ['./types.js', './manifest.js'];
 const errors = [];
 const warnings = [];
+/** Each component's contract text, by name. */
+const contracts = new Map();
 
 const stripComments = (ts) => ts.replace(/\/\*[\s\S]*?\*\//g, '').replace(/^\s*\/\/.*$/gm, '');
 
@@ -35,8 +42,7 @@ for (const name of dirs) {
       `${name}: ${contract} must \`export const a11y = defineA11yContract<${name}Props>()({ … })\``,
     );
   } else {
-    const stale = staleness(name, source);
-    if (stale) warnings.push(stale);
+    contracts.set(name, readFileSync(contract, 'utf8'));
   }
 
   // L09 decision 3: usage guidance, typed and checked like the contract.
@@ -66,43 +72,66 @@ for (const [, path] of entry.matchAll(/from\s+['"]([^'"]+)['"]/g)) {
 }
 
 /**
- * Manual keyboard and screen-reader runs certify the code as it was. If the component's .tsx or .css
- * was committed after the newest such run, say so. Skipped in a shallow clone (CI), where commit
- * dates aren't meaningful. TestRun entries are flat objects, so a regex can read them.
+ * L10 decision 6. A manual run certifies the component as it was: its `sourceHash` is the
+ * fingerprint of what it tested. Unstamped is an error; stale (today's fingerprint differs) is a
+ * warning on pull requests and an error with `--release`, unless a `stale-run` exception in
+ * apps/docs/gate/exceptions.json names the component, pinned to today's fingerprint, so any further
+ * edit voids it.
  */
-function staleness(name, source) {
-  let newestRun = '';
-  for (const [run] of source.matchAll(/\{[^{}]*\}/g)) {
-    if (!/method:\s*['"](screen reader|keyboard)['"]/.test(run)) continue;
-    const date = /date:\s*['"](\d{4}-\d{2}-\d{2})['"]/.exec(run)?.[1] ?? '';
-    if (date > newestRun) newestRun = date;
+async function staleness(sources) {
+  const tokenDir = 'packages/tokens/src';
+  const tokens = await tokenValues(
+    readdirSync(tokenDir)
+      .filter((f) => f.endsWith('.tokens.json'))
+      .sort()
+      .map((f) => readFileSync(join(tokenDir, f), 'utf8')),
+  );
+  const read = workingTree(process.cwd());
+  const { exceptions } = JSON.parse(readFileSync(EXCEPTIONS, 'utf8'));
+  const stale = exceptions.filter((e) => e.check === 'stale-run');
+  const today = new Date().toISOString().slice(0, 10);
+  const LATEST = new Date(Date.now() + 183 * 864e5).toISOString().slice(0, 10);
+  const used = new Set();
+  for (const [name, source] of sources) {
+    const current = sourceHash(read, name, tokens);
+    const runs = runsOf(source).map((r) => r.fields);
+    const manual = runs.filter((r) => r.method !== 'automated');
+    for (const run of manual.filter((r) => r.sourceHash === undefined)) {
+      errors.push(
+        `${name}: the ${run.method} run of ${run.date} has no sourceHash; run \`pnpm a11y:stamp ${name}\``,
+      );
+    }
+    const old = manual.filter((r) => r.sourceHash !== undefined && r.sourceHash !== current);
+    if (old.length === 0) continue;
+    const exception = stale.find((e) => e.component === name && e.sourceHash === current);
+    if (exception) used.add(exception);
+    const what = `${name}: changed since its manual run(s) of ${[...new Set(old.map((r) => r.date))].join(', ')} (sourceHash ${current})`;
+    if (exception) warnings.push(`${what}; excepted until ${exception.expires}`);
+    else if (RELEASE) {
+      errors.push(
+        `${what}. Re-run and \`pnpm a11y:stamp ${name}\`, or add a stale-run exception for sourceHash ${current}`,
+      );
+    } else warnings.push(`${what}. Re-test, or it needs a stale-run exception to release.`);
   }
-  let changed;
-  try {
-    if (git('rev-parse', '--is-shallow-repository') === 'true') return undefined;
-    changed = git(
-      'log',
-      '-1',
-      '--format=%cs',
-      '--',
-      join(COMPONENTS, name, `${name}.tsx`),
-      join(COMPONENTS, name, `${name}.css`),
-    );
-  } catch {
-    return undefined;
+  for (const e of stale) {
+    const label = `exceptions.json: stale-run ${String(e.component)}`;
+    if (!sources.has(e.component)) errors.push(`${label}: no such component`);
+    if (!e.reason?.trim()) errors.push(`${label}: no reason`);
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(e.expires ?? ''))
+      errors.push(`${label}: expires is not YYYY-MM-DD`);
+    else if (e.expires < today) errors.push(`${label}: expired on ${e.expires}`);
+    // Six months at most, as the gate's own exceptions are set: a stale run is a debt to review.
+    else if (e.expires > LATEST) errors.push(`${label}: expires after ${LATEST}, six months out`);
+    // Pinned to a fingerprint: once the component changes again, the exception says nothing.
+    if (sources.has(e.component) && !used.has(e)) {
+      (RELEASE ? errors : warnings).push(
+        `${label}: pinned to sourceHash ${String(e.sourceHash)}, which no longer matches the component (or it isn't stale); remove it or re-pin it after review`,
+      );
+    }
   }
-  if (changed && changed > newestRun) {
-    return `${name}: source changed ${changed}, after its last manual a11y run (${newestRun || 'none'}). Re-test and update testedWith.`;
-  }
-  return undefined;
 }
 
-function git(...args) {
-  return execFileSync('git', args, {
-    encoding: 'utf8',
-    stdio: ['ignore', 'pipe', 'ignore'],
-  }).trim();
-}
+await staleness(contracts);
 
 for (const warning of warnings) console.warn(`warning: ${warning}`);
 if (errors.length > 0) {

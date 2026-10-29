@@ -276,6 +276,10 @@ fact.
   component. A screen-reader run names the assistive technology, browser, OS, versions, the
   package version tested and the `language` of the reader's speech (BCP 47, ADR-0019). Product
   names in this data are compatibility facts and are written out (scope decision, L02).
+- After a manual run, `pnpm a11y:stamp <Name>` writes its `sourceHash`: the fingerprint of what it
+  tested (code, styles, token values, quoted speech and keys; ADR-0022). Never write one by hand.
+  When the component changes, the run is stale: the docs say so, and a release needs a re-run or a
+  `stale-run` exception pinned to the new fingerprint.
 - In `announces`, double quotes mark verbatim speech and nothing else; write a gloss unquoted
   (`"til" means on`). An announcement that quotes speech gives its `language`, one of the
   contract's screen-reader runs, so the published docs can mark the quote with it (ADR-0019).
@@ -290,8 +294,9 @@ fact.
 [`a11y-contracts.test.ts`](src/internal/a11y/a11y-contracts.test.ts), which loads every contract and
 checks the name, dates, evidence, baseline and responsibilities; and
 [`scripts/check-a11y-contracts.mjs`](../../scripts/check-a11y-contracts.mjs) in `pnpm check`, which
-fails a component without a contract and warns when a component's source changed after its last
-manual run.
+fails a component without a contract and a manual run without `sourceHash`, and warns about a stale
+run (with `--release`, the release gate, that fails unless a pinned `stale-run` exception covers
+it). The fingerprint's probes are in [`a11y-stamp.test.mjs`](../../scripts/a11y-stamp.test.mjs).
 
 ## 8. Deprecation before removal
 

@@ -151,6 +151,7 @@ export const a11y = defineA11yContract<CheckboxProps>()({
       os: 'Windows 11 Pro 26H2 (build 26300.9711)',
       result: 'pass',
       date: '2026-10-20',
+      sourceHash: '669d9ed79ade6cbc',
     },
     {
       // Narrator's L05 run found the pre-submit invalid announcement (ADR-0013) and was not repeated.
@@ -164,6 +165,7 @@ export const a11y = defineA11yContract<CheckboxProps>()({
       packageVersion: '0.0.0',
       result: 'pass',
       date: '2026-10-20',
+      sourceHash: '669d9ed79ade6cbc',
     },
     {
       method: 'forced colours',
@@ -171,6 +173,7 @@ export const a11y = defineA11yContract<CheckboxProps>()({
         'Chrome 155.0.8059.40, ForcedColors story: box, check, dash and disabled visible in every state.',
       result: 'pass',
       date: '2026-10-20',
+      sourceHash: '669d9ed79ade6cbc',
     },
   ],
   knownIssues: [],

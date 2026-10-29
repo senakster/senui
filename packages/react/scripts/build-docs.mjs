@@ -8,7 +8,7 @@
 // text, an identifier a consumer can't import, a WCAG claim whose automated evidence tests nothing
 // about it) are errors that fail the build.
 import { execFileSync } from 'node:child_process';
-import { mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { dirname } from 'node:path';
 import ts from 'typescript';
 import { componentCss } from './docs/css.mjs';
@@ -29,6 +29,7 @@ import {
   llmsTxt,
 } from './docs/render.mjs';
 import { createTypes } from './docs/types.mjs';
+import { sourceHash, tokenValues, workingTree } from './source-hash.mjs';
 import { byCodeUnit, kebab, slash, sortKeys } from './docs/util.mjs';
 
 export { UNTRACED, axeCoverage };
@@ -104,7 +105,15 @@ export async function generate(
   const version = released ? pkg.version : `${pkg.version}-main.${sha ?? 'unknown'}`;
   const site = String(pkg.homepage ?? '').replace(/\/?$/, '/');
   if (!/^https:\/\//.test(site)) errors.push('package.json: `homepage` must be the docs site URL');
-  const shallow = git(root, 'rev-parse', '--is-shallow-repository') !== 'false';
+  // Fingerprints (L10 decision 6) read the repository's working tree and the tokens' sources.
+  const repo = workingTree(dirname(dirname(root)));
+  const tokenDir = `${dirname(root)}/tokens/src`;
+  const tokenMap = await tokenValues(
+    readdirSync(tokenDir)
+      .filter((f) => f.endsWith('.tokens.json'))
+      .sort(byCodeUnit)
+      .map((f) => readFileSync(`${tokenDir}/${f}`, 'utf8')),
+  );
 
   /** Published text: the rules contracts and `.docs.ts` follow apply to JSDoc too (decision 8). */
   const checkText = (where, text) => {
@@ -178,17 +187,11 @@ export async function generate(
       })
       .sort((a, b) => byCodeUnit(a.id, b.id));
 
-    const changed = shallow
-      ? null
-      : git(
-          root,
-          'log',
-          '-1',
-          '--format=%cs',
-          '--',
-          `src/components/${name}/${name}.tsx`,
-          `src/components/${name}/${name}.css`,
-        ) || null;
+    // L10 decision 6: a run is stale when what it tested has changed, by fingerprint, so neither
+    // squash merges nor a shallow checkout change the answer. Automated runs are never stale.
+    const current = sourceHash(repo, name, tokenMap);
+    const staleness = (run) =>
+      run.method === 'automated' ? false : run.sourceHash ? run.sourceHash !== current : null;
 
     for (const claim of a11y.wcag) criteria.add(claim.criterion);
     const ids = runIds(a11y.testedWith);
@@ -224,7 +227,7 @@ export async function generate(
       accessibility: a11y,
       testRuns: a11y.testedWith.map((run, i) => ({
         id: ids[i],
-        sourceChangedSince: changed === null ? null : changed > run.date,
+        sourceChangedSince: staleness(run),
       })),
       wcagEvidence: claimEvidence(
         name,

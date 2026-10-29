@@ -155,6 +155,7 @@ export const a11y = defineA11yContract<ButtonProps>()({
       os: 'Windows 11 Pro 26H2 (build 26300.9711)',
       result: 'pass',
       date: '2026-10-17',
+      sourceHash: '4f0c54eb0a13132f',
     },
     {
       method: 'screen reader',
@@ -167,6 +168,7 @@ export const a11y = defineA11yContract<ButtonProps>()({
       packageVersion: '0.0.0',
       result: 'pass',
       date: '2026-10-17',
+      sourceHash: '4f0c54eb0a13132f',
     },
     {
       // After the review fixes: the toggle button (aria-pressed) and the aria-hidden icon wrapper.
@@ -180,6 +182,7 @@ export const a11y = defineA11yContract<ButtonProps>()({
       packageVersion: '0.0.0',
       result: 'pass',
       date: '2026-10-18',
+      sourceHash: '584311a9430864fa',
     },
     {
       method: 'forced colours',
@@ -187,6 +190,7 @@ export const a11y = defineA11yContract<ButtonProps>()({
         'Chrome 155.0.8059.40 DevTools emulation (forced-colors: active, dark scheme), Matrix and ForcedColors stories: borders, disabled, the spinner gap and pressed all distinguishable. The first check found pressed unreadable (backplate); fixed and re-checked the same day.',
       result: 'pass',
       date: '2026-10-18',
+      sourceHash: '584311a9430864fa',
     },
   ],
   knownIssues: [],

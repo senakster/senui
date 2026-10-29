@@ -292,7 +292,7 @@ describe('the published files', () => {
   test('always renders Known issues', () => {
     for (const component of components()) {
       expect(pageOf(component)).toMatch(
-        /### Known issues\n\n(None known as of \d{4}-\d{2}-\d{2}\.|- )/,
+        /### Known issues\n\n(None known as of \d{4}-\d{2}-\d{2}(; manual runs predate later changes)?\.|- )/,
       );
     }
   });

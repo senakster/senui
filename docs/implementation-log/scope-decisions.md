@@ -1761,3 +1761,159 @@ The committed baseline's `dist/` folders were left out of the first push by `.gi
 rule, so CI found only the two `package.json` files; locally the files existed on disk and every
 check passed. `.gitignore` now re-includes `scripts/api-diff/baseline/*/dist/`, and the committed
 file list was compared with the files on disk.
+
+### PR 3 (2026-10-29): `sourceHash`, stale runs
+
+- **Built:**
+  - **ADR-0022** (amends L02): every manual run's `sourceHash` is required by the contract type,
+    with a `@ts-expect-error` type test. Automated runs have none.
+  - `packages/react/scripts/source-hash.mjs`: the fingerprint, read through a `read(path)` function,
+    so it works on the working tree or any commit. It never calls git.
+  - `scripts/a11y-stamp.mjs` (`pnpm a11y:stamp <Name>`, `--date`, `--backfill`), which writes only
+    each run's `sourceHash` line.
+  - `check-a11y-contracts.mjs`:
+    - a manual run without a stamp is an error;
+    - a stale run is a warning, and an error with `--release` unless a `stale-run` exception pinned
+      to today's fingerprint covers it;
+    - an expired, unknown or voided exception is reported.
+
+    The date heuristic and its git calls are gone.
+
+  - **The `stale-run` exception shape** lives in `apps/docs/gate/exceptions.json`, typed in
+    `exceptions.ts`; the gate's own checks ignore it.
+  - **The generator:** `sourceChangedSince` compares fingerprints and no longer reads git dates. A
+    stale run is marked on its Test runs row, its "Observed with …" lines, the evidence that cites
+    it, and Known issues ("None known as of {date}, before later changes").
+  - CONVENTIONS rule 7, CLAUDE.md, ADR index. Probes as `scripts/a11y-stamp.test.mjs` (9 tests).
+
+#### The backfill (Emil: the script writes, each listed)
+
+`pnpm a11y:stamp --backfill` wrote one `sourceHash` line into each manual run of the nine contracts,
+26 lines in all and nothing else. A second run from clean contracts gave an identical diff.
+
+| Contract                | Run            | Date       | First recorded in | `sourceHash`       | Today   |
+| ----------------------- | -------------- | ---------- | ----------------- | ------------------ | ------- |
+| `AlertDialog.a11y.ts`   | keyboard       | 2026-10-21 | a51b509           | `7b37bdd4c5ca5b23` | stale   |
+|                         | screen reader  | 2026-10-21 | a51b509           | `7b37bdd4c5ca5b23` | stale   |
+|                         | forced colours | 2026-10-21 | a51b509           | `7b37bdd4c5ca5b23` | stale   |
+| `Button.a11y.ts`        | keyboard       | 2026-10-17 | 70727dd           | `4f0c54eb0a13132f` | stale   |
+|                         | screen reader  | 2026-10-17 | 70727dd           | `4f0c54eb0a13132f` | stale   |
+|                         | screen reader  | 2026-10-18 | 6b294f8           | `584311a9430864fa` | stale   |
+|                         | forced colours | 2026-10-18 | 6b294f8           | `584311a9430864fa` | stale   |
+| `Checkbox.a11y.ts`      | keyboard       | 2026-10-20 | eff0983           | `669d9ed79ade6cbc` | stale   |
+|                         | screen reader  | 2026-10-20 | eff0983           | `669d9ed79ade6cbc` | stale   |
+|                         | forced colours | 2026-10-20 | eff0983           | `669d9ed79ade6cbc` | stale   |
+| `CheckboxGroup.a11y.ts` | screen reader  | 2026-10-20 | eff0983           | `d714c3951a45c6ed` | stale   |
+|                         | forced colours | 2026-10-20 | eff0983           | `d714c3951a45c6ed` | stale   |
+| `Dialog.a11y.ts`        | keyboard       | 2026-10-21 | a51b509           | `7df9d509b8ba3bee` | stale   |
+|                         | screen reader  | 2026-10-21 | a51b509           | `7df9d509b8ba3bee` | stale   |
+|                         | forced colours | 2026-10-21 | a51b509           | `7df9d509b8ba3bee` | stale   |
+| `EmptyState.a11y.ts`    | keyboard       | 2026-10-26 | 5f8ae1d           | `fb8e655e4c5cf799` | current |
+|                         | screen reader  | 2026-10-26 | 5f8ae1d           | `fb8e655e4c5cf799` | current |
+|                         | forced colours | 2026-10-26 | 5f8ae1d           | `fb8e655e4c5cf799` | current |
+| `FormField.a11y.ts`     | screen reader  | 2026-10-19 | 18f5133           | `7ebf3fb6aff99b26` | stale   |
+|                         | forced colours | 2026-10-19 | 18f5133           | `7ebf3fb6aff99b26` | stale   |
+| `Switch.a11y.ts`        | keyboard       | 2026-10-20 | eff0983           | `8ad15a8a6417cdca` | stale   |
+|                         | screen reader  | 2026-10-20 | eff0983           | `8ad15a8a6417cdca` | stale   |
+|                         | forced colours | 2026-10-20 | eff0983           | `8ad15a8a6417cdca` | stale   |
+| `TextInput.a11y.ts`     | keyboard       | 2026-10-19 | 18f5133           | `945c20df59d39ec7` | stale   |
+|                         | screen reader  | 2026-10-19 | 18f5133           | `945c20df59d39ec7` | stale   |
+|                         | forced colours | 2026-10-19 | 18f5133           | `945c20df59d39ec7` | stale   |
+
+**What made the eight stale:** real behaviour changes, read part by part.
+
+- ADR-0013 made `aria-invalid` always explicit, in every form control.
+- `useNameCheck` gained label-element detection, in Button and every control that uses it.
+- The field wiring was rewritten (ADR-0012).
+- Dialog's stylesheet, focus handling and controllable state changed, and token values changed.
+
+1.0.0 ships them with stale-run exceptions (L10 decision 6, Emil: no re-runs before 1.0.0), added
+in the release PR, pinned to the fingerprints at that point.
+
+#### Deviations from the plan
+
+1. **The fingerprint's contract part is narrower than "announcements and keyboard".** It covers
+   the double-quoted speech in `announces` (CONVENTIONS rule 7: quotes mark verbatim speech and
+   nothing else), each announcement's owner, mechanism and politeness, and each binding's `keys`.
+   With the whole entries hashed, L09's removal of private references ("(L07 decision 7)") from
+   EmptyState's `announces` made its run stale with no change to code, styles or tokens (found on
+   the first backfill).
+2. **No file paths in the fingerprint.** With them, the move of `internal/*.ts` into folders made
+   every run stale (found on the second backfill).
+3. **Composition parents are included** (TextInput's FormField, Checkbox's CheckboxGroup, from
+   `.docs.ts`). The plan's graph is value imports only, but TextInput doesn't import
+   `useFieldWiring`: FormField wires it at runtime, and its runs were done inside a FormField. The
+   acceptance criterion names TextInput (found by its probe). After review, it works both ways: a
+   parent's runs heard its children, so FormField's cover TextInput and CheckboxGroup's cover
+   Checkbox.
+4. **The backfill reads the contract and `.docs.ts` from today's tree,** and the code, styles and
+   tokens from the commit that first recorded the run. L09 also moved glosses out of quotes (a
+   notation fix, not a different reading), and `.docs.ts` didn't exist before L09; a real change in
+   speech also changes the code, styles or tokens.
+5. **A run's identity across commits is its method, date and position among that day's runs of
+   that method.** L09 renamed reader names (`'Narrator (Danish)'` became `'Narrator'` plus
+   `language`), so the first version, which included `at`, matched those runs only at L09's commit
+   (found on the first backfill: three runs read "current").
+6. **Token values come from the token pipeline, built in memory** (`buildTokens`) from each commit's
+   `*.tokens.json`, so the backfill compares like with like. It adds about 5 s to the docs build.
+7. **`--release` is a flag of the contract check**, for PR 5's release job. The plan said "error at
+   release".
+
+#### Probes
+
+- **The fingerprint** (`scripts/a11y-stamp.test.mjs`, edits in memory, no files touched):
+  - a JSDoc-only edit and a type-only edit leave it unchanged;
+  - `type = 'submit'` in Button changes Button, Dialog and AlertDialog (they render Button);
+  - an edit to `useFieldWiring` stales Checkbox, CheckboxGroup, Switch and TextInput, and not
+    Button, Dialog or EmptyState;
+  - a CSS comment changes nothing, while a declaration or a token value does;
+  - rewording a `when` changes nothing, while a quoted word does;
+  - the module never calls git.
+- **The exception:** pinned to Switch's fingerprint, `--release` passes Switch with a warning.
+  After a one-attribute edit to `Switch.tsx`, the exception reads as voided and Switch fails.
+  Restored.
+- **Release mode:** with no exceptions, `--release` exits 1 on the eight stale components.
+
+#### Verified
+
+- `pnpm check`: the eight stale warnings, no errors.
+- `pnpm test`: tokens 32, react 955, scripts 30.
+- `build-storybook`, and the docs-page gate over all 11 docs pages in Chromium (66 passed).
+
+#### Review (`wcag-auditor`, read-only)
+
+Eight findings. Five were fixed, with probes, and the backfill was re-run (identical staleness,
+new hashes, in the table above):
+
+1. **Stamping could launder a stale run.** A run done Monday, an edit Tuesday and a stamp on
+   Wednesday would read as current. `pnpm a11y:stamp <Name>` now stamps only runs dated today and
+   refuses older ones; stamping an older day takes `--date`, a deliberate, reviewed choice. Probed:
+   refused without `--date`, stamped with it, then restored.
+2. **An announcement with no quote was hashed as nothing.** Some describe what was heard without
+   quoting it (Checkbox's, CheckboxGroup's submit). When there is no quote, the whole text counts.
+3. **Composition went one way.** FormField's runs heard TextInput inside it, and CheckboxGroup's
+   heard Checkbox. Now a parent's fingerprint includes the components whose guidance places them
+   inside it. Probed: a TextInput edit stales FormField and TextInput.
+4. **Exceptions could be set far out.** A `stale-run` exception may now expire at most six months
+   ahead, the horizon the gate's exceptions use.
+5. **Wording.** The note now says how to read the run, and comes before the speech on an
+   announcement:
+   - Test runs: "Not re-tested since the component's code, styles or tokens changed; it describes
+     the component as it was.";
+   - announcements: "(Heard before the component last changed; not re-tested since.)";
+   - evidence: "(not re-tested since the component changed)";
+   - Known issues: "; manual runs predate later changes".
+
+Recorded, not fixed:
+
+6. **`--release` isn't wired yet.** The release job that passes it is PR 5's (decision 3). Until
+   then a stale run warns and fails nothing, as the plan has it for pull requests.
+7. **One fingerprint per component, not per method.** A JS-only change stales a forced-colours run.
+   This is conservative, and the alternative splits the fingerprint by method and its exceptions
+   with it. **Revisit when** the exceptions it causes become routine.
+8. **Stories and the base and theme styles are outside the fingerprint.** The plan excludes
+   stories. A run names the story it used, so a story edit that changes what was heard is a review
+   matter. **Revisit when** a stale run is found that only a story change explains.
+
+Also out: CODEOWNERS and a `reviewedBy` field on exceptions. With one maintainer, the review is
+the pull request.

@@ -122,6 +122,7 @@ export const a11y = defineA11yContract<FormFieldProps>()({
       packageVersion: '0.0.0',
       result: 'pass',
       date: '2026-10-19',
+      sourceHash: '7ebf3fb6aff99b26',
     },
     {
       method: 'forced colours',
@@ -129,6 +130,7 @@ export const a11y = defineA11yContract<FormFieldProps>()({
         'Chrome 155.0.8059.40, ForcedColors story: the error icon and message, the required marker and the description stay readable.',
       result: 'pass',
       date: '2026-10-19',
+      sourceHash: '7ebf3fb6aff99b26',
     },
   ],
   knownIssues: [

@@ -94,8 +94,10 @@ export function stylingItems(
 export function semanticsItems(contract: ManifestA11yContract): Text[];
 export function keyboardRows(contract: ManifestA11yContract): { keys: Text; action: Text }[];
 export function focusItems(focus: ManifestFocus): Text[];
+/** `testRuns` marks an announcement whose run is stale (L10 decision 6). */
 export function announcementItems(
   contract: ManifestA11yContract,
+  testRuns?: ManifestComponent['testRuns'],
 ): { text: Text; language?: string }[];
 export function claimText(
   manifest: Manifest,
@@ -109,5 +111,9 @@ export function testRunRows(
   component: ManifestComponent,
 ): { id: Text; text: Text; checks?: Text[] }[];
 export function knownIssueItems(contract: ManifestA11yContract): Text[];
-export function noKnownIssuesText(contract: ManifestA11yContract): string;
+/** "None known as of {date}", plus "; manual runs predate later changes" when a run is stale. */
+export function noKnownIssuesText(
+  contract: ManifestA11yContract,
+  testRuns?: ManifestComponent['testRuns'],
+): string;
 export function storiesIntro(manifest: Manifest): Text;
