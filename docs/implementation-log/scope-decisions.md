@@ -1604,11 +1604,20 @@ Each failed for its own reason, and everything was restored:
 
 #### Verified
 
-With #20's `Dialog.css` line applied (it isn't on `main` yet):
+Rebased onto `main` after #20 (the `Dialog.css` fix):
 
 - `pnpm check`;
 - `pnpm test`: tokens 32, react 952;
 - `build-storybook`: the docs app still resolves the tokens through its own dependency.
 
-Without that line, `pnpm check` fails in `check-tree-shaking`, which is correct. This PR merges
-after #20.
+Before the rebase, `pnpm check` failed in `check-tree-shaking`, which was correct.
+
+#### Ruleset docs (Emil, 2026-10-29)
+
+The `main` ruleset has been live since 2026-10-26, when the repository went public (id
+`25892694`, enforcement `active`), but its README and CONTRIBUTING.md still said it wasn't applied
+(the L00 record of 2026-10-17 stays as history). Fixed here rather than in PR 5, which only changes
+the repository settings. Compared with the live ruleset, the JSON lacked two fields GitHub returns
+by default (`required_reviewers: []`, `require_extra_approval_for_unattributed_changes: true`), so
+they were added and the file now matches it exactly. The repository-level squash-only and
+delete-merged-branches settings are still off and stay for PR 5.

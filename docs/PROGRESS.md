@@ -16,11 +16,12 @@ Status legend — plan: `plan-ready` · `not-planned` (plan not written yet upst
 | L07 | EmptyState                        | L07-empty-state               | plan-ready  | done           | 2026-10-27   |
 | L08 | Test & a11y gate                  | L08-test-and-a11y-gate        | plan-ready  | done           | 2026-10-27   |
 | L09 | Docs & machine-readable manifest  | L09-docs-and-manifest         | plan-ready  | done           | 2026-10-28   |
-| L10 | Release, versioning & deprecation | L10-release-and-versioning    | plan-ready  | not-started    | 2026-10-28   |
+| L10 | Release, versioning & deprecation | L10-release-and-versioning    | plan-ready  | in-progress    | 2026-10-29   |
 | L11 | Motion                            | —                             | not-planned | not-started    | 2026-10-15   |
 
 ## Changelog
 
+- **2026-10-29** — L10 in progress, PR 1 of 5 (package and build): one file per module in `dist`, a tree-shaking check per component, tokens as a peer dependency, and a pack check with attw (ADR-0020). The `main` ruleset docs now say it's applied (live since 2026-10-26).
 - **2026-10-28** — L10 plan-ready and synced. It was written in the planner with Emil and reviewed by `component-api-reviewer`, `wcag-auditor` and `server-boundary-enforcer`; about 30 findings, all adopted.
   - **Emil's calls:**
     - trusted publishing, with 1.0.0 published by hand and without provenance;

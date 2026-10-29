@@ -740,3 +740,11 @@ Entry format: date — module · Did · Verified · Scope decisions · Plan adju
 - **Narrowing:** `llms.txt` holds summaries only, so only `.docs.ts` changes appear in it.
 - **Verified:** `pnpm check`; `pnpm test`: tokens 32, react 952; `build-storybook`.
 - **Next:** L10 (Release, versioning & deprecation) has no plan yet. Write it in the planner first.
+
+## 2026-10-29 — L10 PR 1: package and build
+
+- **Context:** L10 planned in the planner with Emil, reviewed, and synced (#20, which also fixed L06's `Dialog.css`). Emil's delivery: five PRs; repository settings and the `npm` environment only in PR 5; the failing-gate probe runs locally.
+- **Built:** one file per module in `dist` (`unbundle`), `check-tree-shaking.mjs`, tokens as a peer dependency, `check-pack.mjs` with attw (ADR-0020), LICENSE at pack time, `bugs`/`homepage`/`repository`. Details, probes and four deviations in scope-decisions § L10.
+- **Found:** Changesets bumps a tokens major as a components _patch_; the guard goes into PR 2. The `main` ruleset was already live, so its README, the JSON and CONTRIBUTING.md were corrected here (Emil).
+- **Verified:** `pnpm check`; `pnpm test`: tokens 32, react 952; `build-storybook`.
+- **Next:** merge PR 1, then PR 2 (API diff, deprecation data, the tokens-major guard).

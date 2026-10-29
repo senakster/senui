@@ -117,9 +117,8 @@ that supersedes it. A new dependency needs an ADR naming the native alternative 
    review conversation.
 4. **Squash and merge.** Nobody pushes to `main` directly or force-pushes it, admins included.
 
-These rules are written down in [`.github/rulesets/main.json`](.github/rulesets/main.json). GitHub
-doesn't enforce them yet: rulesets need a public repository or GitHub Pro, and this one is private.
-Until it is enforced, follow it by hand.
+GitHub enforces these rules through the `main` ruleset, kept in
+[`.github/rulesets/main.json`](.github/rulesets/main.json).
 
 ## CI
 

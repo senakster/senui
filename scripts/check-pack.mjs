@@ -48,11 +48,12 @@ try {
     pnpmPack(out, join(root, dir));
     const tgz = readdirSync(out).find((f) => !before.has(f));
     const file = join(out, tgz);
-    const files = run('tar', ['-tzf', file], out)
+    // tar gets the bare name, run from its directory: GNU tar reads `C:\…` as a remote host.
+    const files = run('tar', ['-tzf', tgz], out)
       .split(/\r?\n/)
       .filter((f) => f && !f.endsWith('/'))
       .map((f) => f.replace(/^package\//, ''));
-    const manifest = JSON.parse(run('tar', ['-xOzf', file, 'package/package.json'], out));
+    const manifest = JSON.parse(run('tar', ['-xOzf', tgz, 'package/package.json'], out));
     packed[manifest.name] = manifest;
 
     for (const f of files) {

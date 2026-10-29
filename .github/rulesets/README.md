@@ -1,9 +1,12 @@
 # Rulesets
 
-Branch rules for `main`, kept here as the JSON GitHub's REST API takes. **Not applied yet:** GitHub
-offers rulesets only on public repositories or with GitHub Pro, and this repository is private on a
-free account (decided 2026-10-17). Until then the rules are followed by convention (see
-[CONTRIBUTING.md](../../CONTRIBUTING.md), "Branches and pull requests").
+Branch rules for `main`, kept here as the JSON GitHub's REST API takes. **Applied** since
+2026-10-26, when the repository went public (ruleset `main`, id `25892694`, enforcement `active`).
+The live ruleset matches this file; [CONTRIBUTING.md](../../CONTRIBUTING.md), "Branches and pull
+requests", is the same rules in prose.
+
+This file is the source. Change the ruleset by editing it and applying it (below), never in
+Settings alone, or the two drift apart.
 
 ## What [`main.json`](main.json) enforces
 
@@ -22,17 +25,24 @@ free account (decided 2026-10-17). Until then the rules are followed by conventi
 
 ## Applying it
 
-Once the repository is public or on GitHub Pro:
-
 ```sh
-gh api -X POST repos/senakster/senui/rulesets --input .github/rulesets/main.json
+gh api -X PUT repos/senakster/senui/rulesets/25892694 --input .github/rulesets/main.json
 ```
 
-To change it later, find its id with `gh api repos/senakster/senui/rulesets`, then
-`gh api -X PUT repos/senakster/senui/rulesets/<id> --input .github/rulesets/main.json`.
+To check that the live ruleset still matches this file, compare `rules`, `conditions`,
+`bypass_actors` and `enforcement` from `gh api repos/senakster/senui/rulesets/25892694` with the
+JSON here. `required_reviewers` and `require_extra_approval_for_unattributed_changes` are in the
+file because GitHub returns them with these values whether or not they were sent; listing them keeps
+the comparison exact.
 
-Squash-only is also a repository setting, which works on any plan, and pairs with deleting merged
-branches:
+On a fresh repository, create it instead:
+`gh api -X POST repos/senakster/senui/rulesets --input .github/rulesets/main.json`.
+
+## Repository settings
+
+Squash-only is also a repository setting, and pairs with deleting merged branches. **Not applied
+yet:** the repository still allows merge and rebase merges (the ruleset blocks them on `main`
+anyway) and keeps merged branches. L10's release PR applies it with the other repository settings:
 
 ```sh
 gh api -X PATCH repos/senakster/senui \
