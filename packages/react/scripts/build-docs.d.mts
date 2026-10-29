@@ -1,5 +1,5 @@
 // Types for build-docs.mjs, so tsdown.config.ts and the generator's tests can call it.
-import type { Manifest } from '../src/manifest.js';
+import type { Manifest, ManifestComponent, ManifestDeprecation } from '../src/manifest.js';
 
 export interface GenerateOptions {
   /** Test switch: build the TypeScript program from its root files in reverse order. */
@@ -36,3 +36,15 @@ export function axeCoverage(
 
 /** Relative links in the Markdown and text files that name no generated file. */
 export function linkErrors(files: ReadonlyMap<string, string>): string[];
+
+/**
+ * L10 decision 7: a deprecated prop without its `deprecate()` call, or a deprecated data value or
+ * class that no longer renders.
+ */
+export function deprecationErrors(
+  name: string,
+  props: Pick<ManifestComponent, 'props' | 'axes'>,
+  css: { readonly deprecated: Readonly<Record<string, ManifestDeprecation>> },
+  markup: { readonly dataAttributes: Readonly<Record<string, readonly string[]>> },
+  source: string,
+): string[];

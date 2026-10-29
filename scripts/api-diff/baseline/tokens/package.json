@@ -1,0 +1,12 @@
+{
+  "name": "@senakster/senui-tokens",
+  "version": "0.0.0",
+  "exports": {
+    ".": "./dist/index.js",
+    "./tokens.css": "./dist/tokens.css",
+    "./package.json": "./package.json"
+  },
+  "sideEffects": [
+    "**/*.css"
+  ]
+}

@@ -1,0 +1,64 @@
+import { DialogNativeProps } from "../../internal/dialog/ModalDialog.js";
+import { DialogName, DialogOpenState } from "../Dialog/Dialog.js";
+import { ReactElement, ReactNode } from "react";
+//#region src/components/AlertDialog/AlertDialog.d.ts
+type Content = Exclude<ReactNode, null | undefined | boolean>;
+export type AlertDialogSize = 'sm' | 'md';
+export type AlertDialogProps = DialogNativeProps & {
+  /** What will happen, read when the dialog opens. Required: an alert needs its consequence. */
+  description: Content;
+  /** The Cancel button's text. Required, with no English default. Cancel takes focus on open. */
+  cancelLabel: string;
+  /**
+   * The confirming action: one element, usually `<Button variant="danger" onClick={…}>Delete</Button>`.
+   * Not plain text, which would leave the alert with no way to confirm. It closes the dialog
+   * itself, by setting `open` to false. Cancel reports `'cancel'`, and Esc `'escape'`.
+   */
+  action: ReactElement;
+  /** More detail, after the description (a list of what will be deleted, for example). */
+  children?: ReactNode;
+  /** Defaults to `'sm'`. */
+  size?: AlertDialogSize;
+  /** Where focus goes on close when the element that opened the dialog is gone. */
+  finalFocus?: () => HTMLElement | null;
+  /** An alert dialog is never dismissed from the backdrop. */
+  dismiss?: never;
+  /** Focus always starts on Cancel, the least destructive choice. */
+  initialFocus?: never;
+  /** Cancel is the way out; there is no close button. */
+  closeLabel?: never;
+  /** Cancel is the way out; there is no close button. */
+  hideCloseButton?: never;
+  /** The footer holds Cancel and `action`. */
+  footer?: never;
+  /** Modal dialogs are implicitly `aria-modal`. */
+  'aria-modal'?: never;
+  /** Focus always starts on Cancel, the least destructive choice. */
+  autoFocus?: never;
+  /** The dialog is focusable by design (`tabindex="-1"`). */
+  tabIndex?: never;
+  /** Use `onOpenChange`: every close request arrives there, with its reason. */
+  onCancel?: never;
+  /** Use `onOpenChange`: every close request arrives there, with its reason. */
+  onClose?: never;
+} & DialogName & DialogOpenState;
+/**
+ * A confirmation that interrupts, usually before a destructive action: a modal
+ * `<dialog role="alertdialog">` with a required description, a Cancel button that takes focus,
+ * and your action. Esc cancels; a backdrop click never closes it. Shares Dialog's behaviour and
+ * styles (`styles/AlertDialog.css` imports Dialog's). See `AlertDialog.a11y.ts`.
+ *
+ * ```tsx
+ * <AlertDialog
+ *   open={open}
+ *   onOpenChange={setOpen}
+ *   title="Delete project?"
+ *   description="Its files and history are deleted. This can't be undone."
+ *   cancelLabel="Cancel"
+ *   action={<Button variant="danger" onClick={remove}>Delete</Button>}
+ * />
+ * ```
+ */
+export declare const AlertDialog: import("react").ForwardRefExoticComponent<AlertDialogProps & import("react").RefAttributes<HTMLDialogElement>>;
+//#endregion
+export {};

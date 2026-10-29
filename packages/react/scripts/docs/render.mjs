@@ -19,6 +19,7 @@ import {
   claimText,
   code,
   compositionText,
+  deprecatedText,
   dontUseText,
   examplesText,
   focusItems,
@@ -56,6 +57,7 @@ export function componentMarkdown(manifest, component, { path, depth = 1 }) {
   // 1. Summary and 2. import.
   section(
     h(1, component.name),
+    component.deprecated ? deprecatedText(component.deprecated) : undefined,
     component.summary,
     h(2, HEADINGS.import),
     ['```ts', component.import, '```'].join('\n'),
@@ -102,6 +104,7 @@ export function componentMarkdown(manifest, component, { path, depth = 1 }) {
       axis.description,
       ...axis.branches.flatMap((branch) => [
         h(4, branch.summary),
+        branch.deprecated ? deprecatedText(branch.deprecated) : undefined,
         list([...branch.props.map(propText), ...branchNotes(branch)]),
       ]),
     ]),
@@ -185,7 +188,12 @@ export function llmsTxt(manifest) {
       '[Manifest](components.json): every component as JSON: props by branch, CSS surface, stories and the whole accessibility contract. Its type is `Manifest`, exported from the package',
     ]),
     '## Components',
-    list(names.map((n) => `[${n}](docs/${kebab(n)}.md): ${manifest.components[n].summary}`)),
+    list(
+      names.map((n) => {
+        const { deprecated, summary } = manifest.components[n];
+        return `[${n}](docs/${kebab(n)}.md): ${deprecated ? `${deprecatedText(deprecated)} ` : ''}${summary}`;
+      }),
+    ),
     '## Optional',
     list(['[Everything in one file](llms-full.txt): the usage guide and every component page']),
   ].join('\n\n')}\n`;

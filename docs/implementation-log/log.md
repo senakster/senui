@@ -748,3 +748,11 @@ Entry format: date — module · Did · Verified · Scope decisions · Plan adju
 - **Found:** Changesets bumps a tokens major as a components _patch_; the guard goes into PR 2. The `main` ruleset was already live, so its README, the JSON and CONTRIBUTING.md were corrected here (Emil).
 - **Verified:** `pnpm check`; `pnpm test`: tokens 32, react 952; `build-storybook`.
 - **Next:** merge PR 1, then PR 2 (API diff, deprecation data, the tokens-major guard).
+
+## 2026-10-29 — L10 PR 2: API diff, deprecation as data
+
+- **Built:** `pnpm check:api` (facts from both manifests and `package.json`, a compiler check of every shared type export, pending bump from `changeset status`), a committed baseline until the first publish, `api-exceptions.json`, deprecation marks read into `components.json` and rendered as text, the majors-travel-together check (ADR-0021). Probes as `node --test` tests (21) and `deprecation.test.ts`.
+- **Found:** a `unique symbol` brand failed two identical builds' narrowing check; a JSDoc opening with `@deprecated` lost its tag; component-name keys made an alias rename read as removed data values. All fixed.
+- **Review:** `component-api-reviewer`, eight findings: five fixed (package.json facts, alias CSS, all type exports both ways, layer order, ignored marks), three recorded (scope-decisions § L10 PR 2).
+- **Verified:** `pnpm check`; `pnpm test`: tokens 32, react 955, scripts 21; `build-storybook`; the docs-page gate on a deprecated Button page.
+- **Next:** merge PR 2, then PR 3 (`sourceHash`).

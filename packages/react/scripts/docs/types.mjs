@@ -108,11 +108,24 @@ export function createTypes(root, { reorder = false, crlf = false } = {}) {
     const target =
       exported.flags & ts.SymbolFlags.Alias ? checker.getAliasedSymbol(exported) : exported;
     exportedName.set(target, exported.name);
+    const tag = target.getJsDocTags(checker).find((t) => t.name === 'deprecated');
+    const deprecated = tag
+      ? deprecation(collapse(ts.displayPartsToString(tag.text)), `export ${exported.name}`)
+      : undefined;
     let kind = 'type';
     if (target.flags & ts.SymbolFlags.Function) kind = 'function';
     else if (target.flags & ts.SymbolFlags.Variable) {
       kind = 'component';
-      if (!componentDirs.includes(exported.name)) {
+      // A deprecated component kept as an alias of its replacement has no folder (decision 7). It
+      // must warn when used, like a deprecated prop.
+      const alias = target.valueDeclaration;
+      if (deprecated && alias && !componentDirs.includes(exported.name)) {
+        if (!/\bdeprecate\(/.test(alias.getText())) {
+          errors.push(
+            `export ${exported.name}: a deprecated component alias must call deprecate() when rendered`,
+          );
+        }
+      } else if (!componentDirs.includes(exported.name)) {
         errors.push(
           `index.ts: value export '${exported.name}' is neither a component nor a function`,
         );
@@ -122,6 +135,7 @@ export function createTypes(root, { reorder = false, crlf = false } = {}) {
       name: exported.name,
       kind,
       description: cleanDoc(ts.displayPartsToString(target.getDocumentationComment(checker))),
+      ...(deprecated ? { deprecated } : {}),
     });
   }
   exports.sort((a, b) => byCodeUnit(a.name, b.name));
@@ -220,33 +234,61 @@ export function createTypes(root, { reorder = false, crlf = false } = {}) {
 
   // --- Props -----------------------------------------------------------------------------------
 
-  /** The JSDoc on a property: its text (or `undefined`) and its `@default` tag. */
+  /**
+   * The JSDoc on a property: its text (or `undefined`), its `@default` tag and its `@deprecated`
+   * tag (L10 decision 7).
+   */
   function docOf(node) {
     const docs = ts.getJSDocCommentsAndTags(node).filter(ts.isJSDoc);
     const doc = docs.at(-1);
-    if (!doc) return { text: undefined, default: undefined };
+    if (!doc) return { text: undefined, default: undefined, deprecated: undefined };
     const text = collapse(cleanDoc(ts.getTextOfJSDocComment(doc.comment) ?? ''));
-    const tag = doc.tags?.find((t) => t.tagName.text === 'default');
+    const tag = (name) => doc.tags?.find((t) => t.tagName.text === name);
+    const tagText = (t) => collapse(ts.getTextOfJSDocComment(t.comment) ?? '');
+    const deprecated = tag('deprecated');
     return {
       text: text || undefined,
-      default: tag ? collapse(ts.getTextOfJSDocComment(tag.comment) ?? '') : undefined,
+      default: tag('default') ? tagText(tag('default')) : undefined,
+      deprecated: deprecated ? tagText(deprecated) : undefined,
     };
   }
 
-  /** The last `/** … *\/` comment in a source range: the JSDoc written before a union member. */
+  /**
+   * The last `/** … *\/` comment in a source range: the JSDoc written before a union member. Its
+   * text, and its `@deprecated` tag's text when it has one.
+   */
   function docBefore(file, from, to) {
     const comments = [...file.text.slice(from, to).matchAll(/\/\*\*([\s\S]*?)\*\//g)];
     const last = comments.at(-1);
-    if (!last) return undefined;
-    const text = collapse(
-      cleanDoc(
-        last[1]
-          .split(/\r?\n/)
-          .map((line) => line.replace(/^\s*\*\s?/, ''))
-          .join('\n'),
-      ),
+    if (!last) return { text: undefined, deprecated: undefined };
+    const body = cleanDoc(
+      last[1]
+        .split(/\r?\n/)
+        .map((line) => line.replace(/^\s*\*\s?/, ''))
+        .join('\n'),
     );
-    return text || undefined;
+    // Tags start at the first line that opens with `@tag`.
+    const first = /(?:^|\n)\s*@[a-z]+\b/.exec(body);
+    const text = first ? body.slice(0, first.index) : body;
+    const tags = first
+      ? body
+          .slice(first.index)
+          .trim()
+          .split(/\n\s*(?=@[a-z]+\b)/)
+      : [];
+    const deprecated = tags.find((t) => t.startsWith('@deprecated'));
+    return {
+      text: collapse(text) || undefined,
+      deprecated:
+        deprecated === undefined ? undefined : collapse(deprecated.slice('@deprecated'.length)),
+    };
+  }
+
+  /** `{ useInstead }` for a `@deprecated` tag's text; an empty tag is an error. */
+  function deprecation(text, where) {
+    if (text === undefined) return undefined;
+    if (!text) errors.push(`${where}: @deprecated says nothing; write what to use instead`);
+    return { useInstead: text };
   }
 
   /** A type node with its parentheses removed. */
@@ -311,6 +353,35 @@ export function createTypes(root, { reorder = false, crlf = false } = {}) {
     if (members.length === 0) return undefined;
     if (!members.every((t) => t.isStringLiteral() || t.isNumberLiteral())) return undefined;
     return members.map((t) => t.value).sort((a, b) => byCodeUnit(String(a), String(b)));
+  }
+
+  /**
+   * The deprecated members of a literal union, by value: a `@deprecated` JSDoc written before the
+   * member, in the prop's type or in the alias it names (`ButtonVariant`).
+   */
+  function deprecatedMembers(typeNode, where) {
+    let node = bare(typeNode);
+    let file = typeNode.getSourceFile();
+    if (ts.isTypeReferenceNode(node)) {
+      const alias = aliasOf(node);
+      if (!alias) return {};
+      node = bare(alias.decl.type);
+      file = alias.decl.getSourceFile();
+    }
+    if (!ts.isUnionTypeNode(node)) return {};
+    const out = {};
+    node.types.forEach((member, i) => {
+      const literal = bare(member);
+      if (!ts.isLiteralTypeNode(literal)) return;
+      const from = i === 0 ? node.pos : node.types[i - 1].end;
+      const doc = docBefore(file, from, member.getStart(file));
+      const value = ts.isStringLiteral(literal.literal)
+        ? literal.literal.text
+        : literal.literal.getText(file);
+      const deprecated = deprecation(doc.deprecated, `${where} '${value}'`);
+      if (deprecated) out[value] = deprecated;
+    });
+    return out;
   }
 
   const isNever = (member) => member.type?.kind === ts.SyntaxKind.NeverKeyword;
@@ -409,11 +480,10 @@ export function createTypes(root, { reorder = false, crlf = false } = {}) {
 
     /** The first JSDoc across a prop's declarations (L09 "Descriptions"). */
     const describe = (prop) => {
-      for (const member of declarations.get(prop) ?? []) {
-        const doc = docOf(member);
-        if (doc.text) return doc;
-      }
-      return { text: undefined, default: undefined };
+      const docs = (declarations.get(prop) ?? []).map(docOf);
+      const doc = docs.find((d) => d.text) ?? { text: undefined, default: undefined };
+      // Deprecated wherever any declaration says so.
+      return { ...doc, deprecated: docs.find((d) => d.deprecated !== undefined)?.deprecated };
     };
 
     /** Props some declaration (or a native base) accepts, i.e. types as something but `never`. */
@@ -432,6 +502,8 @@ export function createTypes(root, { reorder = false, crlf = false } = {}) {
       if (!doc.text) errors.push(`${at}: prop '${prop}' has no JSDoc`);
       const fallback = doc.text && /\bDefaults to `([^`]+)`/.exec(doc.text)?.[1];
       const values = valuesOf(member.type);
+      const deprecated = deprecation(doc.deprecated, `${at}.${prop}`);
+      const deprecatedValues = values ? deprecatedMembers(member.type, `${at}.${prop}`) : {};
       return {
         name: prop,
         type: printType(member.type, `${at}.${prop}`),
@@ -440,6 +512,8 @@ export function createTypes(root, { reorder = false, crlf = false } = {}) {
         ...((doc.default ?? fallback) ? { default: doc.default ?? fallback } : {}),
         ...(values ? { values } : {}),
         ...(attributes.has(prop) ? { overridesNative: true } : {}),
+        ...(deprecated ? { deprecated } : {}),
+        ...(Object.keys(deprecatedValues).length > 0 ? { deprecatedValues } : {}),
       };
     };
     const toForbidden = (member, at) => {
@@ -481,7 +555,9 @@ export function createTypes(root, { reorder = false, crlf = false } = {}) {
           // The union may be declared in another module (AlertDialog uses Dialog's DialogName).
           const declaredIn = decl.getSourceFile();
           const from = i === 0 ? union.pos : union.types[i - 1].end;
-          const summary = docBefore(declaredIn, from, node.getStart(declaredIn));
+          const doc = docBefore(declaredIn, from, node.getStart(declaredIn));
+          const summary = doc.text;
+          const deprecated = deprecation(doc.deprecated, `${at} branch ${String(i + 1)}`);
           if (!summary) errors.push(`${at}: branch ${String(i + 1)} has no JSDoc summary`);
           const discriminant = requiredIn[i].filter((prop) =>
             neverIn.some((never, j) => j !== i && never.includes(prop)),
@@ -522,6 +598,7 @@ export function createTypes(root, { reorder = false, crlf = false } = {}) {
           }
           return {
             summary: summary ?? '',
+            ...(deprecated ? { deprecated } : {}),
             discriminant: [...new Set(discriminant)].sort(byCodeUnit),
             props: branchProps.sort(byName),
             notInBranch: notInBranch.sort(byName),

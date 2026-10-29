@@ -141,6 +141,12 @@ export async function generate(
     }
 
     const where = `${name}Props`;
+    // The component's code, without comments: a `deprecate()` call in a comment warns nobody.
+    const source = readFileSync(`${src}/components/${name}/${name}.tsx`, 'utf8').replace(
+      /\/\*[\s\S]*?\*\/|\/\/[^\n]*/g,
+      '',
+    );
+    errors.push(...deprecationErrors(name, props, css, markup, source));
     for (const p of props.props) checkText(`${where}.${p.name}`, p.description);
     for (const f of props.forbidden) checkText(`${where}.${f.name}`, f.useInstead);
     for (const axis of props.axes) {
@@ -186,9 +192,17 @@ export async function generate(
 
     for (const claim of a11y.wcag) criteria.add(claim.criterion);
     const ids = runIds(a11y.testedWith);
+    const deprecated = types.exports.find((e) => e.name === name)?.deprecated;
+    // A deprecated component warns when rendered, like a deprecated prop (CONVENTIONS rule 8).
+    if (deprecated && !new RegExp(`\\bdeprecate\\(\\s*['"\`]${name}['"\`]`).test(source)) {
+      errors.push(
+        `${name}: the export is @deprecated, but ${name}.tsx never calls deprecate('${name}', …)`,
+      );
+    }
     components[name] = {
       name,
       import: `import { ${name} } from '${SCOPE_PACKAGE}';`,
+      ...(deprecated ? { deprecated } : {}),
       ...usage,
       element: a11y.semantics.element,
       ...(a11y.semantics.role ? { role: a11y.semantics.role } : {}),
@@ -203,6 +217,7 @@ export async function generate(
         tokens: css.tokens,
         stylesheet: `${SCOPE_PACKAGE}/styles/${name}.css`,
         cssIncludes: css.includes,
+        ...(Object.keys(css.deprecated).length > 0 ? { deprecated: css.deprecated } : {}),
       },
       stories: storyList,
       consumerResponsibilities: a11y.consumerResponsibilities,
@@ -357,6 +372,57 @@ export function linkErrors(files) {
       else if (!files.has(decodeURIComponent(inDist.split('#')[0]))) {
         errors.push(`${path}: link '${target}' names no generated file`);
       }
+    }
+  }
+  return errors;
+}
+
+/**
+ * L10 decision 7: what makes a deprecation real, not just documented. A deprecated prop warns when
+ * passed (`deprecate('<Name>', '<prop>', …)` in the component); a deprecated data-attribute value
+ * still renders, beside its replacement; a deprecated class still renders.
+ *
+ * @param {string} name
+ * @param {{ props: any[], axes: any[] }} props
+ * @param {{ deprecated: Record<string, { useInstead: string }> }} css
+ * @param {{ dataAttributes: Record<string, string[]> }} markup
+ * @param {string} source The component's `.tsx`.
+ */
+export function deprecationErrors(name, props, css, markup, text) {
+  const errors = [];
+  // A call in a comment doesn't warn anyone.
+  const source = text.replace(/\/\*[\s\S]*?\*\/|\/\/[^\n]*/g, '');
+  const all = [
+    ...props.props,
+    ...props.axes.flatMap((a) =>
+      a.branches.flatMap((b) => [...b.props, ...(b.requiresOneOf ?? []).flat()]),
+    ),
+  ];
+  for (const prop of new Set(all.filter((p) => p.deprecated).map((p) => p.name))) {
+    const call = new RegExp(`\\bdeprecate\\(\\s*['"\`]${name}['"\`]\\s*,\\s*['"\`]${prop}['"\`]`);
+    if (!call.test(source)) {
+      errors.push(
+        `${name}: prop '${prop}' is @deprecated, but ${name}.tsx never calls deprecate('${name}', '${prop}', …)`,
+      );
+    }
+  }
+  for (const [from, { useInstead }] of Object.entries(css.deprecated)) {
+    const to = /`([^`]+)`/.exec(useInstead)?.[1] ?? '';
+    const data = /^\[(data-[a-z-]+)='([^']*)'\]$/;
+    if (from.startsWith('[')) {
+      for (const item of [from, to]) {
+        const [, attr = '', value = ''] = data.exec(item) ?? [];
+        if (!markup.dataAttributes[attr]?.includes(value)) {
+          errors.push(
+            `${name}.css: deprecated ${from} needs both values rendered, but ${name} never renders ${item}`,
+          );
+        }
+      }
+    } else if (
+      from.startsWith('.') &&
+      !new RegExp(`(^|[^a-z0-9_-])${from.slice(1)}(?![a-z0-9_-])`).test(source)
+    ) {
+      errors.push(`${name}.css: deprecated class ${from} must still render until its major`);
     }
   }
   return errors;

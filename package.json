@@ -7,14 +7,15 @@
     "node": ">=24"
   },
   "scripts": {
-    "check": "pnpm typecheck && pnpm lint && pnpm check:components && pnpm format:check",
+    "check": "pnpm typecheck && pnpm lint && pnpm check:components && pnpm check:api && pnpm format:check",
     "typecheck": "pnpm build && pnpm -r typecheck",
     "lint": "eslint . --max-warnings 0 && stylelint \"packages/react/src/**/*.css\" --max-warnings 0 --allow-empty-input",
     "sync:wcag": "node scripts/sync-wcag.mjs",
     "check:components": "node scripts/check-a11y-contracts.mjs && node scripts/check-keyboard-trace.mjs && node scripts/check-component-css.mjs && node scripts/check-dist-css.mjs && node scripts/check-tree-shaking.mjs && node scripts/check-pack.mjs",
+    "check:api": "node scripts/check-api-diff.mjs",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "test": "pnpm -r --if-present test",
+    "test": "pnpm -r --if-present test && node --test \"scripts/**/*.test.mjs\"",
     "build": "pnpm -r build",
     "changeset": "changeset",
     "test:gate": "pnpm build && pnpm --filter docs build-storybook && pnpm --filter docs exec playwright test"

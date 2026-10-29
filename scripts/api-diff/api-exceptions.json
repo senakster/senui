@@ -1,0 +1,4 @@
+{
+  "$comment": "L10 decision 7. A public fact removed without a deprecation release first fails the API diff, even in a major, unless it has an entry here: { package, fact (the key the diff prints), reason (why no deprecation path exists: an ADR or issue), expires (YYYY-MM-DD) }. An expired entry, and an entry that matches no difference, fail the check. Reviewed like the gate's exceptions.",
+  "exceptions": []
+}

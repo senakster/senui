@@ -1,0 +1,23 @@
+{
+  "name": "@senakster/senui",
+  "version": "0.0.0",
+  "exports": {
+    ".": "./dist/index.js",
+    "./styles.css": "./dist/styles/index.css",
+    "./styles/*.css": "./dist/components/*/*.css",
+    "./components.json": "./dist/components.json",
+    "./llms.txt": "./dist/llms.txt",
+    "./llms-full.txt": "./dist/llms-full.txt",
+    "./USAGE.md": "./dist/USAGE.md",
+    "./docs/*.md": "./dist/docs/*.md",
+    "./package.json": "./package.json"
+  },
+  "sideEffects": [
+    "**/*.css"
+  ],
+  "peerDependencies": {
+    "@senakster/senui-tokens": "workspace:^",
+    "react": "^18.3 || ^19",
+    "react-dom": "^18.3 || ^19"
+  }
+}

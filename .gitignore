@@ -22,3 +22,5 @@ apps/docs/playwright-report/
 
 # Copied from the root LICENSE by each package's prepack (L10)
 packages/*/LICENSE
+# The API diff baseline mirrors a published tarball, dist included (L10).
+!scripts/api-diff/baseline/*/dist/

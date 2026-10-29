@@ -1,0 +1,1940 @@
+{
+  "package": {
+    "name": "@senakster/senui",
+    "released": false,
+    "version": "0.0.0-main.d86eb12"
+  },
+  "exports": [
+    {
+      "description": "A confirmation that interrupts, usually before a destructive action: a modal\n`<dialog role=\"alertdialog\">` with a required description, a Cancel button that takes focus,\nand your action. Esc cancels; a backdrop click never closes it. Shares Dialog's behaviour and\nstyles (`styles/AlertDialog.css` imports Dialog's). See `AlertDialog.a11y.ts`.\n\n```tsx\n<AlertDialog\n  open={open}\n  onOpenChange={setOpen}\n  title=\"Delete project?\"\n  description=\"Its files and history are deleted. This can't be undone.\"\n  cancelLabel=\"Cancel\"\n  action={<Button variant=\"danger\" onClick={remove}>Delete</Button>}\n/>\n```",
+      "kind": "component",
+      "name": "AlertDialog"
+    },
+    {
+      "description": "",
+      "kind": "type",
+      "name": "AlertDialogProps"
+    },
+    {
+      "description": "",
+      "kind": "type",
+      "name": "AlertDialogSize"
+    },
+    {
+      "description": "A native `<button>`, `type=\"button\"` by default. See `Button.a11y.ts` for its accessibility\ncontract.",
+      "kind": "component",
+      "name": "Button"
+    },
+    {
+      "description": "",
+      "kind": "type",
+      "name": "ButtonProps"
+    },
+    {
+      "description": "",
+      "kind": "type",
+      "name": "ButtonSize"
+    },
+    {
+      "description": "",
+      "kind": "type",
+      "name": "ButtonVariant"
+    },
+    {
+      "description": "A native `<input type=\"checkbox\">` with its own label, description and error. `className`\nand `style` go on the row (`.senui-checkbox`); every other native attribute, and the ref, go on\nthe input. See `Checkbox.a11y.ts` for its accessibility contract.\n\n```tsx\n<Checkbox label=\"Email me about new releases\" defaultChecked />\n<Checkbox aria-label=\"Select all rows\" checked={all} indeterminate={some} onCheckedChange={selectAll} />\n```",
+      "kind": "component",
+      "name": "Checkbox"
+    },
+    {
+      "description": "A `<fieldset>` and `<legend>` around a set of Checkboxes, with one description, one error and one\nvalue array. The group's error is described on the fieldset only, so entering the group reads\nlegend and error once; each checkbox is `aria-invalid` while it shows.\n\n```tsx\n<CheckboxGroup legend=\"Topics\" required=\"Choose at least one topic.\" defaultValue={['news']}>\n  <Checkbox value=\"news\" label=\"News\" />\n  <Checkbox value=\"releases\" label=\"Releases\" />\n</CheckboxGroup>\n```\n\nSee `CheckboxGroup.a11y.ts` for its accessibility contract.",
+      "kind": "component",
+      "name": "CheckboxGroup"
+    },
+    {
+      "description": "",
+      "kind": "type",
+      "name": "CheckboxGroupProps"
+    },
+    {
+      "description": "",
+      "kind": "type",
+      "name": "CheckboxProps"
+    },
+    {
+      "description": "A modal dialog: a native `<dialog>` opened with `showModal()`, so the page behind it is inert\nand focus stays inside without a focus trap. Esc closes it; while it is open, the page doesn't\nscroll (ADR-0014). The content renders only while it is open.\n`className`, `style`, native attributes and the ref go on the `<dialog>`.\nSee `Dialog.a11y.ts` for its accessibility contract.\n\n```tsx\nconst [open, setOpen] = useState(false);\n<Button onClick={() => setOpen(true)}>Edit profile</Button>\n<Dialog open={open} onOpenChange={setOpen} title=\"Edit profile\" closeLabel=\"Close\">\n  …\n</Dialog>\n```",
+      "kind": "component",
+      "name": "Dialog"
+    },
+    {
+      "description": "Why a dialog asked to close. Open to new members in a minor, so a consumer switching on it keeps\na default branch.\n\n`'forced'` is not a request: the browser has already closed the dialog. It does so on a second\nEsc or back gesture with no user action in between, which a page may not refuse, or when code\ncalls `close()` on the element. Set `open` to false; refusing leaves it closed anyway.",
+      "kind": "type",
+      "name": "DialogCloseReason"
+    },
+    {
+      "description": "",
+      "kind": "type",
+      "name": "DialogDismiss"
+    },
+    {
+      "description": "",
+      "kind": "type",
+      "name": "DialogHeadingLevel"
+    },
+    {
+      "description": "A dialog is named by a visible `title`, or, with no visible heading, by exactly one of\n`aria-label` / `aria-labelledby`. Never both.",
+      "kind": "type",
+      "name": "DialogName"
+    },
+    {
+      "description": "The second argument of `onOpenChange`. A `<form method=\"dialog\">` close carries the submitter's\n`value`, read from the submit event, so it is never a stale `returnValue`.",
+      "kind": "type",
+      "name": "DialogOpenChangeDetails"
+    },
+    {
+      "description": "",
+      "kind": "type",
+      "name": "DialogProps"
+    },
+    {
+      "description": "",
+      "kind": "type",
+      "name": "DialogSize"
+    },
+    {
+      "description": "`Omit` for union props. A plain `Omit<ButtonProps, 'variant'>` keeps only the keys every branch\nshares, which collapses a discriminated union and drops type-level requirements such as an\nicon-only button's accessible name. Use this when wrapping a senui component:\n\n```tsx\ntype DangerButtonProps = DistributiveOmit<ButtonProps, 'variant'>;\n```",
+      "kind": "type",
+      "name": "DistributiveOmit"
+    },
+    {
+      "description": "Says there is nothing here, why, and what you can do: a heading, a description, a decorative\nillustration and your actions. A plain `<div>` with no role and no live region. It adapts to the\nwidth of its container, compact below 30rem and stacked above, so it takes the full inline size\nof its parent: give a shrink-to-fit parent a width, and put inline margin on a wrapper.\n`className`, native attributes and the ref go on the root.\nSee `EmptyState.a11y.ts` for its accessibility contract, including what your app must announce.\n\n```tsx\n<EmptyState\n  headingLevel={2}\n  title=\"No projects yet\"\n  description=\"Projects you create or join appear here.\"\n  actions={<Button onClick={create}>Create project</Button>}\n/>\n```",
+      "kind": "component",
+      "name": "EmptyState"
+    },
+    {
+      "description": "The heading's level. Required, with no default, because an empty state sits in your page's outline\nand any default is wrong somewhere. No `1`: the page keeps its own `<h1>`.",
+      "kind": "type",
+      "name": "EmptyStateHeadingLevel"
+    },
+    {
+      "description": "",
+      "kind": "type",
+      "name": "EmptyStateProps"
+    },
+    {
+      "description": "A label, optional description and error message for one form control, and the wiring between\nthem: the label's `for`, the control's `aria-describedby`, `aria-invalid` and `required`. The\ncontrol is rendered by `children`, a function that receives the binding:\n\n```tsx\n<FormField label=\"Email\" description=\"We reply here.\" error={errors.email} required>\n  {(field) => <TextInput field={field} type=\"email\" autoComplete=\"email\" />}\n</FormField>\n```\n\nSee `FormField.a11y.ts` for its accessibility contract.",
+      "kind": "component",
+      "name": "FormField"
+    },
+    {
+      "description": "What FormField hands its control: the ids and state that connect the control to the field's\nlabel, description and error. It is sealed, so only FormField can make one, and a control given\none is named by the field's label (CONVENTIONS rule 3):\n\n```tsx\n<FormField label=\"Email\">{(field) => <TextInput field={field} type=\"email\" />}</FormField>\n```",
+      "kind": "type",
+      "name": "FormFieldBinding"
+    },
+    {
+      "description": "",
+      "kind": "type",
+      "name": "FormFieldProps"
+    },
+    {
+      "description": "The shape of `components.json`, the machine-readable description of this package that ships in\nit (`@senakster/senui/components.json`). This type is the schema: there is no JSON Schema.\n\n```ts\nimport type { Manifest } from '@senakster/senui';\nimport manifest from '@senakster/senui/components.json' with { type: 'json' };\n\nconst button = (manifest as Manifest).components.Button;\n```\n\nSemver covers the set of components and their branches, prop names and whether each is\nrequired, the values of variant props, data-attribute values, classes and component tokens.\nInformative, and may change in any release: printed types, descriptions, dates, story ids and\nURLs.\n\nEnumerations are open: a value not listed here may appear in a minor release. Treat an unknown\nvalue as \"not described\". `schemaVersion` changes only on a breaking change to this shape, in a\nmajor release, after a release that emits the old and the new field side by side. Fields added\nin a minor don't change it, so feature-detect them.\n\nThese are mirror types: they import nothing from the package's internals.",
+      "kind": "type",
+      "name": "Manifest"
+    },
+    {
+      "description": "An on/off setting that takes effect at once: a native `<input type=\"checkbox\" role=\"switch\">`,\nannounced as a switch, toggled with Space or a click on its label. If the change only applies\nwhen the user saves a form, use a Checkbox instead.\n`className` and `style` go on the row (`.senui-switch`); every other native attribute, and the\nref, go on the input. See `Switch.a11y.ts` for its accessibility contract.\n\n```tsx\n<Switch label=\"Wi-Fi\" checked={wifi} onCheckedChange={setWifi} />\n```",
+      "kind": "component",
+      "name": "Switch"
+    },
+    {
+      "description": "",
+      "kind": "type",
+      "name": "SwitchProps"
+    },
+    {
+      "description": "A native single-line `<input>`. Use it inside a FormField, which labels and describes it:\n\n```tsx\n<FormField label=\"Email\" error={errors.email}>\n  {(field) => <TextInput field={field} type=\"email\" autoComplete=\"email\" />}\n</FormField>\n```\n\nStandalone (a search box with a visible button, say), name it with `aria-label` or\n`aria-labelledby`. `value` / `defaultValue` / `onChange`, `autoComplete` and every other native\nattribute pass through; paste is never blocked. See `TextInput.a11y.ts` for its accessibility\ncontract.",
+      "kind": "component",
+      "name": "TextInput"
+    },
+    {
+      "description": "",
+      "kind": "type",
+      "name": "TextInputProps"
+    },
+    {
+      "description": "",
+      "kind": "type",
+      "name": "TextInputSize"
+    },
+    {
+      "description": "Single-line text types. `number` is not one: it is a spin button, with its own role and keys.",
+      "kind": "type",
+      "name": "TextInputType"
+    },
+    {
+      "description": "Moves focus to the first control in `form`, in document order, that shows an error\n(`aria-invalid=\"true\"`, which FormField sets for its `error` prop and for native errors), and\nreturns it. A control that can't take focus (disabled, hidden) is skipped. Returns `null` when\nnothing showing an error could be focused. Focus is how a screen reader hears an error in\ncontext: the control's label, description and error message are read together.\n\nFormField already does this for the browser's own constraint validation on submit. Call it\nyourself after setting `error` props from your own validation, once React has rendered them:\n\n```tsx\nfunction onSubmit(event: SubmitEvent<HTMLFormElement>) {\n  event.preventDefault();\n  const form = event.currentTarget;\n  flushSync(() => setErrors(validate(new FormData(form))));\n  focusFirstInvalid(form);\n}\n```",
+      "kind": "function",
+      "name": "focusFirstInvalid"
+    }
+  ],
+  "css": {
+    "layers": [
+      "senui.tokens",
+      "senui.base",
+      "senui.components"
+    ]
+  },
+  "components": {
+    "AlertDialog": {
+      "axes": [
+        {
+          "branches": [
+            {
+              "discriminant": [
+                "title"
+              ],
+              "forbidden": [],
+              "notInBranch": [
+                {
+                  "name": "aria-label"
+                },
+                {
+                  "name": "aria-labelledby"
+                }
+              ],
+              "props": [
+                {
+                  "description": "The visible heading. Names the dialog through `aria-labelledby`.",
+                  "name": "title",
+                  "overridesNative": true,
+                  "required": true,
+                  "type": "Exclude<ReactNode, boolean | null | undefined>"
+                },
+                {
+                  "description": "The heading's level. Defaults to 2: a modal is its own context.",
+                  "name": "titleLevel",
+                  "required": false,
+                  "type": "DialogHeadingLevel",
+                  "values": [
+                    1,
+                    2,
+                    3,
+                    4,
+                    5,
+                    6
+                  ]
+                }
+              ],
+              "summary": "Named by a visible `title`."
+            },
+            {
+              "discriminant": [
+                "aria-label"
+              ],
+              "forbidden": [],
+              "notInBranch": [
+                {
+                  "name": "aria-labelledby"
+                },
+                {
+                  "name": "title"
+                },
+                {
+                  "name": "titleLevel"
+                }
+              ],
+              "props": [
+                {
+                  "description": "The dialog's name, when it shows no heading.",
+                  "name": "aria-label",
+                  "overridesNative": true,
+                  "required": true,
+                  "type": "string"
+                }
+              ],
+              "summary": "No `title`: named by `aria-label`."
+            },
+            {
+              "discriminant": [
+                "aria-labelledby"
+              ],
+              "forbidden": [],
+              "notInBranch": [
+                {
+                  "name": "aria-label"
+                },
+                {
+                  "name": "title"
+                },
+                {
+                  "name": "titleLevel"
+                }
+              ],
+              "props": [
+                {
+                  "description": "The id of the element whose text names the dialog.",
+                  "name": "aria-labelledby",
+                  "overridesNative": true,
+                  "required": true,
+                  "type": "string"
+                }
+              ],
+              "summary": "No `title`: named by an element's text, through `aria-labelledby`."
+            }
+          ],
+          "description": "A dialog is named by a visible `title`, or, with no visible heading, by exactly one of `aria-label` / `aria-labelledby`. Never both.",
+          "exported": true,
+          "name": "DialogName"
+        },
+        {
+          "branches": [
+            {
+              "discriminant": [
+                "open"
+              ],
+              "forbidden": [],
+              "notInBranch": [
+                {
+                  "name": "defaultOpen"
+                }
+              ],
+              "props": [
+                {
+                  "description": "Called when the dialog asks to close, with why (`details.reason`). The dialog closes only when `open` turns false, so you can refuse, except for `'forced'`, which has already closed.",
+                  "name": "onOpenChange",
+                  "required": true,
+                  "type": "(open: boolean, details: DialogOpenChangeDetails) => void"
+                },
+                {
+                  "description": "Controlled open state.",
+                  "name": "open",
+                  "overridesNative": true,
+                  "required": true,
+                  "type": "boolean"
+                }
+              ],
+              "summary": "Controlled: `open`, with a required `onOpenChange`."
+            },
+            {
+              "discriminant": [],
+              "forbidden": [],
+              "notInBranch": [
+                {
+                  "name": "open"
+                }
+              ],
+              "props": [
+                {
+                  "default": "false",
+                  "description": "Uncontrolled initial state. Defaults to `false`.",
+                  "name": "defaultOpen",
+                  "required": false,
+                  "type": "boolean"
+                },
+                {
+                  "description": "Called when the dialog asks to close, with why (`details.reason`). The dialog closes only when `open` turns false, so you can refuse, except for `'forced'`, which has already closed.",
+                  "name": "onOpenChange",
+                  "required": false,
+                  "type": "(open: boolean, details: DialogOpenChangeDetails) => void"
+                }
+              ],
+              "summary": "Uncontrolled: `defaultOpen`, and an optional `onOpenChange`."
+            }
+          ],
+          "description": "Controlled (`open` with a required `onOpenChange`) or uncontrolled (`defaultOpen`), never both. Controlled without `onOpenChange`, every close request would do nothing.",
+          "exported": false,
+          "name": "DialogOpenState"
+        }
+      ],
+      "css": {
+        "cssIncludes": [
+          "Dialog"
+        ],
+        "dataAttributes": {
+          "data-size": [
+            "md",
+            "sm"
+          ],
+          "data-state": [
+            "closed",
+            "closing",
+            "open"
+          ]
+        },
+        "rootClass": "senui-alert-dialog",
+        "stylesheet": "@senakster/senui/styles/AlertDialog.css",
+        "tokens": []
+      },
+      "element": "dialog",
+      "forbidden": [
+        {
+          "name": "aria-modal",
+          "useInstead": "Modal dialogs are implicitly `aria-modal`."
+        },
+        {
+          "name": "autoFocus",
+          "useInstead": "Focus always starts on Cancel, the least destructive choice."
+        },
+        {
+          "name": "closeLabel",
+          "useInstead": "Cancel is the way out; there is no close button."
+        },
+        {
+          "name": "dismiss",
+          "useInstead": "An alert dialog is never dismissed from the backdrop."
+        },
+        {
+          "name": "footer",
+          "useInstead": "The footer holds Cancel and `action`."
+        },
+        {
+          "name": "hideCloseButton",
+          "useInstead": "Cancel is the way out; there is no close button."
+        },
+        {
+          "name": "initialFocus",
+          "useInstead": "Focus always starts on Cancel, the least destructive choice."
+        },
+        {
+          "name": "onCancel",
+          "useInstead": "Use `onOpenChange`: every close request arrives there, with its reason."
+        },
+        {
+          "name": "onClose",
+          "useInstead": "Use `onOpenChange`: every close request arrives there, with its reason."
+        },
+        {
+          "name": "tabIndex",
+          "useInstead": "The dialog is focusable by design (`tabindex=\"-1\"`)."
+        }
+      ],
+      "name": "AlertDialog",
+      "native": {
+        "element": "dialog",
+        "omitted": [
+          "color",
+          "role"
+        ],
+        "overridden": [
+          "aria-label",
+          "aria-labelledby",
+          "children",
+          "open",
+          "title"
+        ]
+      },
+      "props": [
+        {
+          "description": "The confirming action: one element, usually `<Button variant=\"danger\" onClick={…}>Delete</Button>`. Not plain text, which would leave the alert with no way to confirm. It closes the dialog itself, by setting `open` to false. Cancel reports `'cancel'`, and Esc `'escape'`.",
+          "name": "action",
+          "required": true,
+          "type": "ReactElement"
+        },
+        {
+          "description": "The Cancel button's text. Required, with no English default. Cancel takes focus on open.",
+          "name": "cancelLabel",
+          "required": true,
+          "type": "string"
+        },
+        {
+          "description": "More detail, after the description (a list of what will be deleted, for example).",
+          "name": "children",
+          "overridesNative": true,
+          "required": false,
+          "type": "ReactNode"
+        },
+        {
+          "description": "What will happen, read when the dialog opens. Required: an alert needs its consequence.",
+          "name": "description",
+          "required": true,
+          "type": "Exclude<ReactNode, boolean | null | undefined>"
+        },
+        {
+          "description": "Where focus goes on close when the element that opened the dialog is gone.",
+          "name": "finalFocus",
+          "required": false,
+          "type": "() => HTMLElement | null"
+        },
+        {
+          "default": "'sm'",
+          "description": "Defaults to `'sm'`.",
+          "name": "size",
+          "required": false,
+          "type": "AlertDialogSize",
+          "values": [
+            "md",
+            "sm"
+          ]
+        }
+      ],
+      "rootElement": "dialog"
+    },
+    "Button": {
+      "axes": [
+        {
+          "branches": [
+            {
+              "discriminant": [
+                "children"
+              ],
+              "forbidden": [],
+              "notInBranch": [
+                {
+                  "name": "icon"
+                }
+              ],
+              "props": [
+                {
+                  "description": "The visible label, which names the button.",
+                  "name": "children",
+                  "overridesNative": true,
+                  "required": true,
+                  "type": "Exclude<ReactNode, boolean | null | undefined>"
+                }
+              ],
+              "summary": "A visible label, which names the button."
+            },
+            {
+              "discriminant": [
+                "aria-label",
+                "icon"
+              ],
+              "forbidden": [],
+              "notInBranch": [
+                {
+                  "name": "aria-labelledby"
+                },
+                {
+                  "name": "children"
+                }
+              ],
+              "props": [
+                {
+                  "description": "The button's name, since the icon has no text.",
+                  "name": "aria-label",
+                  "overridesNative": true,
+                  "required": true,
+                  "type": "string"
+                },
+                {
+                  "description": "The icon shown instead of a label. Button hides it from assistive technology.",
+                  "name": "icon",
+                  "required": true,
+                  "type": "ReactElement"
+                }
+              ],
+              "summary": "Icon-only, named by `aria-label`."
+            },
+            {
+              "discriminant": [
+                "aria-labelledby",
+                "icon"
+              ],
+              "forbidden": [],
+              "notInBranch": [
+                {
+                  "name": "aria-label"
+                },
+                {
+                  "name": "children"
+                }
+              ],
+              "props": [
+                {
+                  "description": "The id of the element whose text names the button.",
+                  "name": "aria-labelledby",
+                  "overridesNative": true,
+                  "required": true,
+                  "type": "string"
+                },
+                {
+                  "description": "The icon shown instead of a label. Button hides it from assistive technology.",
+                  "name": "icon",
+                  "required": true,
+                  "type": "ReactElement"
+                }
+              ],
+              "summary": "Icon-only, named by visible text elsewhere on the page, through `aria-labelledby`."
+            }
+          ],
+          "description": "A button shows either a visible label (children) or, icon-only, an `icon` with exactly one of `aria-label` / `aria-labelledby`. An empty string still type-checks; the development name check warns about it.",
+          "exported": false,
+          "name": "ButtonContent"
+        }
+      ],
+      "css": {
+        "cssIncludes": [],
+        "dataAttributes": {
+          "data-size": [
+            "lg",
+            "md",
+            "sm"
+          ],
+          "data-state": [
+            "loading"
+          ],
+          "data-variant": [
+            "danger",
+            "ghost",
+            "primary",
+            "secondary"
+          ]
+        },
+        "rootClass": "senui-button",
+        "stylesheet": "@senakster/senui/styles/Button.css",
+        "tokens": [
+          "--senui-button-bg",
+          "--senui-button-bg-active",
+          "--senui-button-bg-hover",
+          "--senui-button-block-size",
+          "--senui-button-border-color",
+          "--senui-button-fg",
+          "--senui-button-font-size",
+          "--senui-button-padding-inline",
+          "--senui-button-radius"
+        ]
+      },
+      "element": "button",
+      "forbidden": [],
+      "name": "Button",
+      "native": {
+        "element": "button",
+        "omitted": [
+          "color",
+          "role"
+        ],
+        "overridden": [
+          "aria-label",
+          "aria-labelledby",
+          "aria-pressed",
+          "children",
+          "disabled"
+        ]
+      },
+      "props": [
+        {
+          "description": "Makes it a toggle button: announced as \"toggle button, pressed\" or \"not pressed\", and styled as pressed when `true`. Keep it a boolean for the button's whole life.",
+          "name": "aria-pressed",
+          "overridesNative": true,
+          "required": false,
+          "type": "boolean"
+        },
+        {
+          "description": "Native `disabled` removes the button from the tab order. To keep it focusable while unavailable (say, with a tooltip explaining why), pass `aria-disabled=\"true\"` instead: Button then ignores click activation (`onClick`, `onClickCapture`) and shows the disabled look. Pointer handlers and native listeners on the ref are not suppressed.",
+          "name": "disabled",
+          "overridesNative": true,
+          "required": false,
+          "type": "boolean"
+        },
+        {
+          "description": "Shows a spinner and ignores activation, while keeping focus and width. The button stays focusable (`aria-disabled`, not `disabled`), and announces nothing itself: announce the outcome of the action instead. Takes precedence over `disabled`.",
+          "name": "loading",
+          "required": false,
+          "type": "boolean"
+        },
+        {
+          "default": "'md'",
+          "description": "Defaults to `'md'`. Every size meets the 24×24 px target minimum.",
+          "name": "size",
+          "required": false,
+          "type": "ButtonSize",
+          "values": [
+            "lg",
+            "md",
+            "sm"
+          ]
+        },
+        {
+          "default": "'primary'",
+          "description": "Visual emphasis. Defaults to `'primary'`.",
+          "name": "variant",
+          "required": false,
+          "type": "ButtonVariant",
+          "values": [
+            "danger",
+            "ghost",
+            "primary",
+            "secondary"
+          ]
+        }
+      ],
+      "rootElement": "button"
+    },
+    "Checkbox": {
+      "axes": [
+        {
+          "branches": [
+            {
+              "discriminant": [],
+              "forbidden": [],
+              "notInBranch": [],
+              "props": [
+                {
+                  "description": "Shows the mixed state (\"partially checked\") from the native property. A click clears it in the browser and toggles `checked`; clear the prop in `onCheckedChange`.",
+                  "name": "indeterminate",
+                  "required": false,
+                  "type": "false"
+                }
+              ],
+              "summary": "No mixed state: checked or not, controlled or uncontrolled."
+            },
+            {
+              "discriminant": [],
+              "forbidden": [],
+              "notInBranch": [],
+              "props": [
+                {
+                  "description": "Controlled checked state. Pair with `onCheckedChange`.",
+                  "name": "checked",
+                  "overridesNative": true,
+                  "required": true,
+                  "type": "boolean"
+                },
+                {
+                  "description": "Shows the mixed state (\"partially checked\") from the native property. A click clears it in the browser and toggles `checked`; clear the prop in `onCheckedChange`.",
+                  "name": "indeterminate",
+                  "required": true,
+                  "type": "boolean"
+                },
+                {
+                  "description": "Called with the new checked state on every change.",
+                  "name": "onCheckedChange",
+                  "required": true,
+                  "type": "(checked: boolean) => void"
+                }
+              ],
+              "summary": "Can show the mixed state: `indeterminate`, with `checked` and `onCheckedChange` controlled."
+            }
+          ],
+          "description": "The mixed state is controlled only: with `indeterminate`, the consumer owns `checked` and clears `indeterminate` in `onCheckedChange`. Without that, a box could never leave the mixed state, because Checkbox re-applies the prop on every render.",
+          "exported": false,
+          "name": "CheckboxMixed"
+        },
+        {
+          "branches": [
+            {
+              "discriminant": [
+                "label"
+              ],
+              "forbidden": [],
+              "notInBranch": [
+                {
+                  "name": "aria-label"
+                },
+                {
+                  "name": "aria-labelledby"
+                }
+              ],
+              "props": [
+                {
+                  "description": "The visible label, placed after the control. It names the control.",
+                  "name": "label",
+                  "required": true,
+                  "type": "Exclude<ReactNode, boolean | null | undefined>"
+                }
+              ],
+              "summary": "Named by a visible `label`."
+            },
+            {
+              "discriminant": [
+                "aria-label"
+              ],
+              "forbidden": [],
+              "notInBranch": [
+                {
+                  "name": "aria-labelledby"
+                },
+                {
+                  "name": "label"
+                }
+              ],
+              "props": [
+                {
+                  "description": "The control's name, when it shows no text of its own.",
+                  "name": "aria-label",
+                  "overridesNative": true,
+                  "required": true,
+                  "type": "string"
+                }
+              ],
+              "summary": "Named by `aria-label`, with no visible text of its own."
+            },
+            {
+              "discriminant": [
+                "aria-labelledby"
+              ],
+              "forbidden": [],
+              "notInBranch": [
+                {
+                  "name": "aria-label"
+                },
+                {
+                  "name": "label"
+                }
+              ],
+              "props": [
+                {
+                  "description": "The id of the element whose text names the control.",
+                  "name": "aria-labelledby",
+                  "overridesNative": true,
+                  "required": true,
+                  "type": "string"
+                }
+              ],
+              "summary": "Named by visible text elsewhere on the page, through `aria-labelledby`."
+            }
+          ],
+          "description": "Where the name comes from: a visible `label`, placed after the box, or exactly one of `aria-label` / `aria-labelledby` (a select-all box in a table header, say, with no visible text of its own).",
+          "exported": false,
+          "name": "CheckboxName"
+        }
+      ],
+      "css": {
+        "cssIncludes": [],
+        "dataAttributes": {
+          "data-indeterminate": [
+            "true"
+          ]
+        },
+        "rootClass": "senui-checkbox",
+        "stylesheet": "@senakster/senui/styles/Checkbox.css",
+        "tokens": [
+          "--senui-checkbox-bg",
+          "--senui-checkbox-border-color",
+          "--senui-checkbox-border-color-hover",
+          "--senui-checkbox-box",
+          "--senui-checkbox-checked-bg",
+          "--senui-checkbox-checked-bg-hover",
+          "--senui-checkbox-gap",
+          "--senui-checkbox-glyph",
+          "--senui-checkbox-hint-font-size",
+          "--senui-checkbox-radius"
+        ]
+      },
+      "element": "input",
+      "forbidden": [
+        {
+          "name": "aria-checked",
+          "useInstead": "Use `indeterminate`; the native property carries the mixed state."
+        },
+        {
+          "name": "aria-invalid",
+          "useInstead": "Use `error`."
+        }
+      ],
+      "name": "Checkbox",
+      "native": {
+        "element": "input",
+        "omitted": [
+          "children",
+          "color",
+          "role",
+          "size",
+          "type"
+        ],
+        "overridden": [
+          "aria-label",
+          "aria-labelledby",
+          "checked",
+          "defaultChecked",
+          "required",
+          "value"
+        ]
+      },
+      "props": [
+        {
+          "description": "Controlled checked state. Pair with `onCheckedChange`.",
+          "name": "checked",
+          "overridesNative": true,
+          "required": false,
+          "type": "boolean"
+        },
+        {
+          "default": "false",
+          "description": "Uncontrolled initial state. Defaults to `false`.",
+          "name": "defaultChecked",
+          "overridesNative": true,
+          "required": false,
+          "type": "boolean"
+        },
+        {
+          "description": "Help text, read after the label.",
+          "name": "description",
+          "required": false,
+          "type": "ReactNode"
+        },
+        {
+          "description": "The error message; while set, the box is `aria-invalid`. Not `true`: an error needs words.",
+          "name": "error",
+          "required": false,
+          "type": "Exclude<ReactNode, boolean | null | undefined> | false | null | undefined"
+        },
+        {
+          "description": "Called with the new checked state on every change.",
+          "name": "onCheckedChange",
+          "required": false,
+          "type": "(checked: boolean) => void"
+        },
+        {
+          "description": "Must be checked to submit, like a consent box. Inside a CheckboxGroup it is ignored: pass `required` to the group.",
+          "name": "required",
+          "overridesNative": true,
+          "required": false,
+          "type": "boolean"
+        },
+        {
+          "description": "The value submitted when checked (the native default is `\"on\"`). In a CheckboxGroup, it identifies the option and is required.",
+          "name": "value",
+          "overridesNative": true,
+          "required": false,
+          "type": "string"
+        }
+      ],
+      "rootElement": "div"
+    },
+    "CheckboxGroup": {
+      "axes": [],
+      "css": {
+        "cssIncludes": [],
+        "dataAttributes": {},
+        "rootClass": "senui-checkbox-group",
+        "stylesheet": "@senakster/senui/styles/CheckboxGroup.css",
+        "tokens": [
+          "--senui-checkbox-group-gap",
+          "--senui-checkbox-group-hint-font-size",
+          "--senui-checkbox-group-legend-font-size"
+        ]
+      },
+      "element": "fieldset",
+      "forbidden": [
+        {
+          "name": "aria-invalid",
+          "useInstead": "Use `error`; the checkboxes carry `aria-invalid`."
+        },
+        {
+          "name": "aria-label",
+          "useInstead": "The `legend` names the group."
+        },
+        {
+          "name": "aria-labelledby",
+          "useInstead": "The `legend` names the group."
+        },
+        {
+          "name": "aria-required",
+          "useInstead": "Use `required`, which is announced on the checkboxes' validation."
+        }
+      ],
+      "name": "CheckboxGroup",
+      "native": {
+        "element": "fieldset",
+        "omitted": [
+          "color",
+          "role"
+        ],
+        "overridden": [
+          "children",
+          "defaultValue",
+          "name"
+        ]
+      },
+      "props": [
+        {
+          "description": "The options: `<Checkbox value=\"news\" label=\"News\" />`, each with a unique `value`.",
+          "name": "children",
+          "overridesNative": true,
+          "required": true,
+          "type": "ReactNode"
+        },
+        {
+          "description": "Uncontrolled: the initially checked options' values.",
+          "name": "defaultValue",
+          "overridesNative": true,
+          "required": false,
+          "type": "readonly string[]"
+        },
+        {
+          "description": "Help text, read with each checkbox in the group (a fieldset's own description goes unread in NVDA).",
+          "name": "description",
+          "required": false,
+          "type": "ReactNode"
+        },
+        {
+          "description": "The group's error message; while set, every checkbox in it is `aria-invalid`.",
+          "name": "error",
+          "required": false,
+          "type": "Exclude<ReactNode, boolean | null | undefined> | false | null | undefined"
+        },
+        {
+          "description": "The group's visible name, read when focus enters the group.",
+          "name": "legend",
+          "required": true,
+          "type": "Exclude<ReactNode, boolean | null | undefined>"
+        },
+        {
+          "description": "The `name` every checkbox submits under, unless it sets its own.",
+          "name": "name",
+          "overridesNative": true,
+          "required": false,
+          "type": "string"
+        },
+        {
+          "description": "Called with the checked options' values on every change.",
+          "name": "onValueChange",
+          "required": false,
+          "type": "(value: readonly string[]) => void"
+        },
+        {
+          "description": "At least one option must be checked to submit. The value is the message shown, and read, when none is: `required=\"Choose at least one topic.\"`. The library ships no wording of its own, so the type asks for it. Never set `required` on the checkboxes themselves.",
+          "name": "required",
+          "required": false,
+          "type": "string"
+        },
+        {
+          "description": "Controlled: the checked options' values. Pair with `onValueChange`.",
+          "name": "value",
+          "required": false,
+          "type": "readonly string[]"
+        }
+      ],
+      "rootElement": "fieldset"
+    },
+    "Dialog": {
+      "axes": [
+        {
+          "branches": [
+            {
+              "discriminant": [
+                "title"
+              ],
+              "forbidden": [],
+              "notInBranch": [
+                {
+                  "name": "aria-label"
+                },
+                {
+                  "name": "aria-labelledby"
+                }
+              ],
+              "props": [
+                {
+                  "description": "The visible heading. Names the dialog through `aria-labelledby`.",
+                  "name": "title",
+                  "overridesNative": true,
+                  "required": true,
+                  "type": "Exclude<ReactNode, boolean | null | undefined>"
+                },
+                {
+                  "description": "The heading's level. Defaults to 2: a modal is its own context.",
+                  "name": "titleLevel",
+                  "required": false,
+                  "type": "DialogHeadingLevel",
+                  "values": [
+                    1,
+                    2,
+                    3,
+                    4,
+                    5,
+                    6
+                  ]
+                }
+              ],
+              "summary": "Named by a visible `title`."
+            },
+            {
+              "discriminant": [
+                "aria-label"
+              ],
+              "forbidden": [],
+              "notInBranch": [
+                {
+                  "name": "aria-labelledby"
+                },
+                {
+                  "name": "title"
+                },
+                {
+                  "name": "titleLevel"
+                }
+              ],
+              "props": [
+                {
+                  "description": "The dialog's name, when it shows no heading.",
+                  "name": "aria-label",
+                  "overridesNative": true,
+                  "required": true,
+                  "type": "string"
+                }
+              ],
+              "summary": "No `title`: named by `aria-label`."
+            },
+            {
+              "discriminant": [
+                "aria-labelledby"
+              ],
+              "forbidden": [],
+              "notInBranch": [
+                {
+                  "name": "aria-label"
+                },
+                {
+                  "name": "title"
+                },
+                {
+                  "name": "titleLevel"
+                }
+              ],
+              "props": [
+                {
+                  "description": "The id of the element whose text names the dialog.",
+                  "name": "aria-labelledby",
+                  "overridesNative": true,
+                  "required": true,
+                  "type": "string"
+                }
+              ],
+              "summary": "No `title`: named by an element's text, through `aria-labelledby`."
+            }
+          ],
+          "description": "A dialog is named by a visible `title`, or, with no visible heading, by exactly one of `aria-label` / `aria-labelledby`. Never both.",
+          "exported": true,
+          "name": "DialogName"
+        },
+        {
+          "branches": [
+            {
+              "discriminant": [
+                "closeLabel"
+              ],
+              "forbidden": [],
+              "notInBranch": [],
+              "props": [
+                {
+                  "description": "The close button's accessible name. No English default: pass it translated.",
+                  "name": "closeLabel",
+                  "required": true,
+                  "type": "string"
+                },
+                {
+                  "description": "Hide the close button. Pair it with `cancelLabel`, `footer` or `dismiss=\"any\"`.",
+                  "name": "hideCloseButton",
+                  "required": false,
+                  "type": "false"
+                }
+              ],
+              "summary": "The close button shows, named by `closeLabel`."
+            },
+            {
+              "discriminant": [],
+              "forbidden": [],
+              "notInBranch": [
+                {
+                  "name": "closeLabel"
+                }
+              ],
+              "props": [
+                {
+                  "description": "Hide the close button. Pair it with `cancelLabel`, `footer` or `dismiss=\"any\"`.",
+                  "name": "hideCloseButton",
+                  "required": true,
+                  "type": "true"
+                }
+              ],
+              "requiresOneOf": [
+                [
+                  {
+                    "description": "Renders a Cancel button first in the footer, which closes the dialog (`onOpenChange` reason `'cancel'`), as AlertDialog's does. No English default: pass it translated.",
+                    "name": "cancelLabel",
+                    "required": true,
+                    "type": "string"
+                  }
+                ],
+                [
+                  {
+                    "description": "Your actions, after Cancel, in a footer that stays visible while the body scrolls. They close the dialog themselves, by setting `open` to false once their work is done.",
+                    "name": "footer",
+                    "required": true,
+                    "type": "Exclude<ReactNode, boolean | null | undefined>"
+                  }
+                ],
+                [
+                  {
+                    "description": "`'closerequest'` (default): Esc and the platform's back gesture close it, a backdrop click doesn't. `'any'`: a backdrop click closes it too.",
+                    "name": "dismiss",
+                    "required": true,
+                    "type": "'any'",
+                    "values": [
+                      "any"
+                    ]
+                  }
+                ]
+              ],
+              "summary": "No close button, so the dialog needs another visible way out."
+            }
+          ],
+          "description": "The close button is there by default, with a required name. Hiding it requires another visible way out: a Cancel, footer actions, or a backdrop click. Esc alone isn't enough on a touch screen with no keyboard or back gesture.",
+          "exported": false,
+          "name": "DialogCloseButton"
+        },
+        {
+          "branches": [
+            {
+              "discriminant": [
+                "open"
+              ],
+              "forbidden": [],
+              "notInBranch": [
+                {
+                  "name": "defaultOpen"
+                }
+              ],
+              "props": [
+                {
+                  "description": "Called when the dialog asks to close, with why (`details.reason`). The dialog closes only when `open` turns false, so you can refuse, except for `'forced'`, which has already closed.",
+                  "name": "onOpenChange",
+                  "required": true,
+                  "type": "(open: boolean, details: DialogOpenChangeDetails) => void"
+                },
+                {
+                  "description": "Controlled open state.",
+                  "name": "open",
+                  "overridesNative": true,
+                  "required": true,
+                  "type": "boolean"
+                }
+              ],
+              "summary": "Controlled: `open`, with a required `onOpenChange`."
+            },
+            {
+              "discriminant": [],
+              "forbidden": [],
+              "notInBranch": [
+                {
+                  "name": "open"
+                }
+              ],
+              "props": [
+                {
+                  "default": "false",
+                  "description": "Uncontrolled initial state. Defaults to `false`.",
+                  "name": "defaultOpen",
+                  "required": false,
+                  "type": "boolean"
+                },
+                {
+                  "description": "Called when the dialog asks to close, with why (`details.reason`). The dialog closes only when `open` turns false, so you can refuse, except for `'forced'`, which has already closed.",
+                  "name": "onOpenChange",
+                  "required": false,
+                  "type": "(open: boolean, details: DialogOpenChangeDetails) => void"
+                }
+              ],
+              "summary": "Uncontrolled: `defaultOpen`, and an optional `onOpenChange`."
+            }
+          ],
+          "description": "Controlled (`open` with a required `onOpenChange`) or uncontrolled (`defaultOpen`), never both. Controlled without `onOpenChange`, every close request would do nothing.",
+          "exported": false,
+          "name": "DialogOpenState"
+        }
+      ],
+      "css": {
+        "cssIncludes": [
+          "Button"
+        ],
+        "dataAttributes": {
+          "data-size": [
+            "fullscreen",
+            "lg",
+            "md",
+            "sm"
+          ],
+          "data-state": [
+            "closed",
+            "closing",
+            "open"
+          ]
+        },
+        "rootClass": "senui-dialog",
+        "stylesheet": "@senakster/senui/styles/Dialog.css",
+        "tokens": [
+          "--senui-dialog-backdrop",
+          "--senui-dialog-bg",
+          "--senui-dialog-border-color",
+          "--senui-dialog-description-color",
+          "--senui-dialog-fg",
+          "--senui-dialog-gap",
+          "--senui-dialog-inline-size",
+          "--senui-dialog-padding",
+          "--senui-dialog-radius",
+          "--senui-dialog-shadow",
+          "--senui-dialog-viewport-gap"
+        ]
+      },
+      "element": "dialog",
+      "forbidden": [
+        {
+          "name": "aria-modal",
+          "useInstead": "Modal dialogs are implicitly `aria-modal`."
+        },
+        {
+          "name": "autoFocus",
+          "useInstead": "Use `initialFocus`."
+        },
+        {
+          "name": "onCancel",
+          "useInstead": "Use `onOpenChange`: every close request arrives there, with its reason."
+        },
+        {
+          "name": "onClose",
+          "useInstead": "Use `onOpenChange`: every close request arrives there, with its reason."
+        },
+        {
+          "name": "tabIndex",
+          "useInstead": "The dialog is focusable by design (`tabindex=\"-1\"`)."
+        }
+      ],
+      "name": "Dialog",
+      "native": {
+        "element": "dialog",
+        "omitted": [
+          "color",
+          "role"
+        ],
+        "overridden": [
+          "aria-label",
+          "aria-labelledby",
+          "children",
+          "open",
+          "title"
+        ]
+      },
+      "props": [
+        {
+          "description": "Renders a Cancel button first in the footer, which closes the dialog (`onOpenChange` reason `'cancel'`), as AlertDialog's does. No English default: pass it translated.",
+          "name": "cancelLabel",
+          "required": false,
+          "type": "string"
+        },
+        {
+          "description": "The dialog's body.",
+          "name": "children",
+          "overridesNative": true,
+          "required": false,
+          "type": "ReactNode"
+        },
+        {
+          "description": "A short description, read when the dialog opens (`aria-describedby`). Never the whole body: screen readers read a description in full, again on re-entry.",
+          "name": "description",
+          "required": false,
+          "type": "ReactNode"
+        },
+        {
+          "description": "`'closerequest'` (default): Esc and the platform's back gesture close it, a backdrop click doesn't. `'any'`: a backdrop click closes it too.",
+          "name": "dismiss",
+          "required": false,
+          "type": "DialogDismiss",
+          "values": [
+            "any",
+            "closerequest"
+          ]
+        },
+        {
+          "description": "Where focus goes on close when the element that opened the dialog is no longer in the page. Without it, focus falls to the page start, and a development warning says so.",
+          "name": "finalFocus",
+          "required": false,
+          "type": "() => HTMLElement | null"
+        },
+        {
+          "description": "Your actions, after Cancel, in a footer that stays visible while the body scrolls. They close the dialog themselves, by setting `open` to false once their work is done.",
+          "name": "footer",
+          "required": false,
+          "type": "ReactNode"
+        },
+        {
+          "description": "Where focus starts. `'dialog'` (default) focuses the dialog itself, so a screen reader starts at the top. `'first'`: the first control in the body (use it for forms). Or a ref.",
+          "name": "initialFocus",
+          "required": false,
+          "type": "'dialog' | 'first' | { readonly current: HTMLElement | null }"
+        },
+        {
+          "default": "'md'",
+          "description": "Defaults to `'md'`. `'fullscreen'` fills the viewport; choose it from your own breakpoint.",
+          "name": "size",
+          "required": false,
+          "type": "DialogSize",
+          "values": [
+            "fullscreen",
+            "lg",
+            "md",
+            "sm"
+          ]
+        }
+      ],
+      "rootElement": "dialog"
+    },
+    "EmptyState": {
+      "axes": [],
+      "css": {
+        "cssIncludes": [],
+        "dataAttributes": {},
+        "rootClass": "senui-empty-state",
+        "stylesheet": "@senakster/senui/styles/EmptyState.css",
+        "tokens": [
+          "--senui-empty-state-actions-gap",
+          "--senui-empty-state-description-color",
+          "--senui-empty-state-description-font-size",
+          "--senui-empty-state-description-max-inline-size",
+          "--senui-empty-state-gap",
+          "--senui-empty-state-illustration-color",
+          "--senui-empty-state-illustration-gap",
+          "--senui-empty-state-illustration-size-compact",
+          "--senui-empty-state-illustration-size-stacked",
+          "--senui-empty-state-padding-compact",
+          "--senui-empty-state-padding-stacked",
+          "--senui-empty-state-title-color",
+          "--senui-empty-state-title-font-size-compact",
+          "--senui-empty-state-title-font-size-stacked"
+        ]
+      },
+      "element": "div",
+      "forbidden": [
+        {
+          "name": "aria-describedby",
+          "useInstead": "Never read on an unnamed, unfocusable `<div>`: put it in `description`."
+        },
+        {
+          "name": "aria-description",
+          "useInstead": "Never read on an unnamed, unfocusable `<div>`: put it in `description`."
+        },
+        {
+          "name": "aria-label",
+          "useInstead": "The root is a plain `<div>` with no name. The heading is what a screen-reader user finds."
+        },
+        {
+          "name": "aria-labelledby",
+          "useInstead": "The root is a plain `<div>` with no name. The heading is what a screen-reader user finds."
+        },
+        {
+          "name": "aria-roledescription",
+          "useInstead": "Prohibited on an element with no role (ARIA 1.2)."
+        },
+        {
+          "name": "tabIndex",
+          "useInstead": "The root is never a tab stop. To move focus to the empty state, focus `headingRef`."
+        }
+      ],
+      "name": "EmptyState",
+      "native": {
+        "element": "div",
+        "omitted": [
+          "children",
+          "color",
+          "role"
+        ],
+        "overridden": [
+          "title"
+        ]
+      },
+      "props": [
+        {
+          "description": "Up to two actions, primary first: your own Buttons or links, as one element or a fragment. Not text: a label alone renders nothing to activate. For a conditional action, pass `undefined` rather than `false`.",
+          "name": "actions",
+          "required": false,
+          "type": "ReactElement | undefined"
+        },
+        {
+          "description": "Why it is empty, or what to do next. Rendered in a `<p>`, so pass phrasing content only: text, links, `<strong>`. Never a paragraph or a list. An empty string renders nothing.",
+          "name": "description",
+          "required": false,
+          "type": "ReactNode"
+        },
+        {
+          "description": "The heading's level in your page outline, one below the heading the empty state sits under.",
+          "name": "headingLevel",
+          "required": true,
+          "type": "EmptyStateHeadingLevel",
+          "values": [
+            2,
+            3,
+            4,
+            5,
+            6
+          ]
+        },
+        {
+          "description": "The heading element. It has `tabindex=\"-1\"`, so you can move focus to it, for example after the last item was deleted and no action is rendered. EmptyState never moves focus.",
+          "name": "headingRef",
+          "required": false,
+          "type": "Ref<HTMLHeadingElement>"
+        },
+        {
+          "description": "A decorative picture or icon, hidden from assistive technology and inert: it can't be focused or clicked. Put its meaning in `title` or `description`, and links in `actions`. Fitted into a square box sized by `--senui-empty-state-illustration-size-*`; an SVG drawn in `currentColor` takes the theme's colour.",
+          "name": "illustration",
+          "required": false,
+          "type": "ReactNode"
+        },
+        {
+          "description": "What is empty, as a heading: \"No projects yet\", \"No results for 'xyz'\". Text or one element; never `null` or `false`, which would render an empty heading (WCAG 2.4.6).",
+          "name": "title",
+          "overridesNative": true,
+          "required": true,
+          "type": "ReactElement | string"
+        }
+      ],
+      "rootElement": "div"
+    },
+    "FormField": {
+      "axes": [],
+      "css": {
+        "cssIncludes": [],
+        "dataAttributes": {},
+        "rootClass": "senui-form-field",
+        "stylesheet": "@senakster/senui/styles/FormField.css",
+        "tokens": [
+          "--senui-form-field-description-color",
+          "--senui-form-field-error-color",
+          "--senui-form-field-gap",
+          "--senui-form-field-hint-font-size",
+          "--senui-form-field-label-color",
+          "--senui-form-field-label-font-size"
+        ]
+      },
+      "element": "div",
+      "forbidden": [
+        {
+          "name": "aria-describedby",
+          "useInstead": "Pass it to the control, which merges it with the field's description and error."
+        },
+        {
+          "name": "aria-invalid",
+          "useInstead": "Use `error`, which sets the control's `aria-invalid`."
+        },
+        {
+          "name": "aria-label",
+          "useInstead": "The `label` names the control."
+        },
+        {
+          "name": "aria-labelledby",
+          "useInstead": "The `label` names the control."
+        },
+        {
+          "name": "aria-required",
+          "useInstead": "Use `required`, which makes the control required."
+        }
+      ],
+      "name": "FormField",
+      "native": {
+        "element": "div",
+        "omitted": [
+          "color",
+          "role"
+        ],
+        "overridden": [
+          "children",
+          "id"
+        ]
+      },
+      "props": [
+        {
+          "description": "Makes the `error` message a polite live region, so a change is announced without moving focus. Use it only when you validate as the user types; otherwise focus on submit announces each error in context. Native constraint errors are never announced this way: they are read when the field takes focus on submit.",
+          "name": "announce",
+          "required": false,
+          "type": "'polite'",
+          "values": [
+            "polite"
+          ]
+        },
+        {
+          "description": "Renders the control, given the binding that wires it to this field.",
+          "name": "children",
+          "overridesNative": true,
+          "required": true,
+          "type": "(field: FormFieldBinding) => ReactNode"
+        },
+        {
+          "description": "Help text, read after the label when the control is focused.",
+          "name": "description",
+          "required": false,
+          "type": "ReactNode"
+        },
+        {
+          "description": "The error message. While it is set (anything but `undefined`, `null`, `false` or `''`), the control is `aria-invalid` and its description includes the message. Not `true`: an error needs words, so `error={!!errors.email}` doesn't compile. Native constraint errors (`required`, `type=\"email\"`…) show here too, after a submit attempt; this prop wins over them.",
+          "name": "error",
+          "required": false,
+          "type": "Exclude<ReactNode, boolean | null | undefined> | false | null | undefined"
+        },
+        {
+          "description": "The control's id (generated when omitted). Use it to link to the field, e.g. from an error summary.",
+          "name": "id",
+          "overridesNative": true,
+          "required": false,
+          "type": "string"
+        },
+        {
+          "description": "The visible label. It names the control: the control takes no label of its own. The type can't reject an empty string; the development name check warns about one.",
+          "name": "label",
+          "required": true,
+          "type": "Exclude<ReactNode, boolean | null | undefined>"
+        },
+        {
+          "description": "Marks the control `required`, and shows a marker after the label that assistive technology doesn't read (the control's own required state is announced instead). Explain the marker once, above the form.",
+          "name": "required",
+          "required": false,
+          "type": "boolean"
+        }
+      ],
+      "rootElement": "div"
+    },
+    "Switch": {
+      "axes": [
+        {
+          "branches": [
+            {
+              "discriminant": [
+                "label"
+              ],
+              "forbidden": [],
+              "notInBranch": [
+                {
+                  "name": "aria-label"
+                },
+                {
+                  "name": "aria-labelledby"
+                }
+              ],
+              "props": [
+                {
+                  "description": "The visible label, placed after the control. It names the control.",
+                  "name": "label",
+                  "required": true,
+                  "type": "Exclude<ReactNode, boolean | null | undefined>"
+                }
+              ],
+              "summary": "Named by a visible `label`."
+            },
+            {
+              "discriminant": [
+                "aria-label"
+              ],
+              "forbidden": [],
+              "notInBranch": [
+                {
+                  "name": "aria-labelledby"
+                },
+                {
+                  "name": "label"
+                }
+              ],
+              "props": [
+                {
+                  "description": "The control's name, when it shows no text of its own.",
+                  "name": "aria-label",
+                  "overridesNative": true,
+                  "required": true,
+                  "type": "string"
+                }
+              ],
+              "summary": "Named by `aria-label`, with no visible text of its own."
+            },
+            {
+              "discriminant": [
+                "aria-labelledby"
+              ],
+              "forbidden": [],
+              "notInBranch": [
+                {
+                  "name": "aria-label"
+                },
+                {
+                  "name": "label"
+                }
+              ],
+              "props": [
+                {
+                  "description": "The id of the element whose text names the control.",
+                  "name": "aria-labelledby",
+                  "overridesNative": true,
+                  "required": true,
+                  "type": "string"
+                }
+              ],
+              "summary": "Named by visible text elsewhere on the page, through `aria-labelledby`."
+            }
+          ],
+          "description": "Where the name comes from: a visible `label`, placed after the box, or exactly one of `aria-label` / `aria-labelledby` (a select-all box in a table header, say, with no visible text of its own).",
+          "exported": false,
+          "name": "CheckboxName"
+        }
+      ],
+      "css": {
+        "cssIncludes": [],
+        "dataAttributes": {},
+        "rootClass": "senui-switch",
+        "stylesheet": "@senakster/senui/styles/Switch.css",
+        "tokens": [
+          "--senui-switch-inset",
+          "--senui-switch-on-bg",
+          "--senui-switch-on-bg-hover",
+          "--senui-switch-on-thumb",
+          "--senui-switch-thumb",
+          "--senui-switch-track-bg",
+          "--senui-switch-track-border-color",
+          "--senui-switch-track-border-color-hover",
+          "--senui-switch-track-size"
+        ]
+      },
+      "element": "input",
+      "forbidden": [
+        {
+          "name": "aria-checked",
+          "useInstead": "The role announces the state."
+        },
+        {
+          "name": "aria-invalid",
+          "useInstead": "A switch is never invalid: it takes effect at once, so there is nothing to validate."
+        },
+        {
+          "name": "error",
+          "useInstead": "A switch takes effect at once, so there is nothing to validate on submit."
+        },
+        {
+          "name": "indeterminate",
+          "useInstead": "A switch has no mixed state. Use a Checkbox."
+        },
+        {
+          "name": "required",
+          "useInstead": "A \"required switch\" is really a consent checkbox. Use a Checkbox."
+        }
+      ],
+      "name": "Switch",
+      "native": {
+        "element": "input",
+        "omitted": [
+          "children",
+          "color",
+          "role",
+          "size",
+          "type"
+        ],
+        "overridden": [
+          "aria-label",
+          "aria-labelledby",
+          "checked",
+          "defaultChecked",
+          "value"
+        ]
+      },
+      "props": [
+        {
+          "description": "Controlled on/off state. Pair with `onCheckedChange`.",
+          "name": "checked",
+          "overridesNative": true,
+          "required": false,
+          "type": "boolean"
+        },
+        {
+          "default": "false",
+          "description": "Uncontrolled initial state. Defaults to `false` (off).",
+          "name": "defaultChecked",
+          "overridesNative": true,
+          "required": false,
+          "type": "boolean"
+        },
+        {
+          "description": "Help text, read after the label.",
+          "name": "description",
+          "required": false,
+          "type": "ReactNode"
+        },
+        {
+          "description": "Called with the new state on every change. A switch's effect should be immediate.",
+          "name": "onCheckedChange",
+          "required": false,
+          "type": "(checked: boolean) => void"
+        },
+        {
+          "description": "The value submitted when on (the native default is `\"on\"`).",
+          "name": "value",
+          "overridesNative": true,
+          "required": false,
+          "type": "string"
+        }
+      ],
+      "rootElement": "div"
+    },
+    "TextInput": {
+      "axes": [
+        {
+          "branches": [
+            {
+              "discriminant": [
+                "field"
+              ],
+              "forbidden": [],
+              "notInBranch": [
+                {
+                  "name": "aria-invalid"
+                },
+                {
+                  "name": "aria-label"
+                },
+                {
+                  "name": "aria-labelledby"
+                },
+                {
+                  "name": "id"
+                },
+                {
+                  "name": "required"
+                }
+              ],
+              "props": [
+                {
+                  "description": "The binding from `<FormField>{(field) => …}</FormField>`.",
+                  "name": "field",
+                  "required": true,
+                  "type": "FormFieldBinding"
+                }
+              ],
+              "summary": "Inside a FormField, which names the input and owns its id, `required` and invalid state."
+            },
+            {
+              "discriminant": [
+                "aria-label"
+              ],
+              "forbidden": [],
+              "notInBranch": [
+                {
+                  "name": "aria-labelledby"
+                },
+                {
+                  "name": "field"
+                }
+              ],
+              "props": [
+                {
+                  "description": "Standalone only. Inside a FormField, pass `error` to the field instead.",
+                  "name": "aria-invalid",
+                  "overridesNative": true,
+                  "required": false,
+                  "type": "boolean"
+                },
+                {
+                  "description": "The input's name, when no FormField labels it.",
+                  "name": "aria-label",
+                  "overridesNative": true,
+                  "required": true,
+                  "type": "string"
+                }
+              ],
+              "summary": "Standalone, named by `aria-label`."
+            },
+            {
+              "discriminant": [
+                "aria-labelledby"
+              ],
+              "forbidden": [],
+              "notInBranch": [
+                {
+                  "name": "aria-label"
+                },
+                {
+                  "name": "field"
+                }
+              ],
+              "props": [
+                {
+                  "description": "Standalone only. Inside a FormField, pass `error` to the field instead.",
+                  "name": "aria-invalid",
+                  "overridesNative": true,
+                  "required": false,
+                  "type": "boolean"
+                },
+                {
+                  "description": "The id of the element whose text names the input.",
+                  "name": "aria-labelledby",
+                  "overridesNative": true,
+                  "required": true,
+                  "type": "string"
+                }
+              ],
+              "summary": "Standalone, named by visible text elsewhere on the page, through `aria-labelledby`."
+            }
+          ],
+          "description": "Where the name comes from. Inside a FormField, the `field` binding: the field's label names the input, and the field owns its id, `required` and invalid state, so the input can't take a competing one. Standalone, exactly one of `aria-label` / `aria-labelledby`.",
+          "exported": false,
+          "name": "TextInputName"
+        }
+      ],
+      "css": {
+        "cssIncludes": [],
+        "dataAttributes": {
+          "data-size": [
+            "lg",
+            "md",
+            "sm"
+          ]
+        },
+        "rootClass": "senui-text-input",
+        "stylesheet": "@senakster/senui/styles/TextInput.css",
+        "tokens": [
+          "--senui-text-input-bg",
+          "--senui-text-input-block-size",
+          "--senui-text-input-border-color",
+          "--senui-text-input-fg",
+          "--senui-text-input-font-size",
+          "--senui-text-input-padding-inline",
+          "--senui-text-input-placeholder",
+          "--senui-text-input-radius"
+        ]
+      },
+      "element": "input",
+      "forbidden": [],
+      "name": "TextInput",
+      "native": {
+        "element": "input",
+        "omitted": [
+          "children",
+          "color",
+          "role"
+        ],
+        "overridden": [
+          "aria-invalid",
+          "aria-label",
+          "aria-labelledby",
+          "size",
+          "type"
+        ]
+      },
+      "props": [
+        {
+          "default": "'md'",
+          "description": "Defaults to `'md'`, matching Button's heights. Every size meets the 24×24 px target minimum.",
+          "name": "size",
+          "overridesNative": true,
+          "required": false,
+          "type": "TextInputSize",
+          "values": [
+            "lg",
+            "md",
+            "sm"
+          ]
+        },
+        {
+          "default": "'text'",
+          "description": "Defaults to `'text'`.",
+          "name": "type",
+          "overridesNative": true,
+          "required": false,
+          "type": "TextInputType",
+          "values": [
+            "email",
+            "password",
+            "search",
+            "tel",
+            "text",
+            "url"
+          ]
+        }
+      ],
+      "rootElement": "input"
+    }
+  }
+}

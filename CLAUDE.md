@@ -64,6 +64,7 @@ These are the contract. Change one only via an ADR.
 | [0018](docs/decisions/0018-no-dir-pseudo-class.md)                | Component CSS never uses `:dir()`: bundlers lower it to a `:lang()` list (Vite's default build does), which a `dir="rtl"` page in another language never matches. Mirror with logical properties; Stylelint rejects `:dir()`                                                                                                                                                                                                      |
 | [0019](docs/decisions/0019-screen-reader-run-language.md)         | Every screen-reader run in an a11y contract records the language of the reader's speech (`language`, BCP 47), so published quotes carry `lang` and aren't read as component output (amends L02 decision 7)                                                                                                                                                                                                                        |
 | [0020](docs/decisions/0020-attw-publish-check.md)                 | `@arethetypeswrong/cli` checks the packed tarballs' types under `node16` and `bundler` (ESM only; asset subpaths excluded). `publint` stays; principle 2's alternative                                                                                                                                                                                                                                                            |
+| [0021](docs/decisions/0021-tokens-peer-dependency.md)             | The tokens package is a peer dependency of the components package; a tokens major requires a components major (the API diff checks it, since Changesets alone makes it a patch)                                                                                                                                                                                                                                                   |
 
 ## Naming
 
@@ -106,9 +107,13 @@ must be something Emil can defend.
 `*.a11y.ts`; component CSS sits inside `@layer senui.components`; every `@import` in the built CSS
 resolves; importing one component bundles only the components it renders, and its stylesheet
 loads theirs; the packed tarballs hold only the expected files, no `workspace:` range, and types
-that resolve under attw), and format:check. `pnpm test` must pass too: Vitest in `packages/tokens` and
-`packages/react`, including type tests (`*.test-d.tsx`, type-checked, never executed), the
-runtime check of every a11y contract, and `*.browser.test.tsx` in Chromium (run
+that resolve under attw), `check:api` (the public surface against npm `latest`, or the committed
+baseline before the first publish: the pending changesets must cover every difference, a removal
+needs a deprecation first, a tokens major needs a components major; it fetches from the registry,
+and skips with a warning offline outside CI), and format:check. `pnpm test` must pass too: Vitest
+in `packages/tokens` and `packages/react`, including type tests (`*.test-d.tsx`, type-checked,
+never executed), the runtime check of every a11y contract, `*.browser.test.tsx` in Chromium, and
+`node --test` over `scripts/**/*.test.mjs` (the API diff's probes) (run
 `pnpm --filter @senakster/senui exec playwright install chromium` once per machine). CI (`.github/workflows/ci.yml`) also runs
 `pnpm --filter docs build-storybook` and then **the a11y gate** (L08): Playwright over the built
 Storybook, styled by the package's built CSS, checking every story against its component's a11y

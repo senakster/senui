@@ -1621,3 +1621,143 @@ the repository settings. Compared with the live ruleset, the JSON lacked two fie
 by default (`required_reviewers: []`, `require_extra_approval_for_unattributed_changes: true`), so
 they were added and the file now matches it exactly. The repository-level squash-only and
 delete-merged-branches settings are still off and stay for PR 5.
+
+### PR 2 (2026-10-29): API diff, deprecation as data, majors travel together
+
+- **Built:**
+  - **Deprecation as data** (decision 7). The generator reads `@deprecated` on a prop, a union
+    branch's summary, a literal union member and an export, and `deprecated <old>: use <new>` in a
+    stylesheet's "Public surface" comment (tokens, `[data-*='value']`, classes). `components.json`
+    gains optional fields: `deprecated` on exports, components, props and branches,
+    `deprecatedValues` on props, and `css.deprecated`. `schemaVersion` stays 1. The text
+    "Deprecated. Use … instead." comes from one wording function, used by `docs/*.md`, `llms.txt`
+    and the docs pages: first in a prop's description, a `<p>` after a deprecated component's `<h1>`
+    or a branch's `<h4>`, beside a token in Styling.
+  - **Checks on it:** a `@deprecated` prop without `deprecate('<Name>', '<prop>', …)` in the
+    component (comments don't count); an empty `@deprecated`; a deprecated token that is still
+    declared, or that the new token doesn't read as its fallback; a deprecated data value or class
+    that no longer renders; a deprecated component alias that never calls `deprecate()`.
+  - **The API diff** (decision 5): `scripts/check-api-diff.mjs` with `scripts/api-diff/`, as
+    `pnpm check:api` in `pnpm check`, so `verify` runs it on every pull request. The baseline is
+    each package's npm `latest` (fetched and checked against the registry's integrity hash, never
+    installed), or the committed baseline while the package isn't on npm. The facts follow
+    CONVENTIONS "Public surface". Narrowing is the compiler's: each baseline `*Props` type must be
+    assignable to this build's, in a throwaway program. The pending bump comes from the changeset
+    files themselves, or, on the version pull request, from `package.json` against the baseline.
+    The first version called `changeset status`, which failed in CI's shallow checkout ("Failed to
+    find where HEAD diverged from main"); reading the front matter needs no git history.
+  - **Majors travel together** (decision 2, ADR-0021, new): a pending tokens major needs a pending
+    components major.
+  - `api-exceptions.json`: `{ package, fact, reason, expires }`. Expired or unused entries fail,
+    as the gate's do.
+  - Probes as tests: `scripts/api-diff/diff.test.mjs` (`node --test`, in `pnpm test`, no new
+    dependency), one per "API diff" acceptance criterion plus the edges below; and
+    `src/internal/docs/deprecation.test.ts` for the generator's deprecation checks and wording.
+  - CONVENTIONS rule 8 (the marks, as a table, and what enforces them) and "Public surface" (what
+    enforces it); CLAUDE.md's Verification; ADR-0021.
+
+#### Deviations from the plan
+
+1. **Branch keys.** The plan keys a branch by "its discriminant plus its prop-name set". With the
+   prop names in the key, adding an optional prop to a branch would read as the branch removed and
+   another added: a false major. A branch is keyed by its discriminant when that is unique in its
+   axis, else by its prop names, and a new build's branches are first matched to the baseline's
+   (same discriminant, else the most prop names in common, at least half). Checkbox's
+   `CheckboxMixed` has two branches with no discriminant, so this case is real.
+2. **Narrowing is checked per `*Props` type, not per branch.** Assigning a union checks every
+   member, and the compiler's message names the member that fails. Branch identity is in the facts
+   already.
+3. **Brands.** `FormFieldBinding`'s `unique symbol` (ADR-0011) is a different type in each copy of
+   the declarations, so two identical builds failed the narrowing check for `FormFieldProps` and
+   `TextInputProps` (found on the first run). Consumer code can't name a brand, so the same brand
+   in the same file is one symbol in the throwaway program.
+4. **Restrictions.** Lifting one (a forbidden, not-in-branch or omitted prop, or a `requiresOneOf`)
+   is a minor and needs no deprecation. Adding one is a major only where the component or branch
+   already existed; on a new branch it restricts nothing.
+5. **A deprecated component alias** has no folder, so its `components` entry goes. The diff doesn't
+   compare the facts of a component whose export stays, deprecated; its `*Props` type, if kept, is
+   still type-checked.
+6. **Values are primitives**, so a deprecated value is `deprecatedValues` on its prop (by the value
+   as a string), and CSS deprecations are one `css.deprecated` map keyed by the name as written.
+   The plan said "`deprecated` on the value".
+7. **Where it runs:** in `pnpm check`, not a separate `ci.yml` step: `verify` already runs
+   `pnpm check` on every pull request. Offline, it skips with a warning outside CI and fails in CI.
+   The release gate's run is PR 5's.
+8. **The committed baseline is trimmed:** the manifest without contracts, stories or prose, the
+   `.d.ts` tree, `tokens.css`, and `name`/`version`/`exports` from each `package.json` (184 KB,
+   kept out of Prettier). It was written from this branch's build, whose public surface equals
+   `main`'s. Once both packages are on npm it is unused, and the release PR deletes it.
+
+#### Probes
+
+The generator ones were temporary edits to Button (restored with `git checkout`; pair mode). Each
+one failed for its own reason:
+
+- **`@deprecated` on `size` without a `deprecate()` call:** the build fails, naming the prop and
+  the call it needs. The same with the call only in a comment.
+- **A renamed token** (`--senui-button-bg` → `--senui-button-background`) whose replacement
+  doesn't read the old one: the build fails, giving the declaration it needs.
+- **Everything deprecated correctly** (the `size` prop with its call, a `'subtle'` variant value,
+  the second `ButtonContent` branch, the token rename): the manifest carries each mark, and
+  `docs/button.md` and `llms-full.txt` say "Deprecated. Use … instead.". The docs-page gate passed
+  on the Button page in Chromium, with the text in the built site. The API diff reads three
+  additions and no removal.
+- **The first value probe found a bug:** a JSDoc that opens with `@deprecated` lost its tag,
+  because JavaScript's `split` skips a zero-length match at index 0. Fixed.
+- **`description?: ReactNode` → `ReactElement`** in EmptyState's source: the API diff fails a
+  minor, naming `EmptyStateProps` and `description`.
+- **A temporary `'@senakster/senui-tokens': major` changeset:** fails, asking for a components
+  major.
+
+#### Verified
+
+- `pnpm check`, including `check:api`: 0 differences against the committed baseline.
+- `pnpm test`: tokens 32, react 955, scripts 21.
+- `build-storybook`.
+
+#### Review (`component-api-reviewer`, read-only)
+
+Eight findings. Five were fixed in this PR, each with a probe or test:
+
+1. **`package.json` wasn't compared.** A narrowed peer range (`react: ^19`), a retargeted subpath
+   and a dropped `sideEffects` all passed. Now each is a fact. A widened peer range is a minor,
+   and the tokens peer is left to the majors-travel-together check. The committed baseline now
+   keeps `sideEffects` and `peerDependencies`.
+2. **An alias hid the old component's CSS.** The alias skip now covers only props, values and
+   elements: the class, tokens and data values a consumer's stylesheet targets are still compared.
+   Data values are now keyed as a consumer selects them (`data .senui-button[data-variant='danger']`),
+   not by component name. With component-name keys, a rename that kept the class read as a
+   removal; the existing alias probe caught it. An alias must also stay a `component` export.
+3. **Only `*Props` types were type-checked.** Now every shared type export is.
+   - A type other than props is checked both ways: one that narrows is a major, one that widens
+     (a new `DialogCloseReason`) is a minor, because the manifest treats enumerations as open.
+   - Generic types (`DistributiveOmit`) can't be named without their arguments, so they are
+     skipped. Their export fact still catches a removal.
+4. **Layer order wasn't a fact.** It is now, for both packages, and any change is a major.
+5. **Ignored deprecation marks:**
+   - a "deprecated" mention in a Public surface comment that the grammar can't read is an error;
+   - a deprecated class must render as a whole class name, not as part of a longer one;
+   - a deprecated component with its own folder must call `deprecate('<Name>', …)`.
+
+   Probed on Button and restored; each failed with its own message. Branches and literal values
+   stay without a required `deprecate()` call, as the plan's table has them ("Checked: —").
+
+Recorded, not fixed:
+
+6. **The tokens package has no deprecation mark.** Removing a semantic token after a deprecation
+   minor still needs an `api-exceptions.json` entry. Marking it belongs in the L01 pipeline (DTCG
+   2025.10 has `$deprecated`), and the plan's deprecation table doesn't list semantic tokens.
+   **Re-include when** the first semantic token is renamed or removed.
+7. **Prop facts are keyed by axis (type-alias) name, and a component without axes uses `props`.**
+   Renaming an axis alias, or giving a component its first axis, reads as every prop removed: a
+   false major, which fails loudly and is resolvable. Exported axis aliases are public names
+   anyway. **Revisit when** it fires on a real change.
+8. **Two smaller edges, both false majors in the safe direction:**
+   - branch matching by prop-name overlap, on branches without a discriminant;
+   - a new branch that lacks a prop every other branch of its axis had: that prop drops out of the
+     other axes' contexts.
+
+The committed baseline's `dist/` folders were left out of the first push by `.gitignore`'s `dist/`
+rule, so CI found only the two `package.json` files; locally the files existed on disk and every
+check passed. `.gitignore` now re-includes `scripts/api-diff/baseline/*/dist/`, and the committed
+file list was compared with the files on disk.
