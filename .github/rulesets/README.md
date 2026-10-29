@@ -41,13 +41,27 @@ On a fresh repository, create it instead:
 
 ## Repository settings
 
-Squash-only is also a repository setting, and pairs with deleting merged branches. **Not applied
-yet:** the repository still allows merge and rebase merges (the ruleset blocks them on `main`
-anyway) and keeps merged branches. L10's release PR applies it with the other repository settings:
+**Applied 2026-10-29 (L10, the maintainer's OK):**
 
-```sh
-gh api -X PATCH repos/senakster/senui \
-  -F allow_squash_merge=true -F allow_merge_commit=false -F allow_rebase_merge=false \
-  -F delete_branch_on_merge=true \
-  -f squash_merge_commit_title=PR_TITLE -f squash_merge_commit_message=PR_BODY
-```
+- **Merges:** squash only, with the pull request's title and body as the commit; merged branches are
+  deleted (which also retargets a stacked pull request when its base merges).
+
+  ```sh
+  gh api -X PATCH repos/senakster/senui \
+    -F allow_squash_merge=true -F allow_merge_commit=false -F allow_rebase_merge=false \
+    -F delete_branch_on_merge=true \
+    -f squash_merge_commit_title=PR_TITLE -f squash_merge_commit_message=PR_BODY
+  ```
+
+- **Actions** may create pull requests (the release workflow's Version packages pull request);
+  workflows' default token stays read-only.
+
+  ```sh
+  gh api -X PUT repos/senakster/senui/actions/permissions/workflow \
+    -f default_workflow_permissions=read -F can_approve_pull_request_reviews=true
+  ```
+
+- **The `no-release` label**, for a pull request that changes nothing a consumer gets.
+- **Environment `npm`:** deployments from `main` only, the maintainer as required reviewer, no
+  secrets (publishing uses OIDC trusted publishing). **Environment `github-pages`:** `main` only.
+- **"Gate (all engines)"** is enabled, with no `push` trigger (ADR-0023).

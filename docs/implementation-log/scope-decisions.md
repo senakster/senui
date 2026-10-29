@@ -2134,3 +2134,30 @@ Recorded, not fixed:
 
 The environment settings it asks to verify (`npm`: `main` only, with a required reviewer;
 `github-pages`: `main` only) are part of the settings Emil applies.
+
+#### Settings, and cheapest-first ordering (Emil, 2026-10-29)
+
+Emil OKed all four groups of settings. Applied before merge, each checked after:
+
+- **Merges:** squash only, with the pull request's title and body; delete branches on merge.
+- **Actions:** may create pull requests; the default token stays read-only.
+- **The ruleset:** updated from `main.json`, so `changesets` is required beside `verify`. Compared
+  with the live ruleset ignoring key order, it matches.
+- **The `no-release` label** exists.
+- **Environment `npm`:** `main` only, Emil as required reviewer, no secrets. `github-pages` was
+  already `main` only.
+- **"Gate (all engines)":** re-enabled only after this pull request merges. The version on `main`
+  until then still has its `push` trigger, so enabling it first would run three engines on any push
+  in between.
+
+**Emil:** "order so cheap pipeline like changeset that fail blocks ci if dependency allows it".
+
+- **`gate-full.yml`:** at release, `gate` and `react-18` need `checks`, so a failing check never
+  spends three engines. Run by hand, `checks` is skipped and they start at once.
+- **`ci.yml`:** a new seconds-long `changeset-text` job runs `check-changesets.mjs` (text only), and
+  `verify` needs it.
+  - The "needs a changeset or the label" rule stays only in `changesets.yml`. Gating `verify` on it
+    would leave `verify` skipped when the label is added later, and a skipped required job reads as
+    passing.
+  - For the same reason, a skipped `verify` after a failed text check is safe: the required
+    `changesets` check runs the same text check and fails too, so the merge stays blocked.

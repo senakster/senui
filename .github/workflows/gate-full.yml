@@ -66,8 +66,14 @@ jobs:
       # Decision 6: at release, a stale manual run fails unless a pinned exception covers it.
       - run: node scripts/check-a11y-contracts.mjs --release
 
+  # Cheapest first (Emil, 2026-10-29): at release, the three-engine gate and the React 18.3 job
+  # start only after the checks pass, so a failing check never spends them. Run by hand (no
+  # `release`), `checks` is skipped and they start at once.
   gate:
-    if: inputs.probe == ''
+    needs: checks
+    if: >-
+      !cancelled() && inputs.probe == '' &&
+      (needs.checks.result == 'success' || needs.checks.result == 'skipped')
     runs-on: ubuntu-latest
     container:
       image: mcr.microsoft.com/playwright:v1.64.0-noble
@@ -112,7 +118,10 @@ jobs:
     # change stays on the runner. It proves runtime behaviour only: @types/react stays at 19, so the
     # type tests still check the .d.ts against React 19's types, not what an 18 consumer compiles
     # against.
-    if: inputs.probe == ''
+    needs: checks
+    if: >-
+      !cancelled() && inputs.probe == '' &&
+      (needs.checks.result == 'success' || needs.checks.result == 'skipped')
     runs-on: ubuntu-latest
     container:
       image: mcr.microsoft.com/playwright:v1.64.0-noble
@@ -140,7 +149,9 @@ jobs:
 
   # Decision 1: the gated build, packed once. The publish job publishes exactly these tarballs.
   pack:
-    if: inputs.release && inputs.probe == ''
+    if: >-
+      !cancelled() && inputs.release && inputs.probe == '' && needs.checks.result == 'success' &&
+      needs.gate.result == 'success' && needs.react-18.result == 'success'
     needs: [checks, gate, react-18]
     runs-on: ubuntu-latest
     env:

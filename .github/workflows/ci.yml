@@ -24,7 +24,23 @@ concurrency:
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
+  # Cheapest first (Emil, 2026-10-29): a changeset that breaks the published-text rules fails in
+  # seconds, before the container job starts. Only the text: whether a pull request needs a
+  # changeset depends on its labels, which `changesets.yml` re-checks without re-running this.
+  # A skipped `verify` reads as passing to the ruleset, so a merge still waits on `changesets`,
+  # which checks the same text.
+  changeset-text:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version-file: .node-version
+          package-manager-cache: false
+      - run: node scripts/check-changesets.mjs
+
   verify:
+    needs: changeset-text
     runs-on: ubuntu-latest
     outputs:
       release: ${{ steps.release.outputs.release }}
