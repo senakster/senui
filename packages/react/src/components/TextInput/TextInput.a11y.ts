@@ -129,6 +129,7 @@ export const a11y = defineA11yContract<TextInputProps>()({
       os: 'Windows 11 Pro 26H2 (build 26300.9711)',
       result: 'pass',
       date: '2026-10-19',
+      sourceHash: '945c20df59d39ec7',
     },
     {
       // Narrator in English on a Danish system.
@@ -142,6 +143,7 @@ export const a11y = defineA11yContract<TextInputProps>()({
       packageVersion: '0.0.0',
       result: 'pass',
       date: '2026-10-19',
+      sourceHash: '945c20df59d39ec7',
     },
     {
       method: 'forced colours',
@@ -149,6 +151,7 @@ export const a11y = defineA11yContract<TextInputProps>()({
         'Chrome 155.0.8059.40, ForcedColors story: every size and the invalid (thicker border) and disabled (GrayText) states distinguishable. Read-only was not at first (fill alone); with a dashed border in forced colours, re-checked on 2026-10-19 and distinguishable.',
       result: 'pass',
       date: '2026-10-19',
+      sourceHash: '945c20df59d39ec7',
     },
   ],
   knownIssues: [],

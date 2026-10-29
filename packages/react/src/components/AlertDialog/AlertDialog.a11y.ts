@@ -161,6 +161,7 @@ export const a11y = defineA11yContract<AlertDialogProps>()({
       os: 'Windows 11 Pro 26H2 (build 26300.9711)',
       result: 'pass',
       date: '2026-10-21',
+      sourceHash: '7b37bdd4c5ca5b23',
     },
     {
       method: 'screen reader',
@@ -173,6 +174,7 @@ export const a11y = defineA11yContract<AlertDialogProps>()({
       packageVersion: '0.0.0',
       result: 'pass',
       date: '2026-10-21',
+      sourceHash: '7b37bdd4c5ca5b23',
     },
     {
       method: 'forced colours',
@@ -180,6 +182,7 @@ export const a11y = defineA11yContract<AlertDialogProps>()({
         'Chrome, DevTools Rendering forced-colors: active, AlertDialog ForcedColors story: the dialog border and the keyboard focus ring visible.',
       result: 'pass',
       date: '2026-10-21',
+      sourceHash: '7b37bdd4c5ca5b23',
     },
   ],
   knownIssues: [

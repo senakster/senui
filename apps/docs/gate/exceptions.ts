@@ -31,11 +31,32 @@ export interface Exception {
   expires: string;
 }
 
-export const EXCEPTIONS = (
+/**
+ * L10 decision 6: a component released although a manual run is stale. Pinned to the component's
+ * fingerprint at review, so any further edit voids it. `scripts/check-a11y-contracts.mjs` checks
+ * these (fails at release without one); the gate itself ignores them.
+ */
+export interface StaleRunException {
+  component: string;
+  check: 'stale-run';
+  sourceHash: string;
+  reason: string;
+  expires: string;
+}
+
+const ENTRIES = (
   JSON.parse(readFileSync(new URL('./exceptions.json', import.meta.url), 'utf8')) as {
-    exceptions: Exception[];
+    exceptions: (Exception | StaleRunException)[];
   }
 ).exceptions;
+
+const isStaleRun = (entry: Exception | StaleRunException): entry is StaleRunException =>
+  entry.check === 'stale-run';
+
+/** The gate's own exceptions: one story skipping one check. */
+export const EXCEPTIONS: Exception[] = ENTRIES.filter(
+  (entry): entry is Exception => !isStaleRun(entry),
+);
 
 const tagFor = (check: string) => `gate-skip-${check}`;
 

@@ -29,6 +29,7 @@ ADR that supersedes it. Every ADR names what was rejected and what the choice co
 | [0019](0019-screen-reader-run-language.md)         | Screen-reader runs record their language                                                                         | Accepted                         |
 | [0020](0020-attw-publish-check.md)                 | Published types are checked with attw                                                                            | Accepted                         |
 | [0021](0021-tokens-peer-dependency.md)             | The tokens package is a peer dependency, and its majors are components majors                                    | Accepted                         |
+| [0022](0022-source-hash-manual-runs.md)            | Manual a11y runs record a fingerprint of what they tested                                                        | Accepted                         |
 
 ## Template
 

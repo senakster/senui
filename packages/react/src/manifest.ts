@@ -274,8 +274,10 @@ export interface ManifestTestRunStatus {
   /** The run's id, which `wcagEvidence` cites: its method and date (`screen-reader-2026-10-17`). */
   readonly id: string;
   /**
-   * Whether the component's source was committed after the run's date: the run may no longer
-   * describe it. `null` when the build couldn't tell (no git history).
+   * Whether the component's behaviour changed after the run: its code, styles, token values or
+   * quoted speech no longer match the run's `sourceHash`, so the run may no longer describe it.
+   * Always `false` for an automated run, which re-runs on every build. `null` when the run has no
+   * fingerprint.
    */
   readonly sourceChangedSince: boolean | null;
 }
@@ -450,4 +452,6 @@ export interface ManifestTestRun {
   readonly packageVersion?: string;
   /** Other runs: what was checked, and how. */
   readonly detail?: string;
+  /** Manual runs: the fingerprint of what was tested, which `sourceChangedSince` compares. */
+  readonly sourceHash?: string;
 }

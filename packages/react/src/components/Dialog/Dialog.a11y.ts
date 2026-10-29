@@ -178,6 +178,7 @@ export const a11y = defineA11yContract<DialogProps>()({
       os: 'Windows 11 Pro 26H2 (build 26300.9711)',
       result: 'pass',
       date: '2026-10-21',
+      sourceHash: '7df9d509b8ba3bee',
     },
     {
       method: 'screen reader',
@@ -190,6 +191,7 @@ export const a11y = defineA11yContract<DialogProps>()({
       packageVersion: '0.0.0',
       result: 'pass',
       date: '2026-10-21',
+      sourceHash: '7df9d509b8ba3bee',
     },
     {
       method: 'forced colours',
@@ -197,6 +199,7 @@ export const a11y = defineA11yContract<DialogProps>()({
         'Chrome, DevTools Rendering forced-colors: active, Dialog ForcedColors story: the dialog border and the keyboard focus ring visible.',
       result: 'pass',
       date: '2026-10-21',
+      sourceHash: '7df9d509b8ba3bee',
     },
   ],
   knownIssues: [

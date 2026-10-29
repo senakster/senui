@@ -126,7 +126,7 @@ export function componentMarkdown(manifest, component, { path, depth = 1 }) {
     h(3, HEADINGS.focus),
     list(focusItems(contract.focus)),
     h(3, HEADINGS.announcements),
-    list(announcementItems(contract).map((a) => a.text)),
+    list(announcementItems(contract, component.testRuns).map((a) => a.text)),
     h(3, HEADINGS.wcag),
     list(contract.wcag.map((claim, i) => claimText(manifest, component, claim, i))),
     h(3, HEADINGS.adaptation),
@@ -141,7 +141,9 @@ export function componentMarkdown(manifest, component, { path, depth = 1 }) {
       ),
     ),
     h(3, HEADINGS.knownIssues),
-    contract.knownIssues.length > 0 ? list(knownIssueItems(contract)) : noKnownIssuesText(contract),
+    contract.knownIssues.length > 0
+      ? list(knownIssueItems(contract))
+      : noKnownIssuesText(contract, component.testRuns),
   );
 
   // 8. Stories.

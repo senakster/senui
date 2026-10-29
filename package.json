@@ -13,6 +13,7 @@
     "sync:wcag": "node scripts/sync-wcag.mjs",
     "check:components": "node scripts/check-a11y-contracts.mjs && node scripts/check-keyboard-trace.mjs && node scripts/check-component-css.mjs && node scripts/check-dist-css.mjs && node scripts/check-tree-shaking.mjs && node scripts/check-pack.mjs",
     "check:api": "node scripts/check-api-diff.mjs",
+    "a11y:stamp": "node scripts/a11y-stamp.mjs",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "test": "pnpm -r --if-present test && node --test \"scripts/**/*.test.mjs\"",

@@ -463,17 +463,19 @@ function heardIn(announcement, runs) {
  *
  * @returns {{ text: string, language?: string }[]}
  */
-export function announcementItems(contract) {
+export function announcementItems(contract, testRuns = []) {
   const runs = contract.testedWith;
   return contract.announcements.map((a) => {
     let text;
     if (a.owner === 'component') {
       const run = heardIn(a, runs);
       const speech = a.language ? ` Quoted speech is in ${languageName(a.language)}.` : '';
+      // Said before the speech, so it isn't read as today's behaviour first.
+      const stale = run && testRuns[runs.indexOf(run)]?.sourceChangedSince ? `${STALE_HEARD} ` : '';
       const observed = run
         ? ` Observed with ${run.at} ${run.atVersion}, ${run.browser} ${run.browserVersion}, ${run.os}, ${run.date}; other readers may differ.`
         : '';
-      text = `${a.when} (${mechanismText(a)}): ${sentence(a.announces)}${speech}${observed}`;
+      text = `${a.when} (${mechanismText(a)}): ${stale}${sentence(a.announces)}${speech}${observed}`;
     } else {
       text = `${a.when} (${mechanismText(a)}): your app announces this; see Your app must.`;
     }
@@ -497,7 +499,15 @@ function evidenceText(claim, evidence, component) {
     const runs = component.accessibility.testedWith
       .map((run, i) => (run.method === method ? component.testRuns[i]?.id : undefined))
       .filter((id) => id !== undefined && evidence.runs.includes(id));
-    if (method !== 'automated') return `${method} (${runs.map(code).join(', ') || 'no run'})`;
+    if (method !== 'automated') {
+      const stale = new Set(
+        component.testRuns.filter((s) => s.sourceChangedSince).map((s) => s.id),
+      );
+      const cited = runs.map((id) =>
+        stale.has(id) ? `${code(id)} (not re-tested since the component changed)` : code(id),
+      );
+      return `${method} (${cited.join(', ') || 'no run'})`;
+    }
     const inside = [
       evidence.axeRules.length > 0 ? `axe rules ${evidence.axeRules.map(code).join(', ')}` : '',
       evidence.tests.length > 0 ? `tests ${evidence.tests.map((t) => `"${t}"`).join(', ')}` : '',
@@ -566,7 +576,7 @@ function runRow(run, status, currentVersion) {
   const version = run.packageVersion
     ? ` Package version tested: ${versionText(run.packageVersion)}; this version: ${currentVersion}.`
     : '';
-  const stale = status?.sourceChangedSince ? ' Component changed since this run.' : '';
+  const stale = status?.sourceChangedSince ? ` ${STALE}` : '';
   return {
     id: status?.id ? code(status.id) : '',
     text: `${method}, ${run.date}${what ? ` (${what})` : ''}${result}.${version}${stale}`,
@@ -590,14 +600,27 @@ export function knownIssueItems(contract) {
   return contract.knownIssues.map((k) => `${k.issue} Workaround: ${k.workaround}`);
 }
 
-export function noKnownIssuesText(contract) {
+export function noKnownIssuesText(contract, testRuns = []) {
   const lastRunDate =
     contract.testedWith
       .map((r) => r.date)
       .sort()
       .at(-1) ?? '';
-  return `None known as of ${lastRunDate}.`;
+  // A manual run that no longer matches the component can't vouch for what changed after it.
+  const later = testRuns.some((s) => s.sourceChangedSince)
+    ? '; manual runs predate later changes'
+    : '';
+  return `None known as of ${lastRunDate}${later}.`;
 }
+
+/**
+ * Said wherever a manual run is cited after the component changed (L10 decision 6): its fingerprint
+ * no longer matches the component's code, styles, token values or quoted speech. Stated as what to
+ * make of the run, not just that something changed.
+ */
+const STALE =
+  "Not re-tested since the component's code, styles or tokens changed; it describes the component as it was.";
+const STALE_HEARD = '(Heard before the component last changed; not re-tested since.)';
 
 // --- 8. Stories -----------------------------------------------------------------------------
 

@@ -40,7 +40,14 @@ const minimal = {
   },
   wcag: [{ criterion: '2.4.7', claim: 'meets', how: 'Visible focus ring', evidence: ['keyboard'] }],
   testedWith: [
-    { method: 'keyboard', browser: 'any', os: 'any', result: 'pass', date: '2026-10-16' },
+    {
+      method: 'keyboard',
+      browser: 'any',
+      os: 'any',
+      result: 'pass',
+      date: '2026-10-16',
+      sourceHash: '0123456789abcdef',
+    },
   ],
   knownIssues: [],
 } satisfies A11yContract<ExampleProps>;
@@ -137,6 +144,21 @@ describe('A11yContract', () => {
       ...minimal,
       // @ts-expect-error -- a screen-reader run names the AT, browser, OS, versions and result
       testedWith: [{ method: 'screen reader', detail: 'tested', date: '2026-10-16' }],
+    });
+    void define({
+      ...minimal,
+      testedWith: [
+        // @ts-expect-error -- a manual run records what it tested: `pnpm a11y:stamp` (ADR-0022)
+        { method: 'keyboard', browser: 'b', os: 'o', result: 'pass', date: '2026-10-16' },
+      ],
+    });
+    void define({
+      ...minimal,
+      // An automated run re-runs on every build, so it has no fingerprint.
+      testedWith: [
+        { method: 'automated', tool: 'axe-core', date: '2026-10-16' },
+        { ...minimal.testedWith[0] },
+      ],
     });
     void define({
       ...minimal,

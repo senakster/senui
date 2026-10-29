@@ -134,6 +134,7 @@ export const a11y = defineA11yContract<SwitchProps>()({
       os: 'Windows 11 Pro 26H2 (build 26300.9711)',
       result: 'pass',
       date: '2026-10-20',
+      sourceHash: '8ad15a8a6417cdca',
     },
     {
       // Narrator's L05 run found the pre-submit invalid announcement (ADR-0013) and was not repeated.
@@ -147,6 +148,7 @@ export const a11y = defineA11yContract<SwitchProps>()({
       packageVersion: '0.0.0',
       result: 'pass',
       date: '2026-10-20',
+      sourceHash: '8ad15a8a6417cdca',
     },
     {
       method: 'forced colours',
@@ -154,6 +156,7 @@ export const a11y = defineA11yContract<SwitchProps>()({
         'Chrome 155.0.8059.40, ForcedColors story: track and thumb visible, on and off, enabled and disabled.',
       result: 'pass',
       date: '2026-10-20',
+      sourceHash: '8ad15a8a6417cdca',
     },
   ],
   knownIssues: [],

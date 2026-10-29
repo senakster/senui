@@ -102,6 +102,7 @@ export const a11y = defineA11yContract<CheckboxGroupProps>()({
       packageVersion: '0.0.0',
       result: 'pass',
       date: '2026-10-20',
+      sourceHash: 'd714c3951a45c6ed',
     },
     {
       method: 'forced colours',
@@ -109,6 +110,7 @@ export const a11y = defineA11yContract<CheckboxGroupProps>()({
         'Chrome 155.0.8059.40, ForcedColors story: the error message and icon, and the boxes, visible.',
       result: 'pass',
       date: '2026-10-20',
+      sourceHash: 'd714c3951a45c6ed',
     },
   ],
   knownIssues: [],

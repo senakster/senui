@@ -70,7 +70,7 @@ export function Accessibility({ component }: { component: ManifestComponent }) {
 
       <h3>{HEADINGS.announcements}</h3>
       <ul>
-        {announcementItems(contract).map((a) => (
+        {announcementItems(contract, component.testRuns).map((a) => (
           <li key={a.text}>{text(a.text, a.language)}</li>
         ))}
       </ul>
@@ -103,7 +103,7 @@ export function Accessibility({ component }: { component: ManifestComponent }) {
       {contract.knownIssues.length > 0 ? (
         <List items={knownIssueItems(contract)} />
       ) : (
-        <p>{noKnownIssuesText(contract)}</p>
+        <p>{noKnownIssuesText(contract, component.testRuns)}</p>
       )}
     </>
   );

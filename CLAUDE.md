@@ -65,6 +65,7 @@ These are the contract. Change one only via an ADR.
 | [0019](docs/decisions/0019-screen-reader-run-language.md)         | Every screen-reader run in an a11y contract records the language of the reader's speech (`language`, BCP 47), so published quotes carry `lang` and aren't read as component output (amends L02 decision 7)                                                                                                                                                                                                                        |
 | [0020](docs/decisions/0020-attw-publish-check.md)                 | `@arethetypeswrong/cli` checks the packed tarballs' types under `node16` and `bundler` (ESM only; asset subpaths excluded). `publint` stays; principle 2's alternative                                                                                                                                                                                                                                                            |
 | [0021](docs/decisions/0021-tokens-peer-dependency.md)             | The tokens package is a peer dependency of the components package; a tokens major requires a components major (the API diff checks it, since Changesets alone makes it a patch)                                                                                                                                                                                                                                                   |
+| [0022](docs/decisions/0022-source-hash-manual-runs.md)            | Every manual a11y run records `sourceHash` (`pnpm a11y:stamp <Name>`): a fingerprint of the value-import graph, stylesheets, token values and quoted speech. Stale (fingerprint differs) warns on pull requests and fails at release unless a hash-pinned `stale-run` exception covers it (amends L02)                                                                                                                            |
 
 ## Naming
 
@@ -104,7 +105,8 @@ must be something Emil can defend.
 
 `pnpm check` must pass before any module is marked done. It runs, in order: build + typecheck, lint
 (ESLint, then Stylelint on component CSS), `check:components` (every component has a typed
-`*.a11y.ts`; component CSS sits inside `@layer senui.components`; every `@import` in the built CSS
+`*.a11y.ts` whose manual runs carry a `sourceHash`, with a warning for each stale run, an error at
+release; component CSS sits inside `@layer senui.components`; every `@import` in the built CSS
 resolves; importing one component bundles only the components it renders, and its stylesheet
 loads theirs; the packed tarballs hold only the expected files, no `workspace:` range, and types
 that resolve under attw), `check:api` (the public surface against npm `latest`, or the committed

@@ -756,3 +756,11 @@ Entry format: date — module · Did · Verified · Scope decisions · Plan adju
 - **Review:** `component-api-reviewer`, eight findings: five fixed (package.json facts, alias CSS, all type exports both ways, layer order, ignored marks), three recorded (scope-decisions § L10 PR 2).
 - **Verified:** `pnpm check`; `pnpm test`: tokens 32, react 955, scripts 21; `build-storybook`; the docs-page gate on a deprecated Button page.
 - **Next:** merge PR 2, then PR 3 (`sourceHash`).
+
+## 2026-10-29 — L10 PR 3: `sourceHash`, stale runs
+
+- **Built:** ADR-0022 (amends L02): every manual run carries `sourceHash`, a fingerprint of the code it tested (transpiled value-import graph, composition parents and children), its stylesheets, token values and quoted speech. `pnpm a11y:stamp`, the one-time backfill into the nine contracts (26 lines, listed in scope-decisions), `check-a11y-contracts.mjs` (stale warns; `--release` fails without a pinned, at most six-month exception), and the stale wording in the docs.
+- **Found by the backfill:** three sources of false staleness (file paths, `announces` prose, L09's rename of reader names in run identity) and one gap (TextInput is wired by FormField, not by import). All fixed; what remains stale is real: eight of nine components, EmptyState current.
+- **Review:** `wcag-auditor`, eight findings: five fixed (stamping only same-day runs, unquoted announcements, composition both ways, expiry cap, wording), three recorded.
+- **Verified:** `pnpm check`; `pnpm test`: tokens 32, react 955, scripts 30; the docs-page gate on all 11 pages in Chromium.
+- **Next:** merge PR 3, then PR 4 (changesets job, changelog pages).

@@ -228,7 +228,7 @@ type Result = 'pass' | 'pass-with-known-issues';
  */
 export type TestRun =
   | { readonly method: 'automated'; readonly tool: string; readonly date: IsoDate }
-  | {
+  | (ManualRun & {
       readonly method: 'screen reader';
       readonly at: string;
       readonly atVersion: string;
@@ -238,17 +238,13 @@ export type TestRun =
       readonly browserVersion: string;
       readonly os: string;
       readonly packageVersion: string;
-      readonly result: Result;
-      readonly date: IsoDate;
-    }
-  | {
+    })
+  | (ManualRun & {
       readonly method: 'keyboard';
       readonly browser: string;
       readonly os: string;
-      readonly result: Result;
-      readonly date: IsoDate;
-    }
-  | {
+    })
+  | (ManualRun & {
       readonly method:
         | 'forced colours'
         | 'resize-200'
@@ -258,9 +254,22 @@ export type TestRun =
         | 'pointer-touch'
         | 'voice control';
       readonly detail: string;
-      readonly result: Result;
-      readonly date: IsoDate;
-    };
+    });
+
+/**
+ * What every manual run records. Automated runs re-run on every build, so they never go stale and
+ * carry no fingerprint.
+ */
+interface ManualRun {
+  readonly result: Result;
+  readonly date: IsoDate;
+  /**
+   * The fingerprint of what the run tested: the component's code, styles, token values and quoted
+   * speech (ADR-0022). Written by `pnpm a11y:stamp <Name>` after the run, never by hand. When it
+   * no longer matches the component, the run is stale.
+   */
+  readonly sourceHash: string;
+}
 
 export type TestMethod = TestRun['method'];
 

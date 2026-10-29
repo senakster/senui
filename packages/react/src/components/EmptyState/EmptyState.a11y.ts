@@ -168,6 +168,7 @@ export const a11y = defineA11yContract<EmptyStateProps>()({
       os: 'Windows 11 Pro 26H2 (build 26300.9711)',
       result: 'pass',
       date: '2026-10-26',
+      sourceHash: 'fb8e655e4c5cf799',
     },
     {
       method: 'screen reader',
@@ -180,6 +181,7 @@ export const a11y = defineA11yContract<EmptyStateProps>()({
       packageVersion: '0.0.0',
       result: 'pass',
       date: '2026-10-26',
+      sourceHash: 'fb8e655e4c5cf799',
     },
     {
       method: 'forced colours',
@@ -187,6 +189,7 @@ export const a11y = defineA11yContract<EmptyStateProps>()({
         'Chrome, DevTools Rendering forced-colors: active, EmptyState ForcedColors story: text and illustration visible in the compact and stacked layouts.',
       result: 'pass',
       date: '2026-10-26',
+      sourceHash: 'fb8e655e4c5cf799',
     },
   ],
   knownIssues: [],
