@@ -21,6 +21,7 @@ Status legend — plan: `plan-ready` · `not-planned` (plan not written yet upst
 
 ## Changelog
 
+- **2026-10-29** — L10 PR 2 of 5: the API diff (`pnpm check:api`, against npm `latest` or a committed baseline until the first publish), deprecation as data in `components.json` and the docs, and the check that a tokens major forces a components major (ADR-0021).
 - **2026-10-29** — L10 in progress, PR 1 of 5 (package and build): one file per module in `dist`, a tree-shaking check per component, tokens as a peer dependency, and a pack check with attw (ADR-0020). The `main` ruleset docs now say it's applied (live since 2026-10-26).
 - **2026-10-28** — L10 plan-ready and synced. It was written in the planner with Emil and reviewed by `component-api-reviewer`, `wcag-auditor` and `server-boundary-enforcer`; about 30 findings, all adopted.
   - **Emil's calls:**

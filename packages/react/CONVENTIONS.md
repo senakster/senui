@@ -311,10 +311,28 @@ before its removal:
   `--senui-button-background: var(--senui-button-bg, var(--senui-color-bg-accent));`
 - **A `data-*` value or class name:** render both, old and new, for one minor.
 
-Pair each with a changeset that says the same thing.
+Every deprecation is also marked where the docs generator reads it, so `components.json`, the docs
+pages, `docs/*.md` and `llms.txt` say "Deprecated. Use … instead." in words (never only a
+strike-through or a colour), and the API diff knows a later major may remove it:
 
-**Enforced by:** [`deprecate.test.ts`](src/internal/dev/deprecate.test.ts), and changesets reviewed per
-release (L10).
+| Surface                    | Mark                                                                                                                                                                                       |
+| -------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Prop                       | `@deprecated Use \`variant\` instead.` in its JSDoc                                                                                                                                        |
+| Union branch               | `@deprecated …` in the branch's summary JSDoc                                                                                                                                              |
+| Variant value              | `/** @deprecated Use \`ghost\` instead. */` before the literal in its union                                                                                                                |
+| Component or type export   | `@deprecated …` on the export. A component alias needs no folder, but must call `deprecate()`                                                                                              |
+| Token, data value or class | `deprecated <old>: use <new>` in the stylesheet's "Public surface" comment: `deprecated \`--senui-button-bg\`: use \`--senui-button-background\``, `[data-variant='subtle']`, `.senui-old` |
+
+A deprecated token stays listed in `components.json` though it is no longer declared, so the
+deprecation minor doesn't read as a removal.
+
+Pair each with a minor changeset that says what replaces what.
+
+**Enforced by:** [`deprecate.test.ts`](src/internal/dev/deprecate.test.ts); the docs generator, which
+fails a `@deprecated` prop without its `deprecate('<Name>', '<prop>', …)` call, a deprecated token
+the new one doesn't read as its fallback, and a deprecated data value or class that no longer
+renders ([`deprecation.test.ts`](src/internal/docs/deprecation.test.ts)); and the API diff (see
+[Public surface](#public-surface)), which fails a removal the baseline didn't mark deprecated.
 
 ## 9. One element per component
 
@@ -502,6 +520,24 @@ published at stable paths; their prose is informative.
 **Not public:** part classes with a double underscore (`.senui-button__label`, `__icon`,
 `__spinner`) are internal and can change in any release. Each component's CSS opens with a comment
 listing its public classes, data-attribute values and component tokens.
+
+**Enforced by:** [`scripts/check-api-diff.mjs`](../../scripts/check-api-diff.mjs) (`pnpm check:api`,
+in `pnpm check`), against each package's `latest` on npm, or the committed baseline in
+`scripts/api-diff/baseline/` until it is published. It compares every fact above (descriptions,
+summaries and printed types aren't facts, so rewording is no change), plus the `package.json`
+facts (each subpath's target, `sideEffects`, peer ranges) and the layer order. It type-checks every
+exported type both builds share: a value of the baseline's type must fit this build's (narrowing is
+a major), and a type other than props that now holds new values (a new `DialogCloseReason`) is a
+minor. Generic types are covered by their export fact only. It fails when:
+
+- the pending changesets bump less than the largest difference (a removal or narrowing needs a
+  major, an addition a minor);
+- a removed fact wasn't marked deprecated in the baseline, unless
+  [`api-exceptions.json`](../../scripts/api-diff/api-exceptions.json) has a dated entry for it;
+- the tokens package takes a major and this one doesn't: its peer range on the tokens changes
+  ([ADR-0021](../../docs/decisions/0021-tokens-peer-dependency.md)).
+
+Its probes are [`diff.test.mjs`](../../scripts/api-diff/diff.test.mjs), in `pnpm test`.
 
 ## Loading the CSS
 

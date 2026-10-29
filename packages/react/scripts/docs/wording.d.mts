@@ -7,6 +7,7 @@ import type {
   ManifestBranch,
   ManifestComponent,
   ManifestComposition,
+  ManifestDeprecation,
   ManifestFocus,
   ManifestForbidden,
   ManifestProp,
@@ -81,6 +82,8 @@ export function propCells(p: ManifestProp): {
 };
 export function propText(p: ManifestProp): Text;
 export function forbiddenText(f: ManifestForbidden): Text;
+/** "Deprecated. Use `variant` instead." Always text: never only a strike-through or a colour. */
+export function deprecatedText(d: ManifestDeprecation): Text;
 export function axisHeading(axis: ManifestAxis): string;
 export function branchNotes(branch: ManifestBranch): Text[];
 export function stylingItems(

@@ -75,6 +75,17 @@ export interface ManifestExport {
   readonly name: string;
   readonly kind: OpenEnum<'component' | 'function' | 'type'>;
   readonly description: string;
+  /**
+   * Set from the minor that deprecates it until the major that removes it. A deprecated component
+   * kept only as an alias of its replacement has no entry in `components`.
+   */
+  readonly deprecated?: ManifestDeprecation;
+}
+
+/** Something public that the next major removes. */
+export interface ManifestDeprecation {
+  /** What to use instead, as a sentence: "Use `variant` instead." */
+  readonly useInstead: string;
 }
 
 export interface ManifestTokens {
@@ -108,6 +119,7 @@ export interface ManifestComponent extends ManifestUsage {
   readonly name: string;
   /** The line that imports it: `import { Button } from '@senakster/senui';`. */
   readonly import: string;
+  readonly deprecated?: ManifestDeprecation;
   /** The element that gets the native attributes and the ref (from the contract). */
   readonly element: string;
   /** An explicit role, when the element's native one isn't enough. */
@@ -189,6 +201,9 @@ export interface ManifestProp {
   readonly values?: readonly (string | number)[];
   /** The prop has a native attribute's name, but the component declares it with its own meaning. */
   readonly overridesNative?: boolean;
+  readonly deprecated?: ManifestDeprecation;
+  /** Deprecated members of `values`, by the value as a string. */
+  readonly deprecatedValues?: Readonly<Record<string, ManifestDeprecation>>;
 }
 
 export interface ManifestForbidden {
@@ -209,6 +224,7 @@ export interface ManifestAxis {
 
 export interface ManifestBranch {
   readonly summary: string;
+  readonly deprecated?: ManifestDeprecation;
   /** The props this branch requires that a sibling branch forbids, sorted. */
   readonly discriminant: readonly string[];
   /** The props this branch declares, sorted by name. */
@@ -232,6 +248,11 @@ export interface ManifestComponentCss {
   readonly stylesheet: string;
   /** Other components whose stylesheets this one imports. */
   readonly cssIncludes: readonly string[];
+  /**
+   * Deprecated CSS surface, by the name as written: a token (`--senui-button-bg`, still listed in
+   * `tokens`), a data-attribute value (`[data-variant='subtle']`) or a class (`.senui-old`).
+   */
+  readonly deprecated?: Readonly<Record<string, ManifestDeprecation>>;
 }
 
 export interface ManifestStory {

@@ -7,3 +7,5 @@ storybook-static/
 coverage/
 .ssr-fixtures/
 packages/tokens/src/generated/
+# The API diff baseline: a package as built, compared byte for byte by the diff (L10).
+scripts/api-diff/baseline/

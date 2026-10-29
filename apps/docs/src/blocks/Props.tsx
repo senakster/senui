@@ -9,6 +9,7 @@ import {
   axisHeading,
   branchNotes,
   code,
+  deprecatedText,
   nativeText,
   propCells,
 } from '../../../../packages/react/scripts/docs/wording.mjs';
@@ -109,6 +110,7 @@ export function Props({ component }: { component: ManifestComponent }) {
             return (
               <div key={branch.summary} className="docs-branch">
                 <h4>{text(branch.summary)}</h4>
+                {branch.deprecated && <p>{text(deprecatedText(branch.deprecated))}</p>}
                 {branch.props.length > 0 && (
                   <DataTable
                     caption={`${axis.name}: ${branch.summary}`}

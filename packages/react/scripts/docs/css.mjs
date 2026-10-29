@@ -88,5 +88,69 @@ export function componentCss(src, name, errors) {
     if (value !== undefined) selectors.get(attr).add(value);
   }
 
-  return { rootClass, tokens, includes, selectors };
+  const deprecated = surface ? deprecations(surface, code, tokens, where, errors) : {};
+  // A deprecated token is read as a fallback, never declared, and stays listed until its major.
+  const listed = [...new Set([...tokens, ...Object.keys(deprecated).filter(isToken)])].sort(
+    byCodeUnit,
+  );
+
+  return { rootClass, tokens: listed, includes, selectors, deprecated };
 }
+
+const isToken = (name) => name.startsWith('--');
+
+/**
+ * L10 decision 7: `deprecated <old>: use <new>` in the "Public surface" comment, one per deprecated
+ * token (`--senui-button-bg`), data-attribute value (`[data-variant='subtle']`) or class
+ * (`.senui-old`). Returns them by old name. A token is checked here: the old one is never declared,
+ * and the new one reads it as its fallback, so an override of either still works. Data values and
+ * classes are checked against the markup by the caller.
+ */
+function deprecations(surface, code, declared, where, errors) {
+  const out = {};
+  const text = surface.replace(/\s+/g, ' ');
+  // Every mention must parse: a misspelt entry would otherwise deprecate nothing, silently.
+  const mentions = text.match(/\bdeprecated\b/gi)?.length ?? 0;
+  const parsed =
+    text.match(/\bdeprecated `?[^\s`:]+`?: use `?[^\s`]+?`?(?=[\s,.;]|$)/g)?.length ?? 0;
+  if (mentions !== parsed) {
+    errors.push(
+      `${where}: the "Public surface" comment mentions "deprecated" in a form it can't read; write \`deprecated <old>: use <new>\``,
+    );
+  }
+  for (const [, from, to] of text.matchAll(
+    /\bdeprecated `?([^\s`:]+)`?: use `?([^\s`]+?)`?(?=[\s,.;]|$)/g,
+  )) {
+    const kind = (name) =>
+      isToken(name)
+        ? 'token'
+        : name.startsWith('[data-')
+          ? 'data'
+          : name.startsWith('.')
+            ? 'class'
+            : '';
+    if (!kind(from) || kind(from) !== kind(to)) {
+      errors.push(
+        `${where}: can't read "deprecated ${from}: use ${to}"; both must be a token, a [data-*='value'] or a .class`,
+      );
+      continue;
+    }
+    if (kind(from) === 'token') {
+      if (declared.includes(from)) {
+        errors.push(
+          `${where}: deprecated ${from} is still declared; read it as ${to}'s fallback instead`,
+        );
+      }
+      const reads = new RegExp(`${escape(to)}\\s*:\\s*var\\(\\s*${escape(from)}\\s*,`);
+      if (!reads.test(code)) {
+        errors.push(
+          `${where}: ${to} must read the deprecated ${from} first: \`${to}: var(${from}, …)\``,
+        );
+      }
+    }
+    out[from] = { useInstead: `Use \`${to}\` instead.` };
+  }
+  return out;
+}
+
+const escape = (text) => text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');

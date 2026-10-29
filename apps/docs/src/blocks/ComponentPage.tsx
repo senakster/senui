@@ -12,6 +12,7 @@ import {
   NOTHING_TO_DO,
   appMustItems,
   compositionText,
+  deprecatedText,
   dontUseText,
   examplesText,
   requiredItems,
@@ -71,6 +72,8 @@ export function ComponentPage() {
   return (
     <div className="docs-page sb-unstyled">
       <h1>{component.name}</h1>
+      {/* L10 decision 7: plain text, no live region and no new heading. */}
+      {component.deprecated && <p>{text(deprecatedText(component.deprecated))}</p>}
       <p className="docs-summary">{text(component.summary)}</p>
 
       <Section title={HEADINGS.import}>

@@ -306,17 +306,29 @@ export const NO_OWN_PROPS = 'No props of its own.';
  * @returns {{ name: string, required: string, type: string, default?: string, description: string }}
  */
 export function propCells(p) {
+  const literal = (v) => code(typeof v === 'string' ? `'${v}'` : v);
+  // L10 decision 7: deprecation is stated in words, first in the description.
+  const deprecated = [
+    ...(p.deprecated ? [deprecatedText(p.deprecated)] : []),
+    ...Object.entries(p.deprecatedValues ?? {}).map(
+      ([value, d]) =>
+        `${literal(p.values?.find((v) => String(v) === value) ?? value)} is deprecated. ${d.useInstead}`,
+    ),
+  ];
   return {
     name: code(p.name),
     required: p.required ? 'required' : 'optional',
     type: `${typeText(p.type)}${
-      p.values && !p.type.startsWith("'")
-        ? `, one of ${p.values.map((v) => code(typeof v === 'string' ? `'${v}'` : v)).join(', ')}`
-        : ''
+      p.values && !p.type.startsWith("'") ? `, one of ${p.values.map(literal).join(', ')}` : ''
     }`,
     ...(p.default !== undefined ? { default: code(p.default) } : {}),
-    description: p.description,
+    description: [...deprecated, p.description].filter(Boolean).join(' '),
   };
+}
+
+/** "Deprecated. Use `variant` instead." Always text: never only a strike-through or a colour. */
+export function deprecatedText(d) {
+  return `Deprecated. ${d.useInstead}`;
 }
 
 /** One prop as a sentence. */
@@ -364,13 +376,18 @@ export function branchNotes(branch) {
 
 export function stylingItems(manifest, component, docLink) {
   const data = Object.entries(component.css.dataAttributes);
+  const deprecated = component.css.deprecated ?? {};
+  const mark = (name, text) =>
+    deprecated[name] ? `${text} (${deprecatedText(deprecated[name])})` : text;
+  const classes = Object.keys(deprecated).filter((n) => n.startsWith('.'));
   return [
     `Root class: ${code(`.${component.css.rootClass}`)}, on the ${code(`<${component.rootElement}>`)}.`,
+    ...classes.map((c) => `Also renders ${mark(c, code(c))}.`),
     data.length > 0
-      ? `Data attributes: ${data.map(([name, values]) => `${code(name)} (${values.map(code).join(', ')})`).join('; ')}.`
+      ? `Data attributes: ${data.map(([name, values]) => `${code(name)} (${values.map((v) => mark(`[${name}='${v}']`, code(v))).join(', ')})`).join('; ')}.`
       : 'Data attributes: none.',
     component.css.tokens.length > 0
-      ? `Component tokens: ${component.css.tokens.map(code).join(', ')}.`
+      ? `Component tokens: ${component.css.tokens.map((t) => mark(t, code(t))).join(', ')}.`
       : 'Component tokens: none of its own.',
     `Stylesheet: ${code(component.css.stylesheet)}.`,
     component.css.cssIncludes.length > 0
