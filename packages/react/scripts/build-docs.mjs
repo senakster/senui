@@ -249,7 +249,9 @@ export async function generate(
     readFileSync(`${root}/node_modules/${TOKENS_PACKAGE}/package.json`, 'utf8'),
   );
   const { tokens } = await import(TOKENS_PACKAGE);
-  const range = String(pkg.dependencies?.[TOKENS_PACKAGE] ?? '');
+  // A peer (L10 decision 2): consumers install the tokens themselves, so there's one copy.
+  const range = pkg.peerDependencies?.[TOKENS_PACKAGE];
+  if (!range) errors.push(`package.json: ${TOKENS_PACKAGE} must be a peer dependency`);
   const layers = /@layer\s+([^;]+);/.exec(readFileSync(`${src}/styles/layers.css`, 'utf8'));
 
   const manifest = sortKeys({

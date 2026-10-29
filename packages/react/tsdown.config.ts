@@ -8,6 +8,10 @@ export default defineConfig({
   format: 'esm',
   platform: 'neutral',
   dts: true,
+  // L10 decision 11: one file per module, so a bundler drops the components an app doesn't import
+  // (`sideEffects` lists only CSS). In one bundled file, each component's `forwardRef(...)` call
+  // and `displayName` assignment are statements a bundler must keep.
+  unbundle: true,
   // dist mirrors src, so styles/index.css's `@import '../components/<Name>/<Name>.css'` resolves.
   // scripts/check-dist-css.mjs fails the check if one doesn't.
   copy: [

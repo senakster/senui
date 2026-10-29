@@ -63,6 +63,7 @@ These are the contract. Change one only via an ADR.
 | [0017](docs/decisions/0017-contract-essential-motion.md)          | Amends 0008: an optional `adaptation.essentialMotion` (`'progress-rotation'`, with `reducedMotion: 'motion-factor'` only) names the one animation a component keeps under reduced motion (Button's spinner). The L08 gate allows exactly that and nothing else                                                                                                                                                                    |
 | [0018](docs/decisions/0018-no-dir-pseudo-class.md)                | Component CSS never uses `:dir()`: bundlers lower it to a `:lang()` list (Vite's default build does), which a `dir="rtl"` page in another language never matches. Mirror with logical properties; Stylelint rejects `:dir()`                                                                                                                                                                                                      |
 | [0019](docs/decisions/0019-screen-reader-run-language.md)         | Every screen-reader run in an a11y contract records the language of the reader's speech (`language`, BCP 47), so published quotes carry `lang` and aren't read as component output (amends L02 decision 7)                                                                                                                                                                                                                        |
+| [0020](docs/decisions/0020-attw-publish-check.md)                 | `@arethetypeswrong/cli` checks the packed tarballs' types under `node16` and `bundler` (ESM only; asset subpaths excluded). `publint` stays; principle 2's alternative                                                                                                                                                                                                                                                            |
 
 ## Naming
 
@@ -103,7 +104,9 @@ must be something Emil can defend.
 `pnpm check` must pass before any module is marked done. It runs, in order: build + typecheck, lint
 (ESLint, then Stylelint on component CSS), `check:components` (every component has a typed
 `*.a11y.ts`; component CSS sits inside `@layer senui.components`; every `@import` in the built CSS
-resolves), and format:check. `pnpm test` must pass too: Vitest in `packages/tokens` and
+resolves; importing one component bundles only the components it renders, and its stylesheet
+loads theirs; the packed tarballs hold only the expected files, no `workspace:` range, and types
+that resolve under attw), and format:check. `pnpm test` must pass too: Vitest in `packages/tokens` and
 `packages/react`, including type tests (`*.test-d.tsx`, type-checked, never executed), the
 runtime check of every a11y contract, and `*.browser.test.tsx` in Chromium (run
 `pnpm --filter @senakster/senui exec playwright install chromium` once per machine). CI (`.github/workflows/ci.yml`) also runs
