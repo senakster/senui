@@ -4,13 +4,13 @@ Single source of truth for **where the implementation is right now**. Overwritte
 `implement-module` skill at the end of every run. For history, see `log.md`; for status, see
 `docs/PROGRESS.md`.
 
-| Field         | Value                                                                            |
-| ------------- | -------------------------------------------------------------------------------- |
-| Target app    | repo root (pnpm workspace: `packages/tokens`, `packages/react`, `apps/docs`)     |
-| Active module | L10 (Release, versioning & deprecation), `in-progress`                           |
-| Sub-step      | PR 4 of 5 (changesets job, changelog pages) open; PRs 1 to 3 merged              |
-| Last verified | 2026-10-29: `pnpm check`; `pnpm test` 32 + 955 + 45; docs-page gate on all pages |
-| Updated       | 2026-10-29                                                                       |
+| Field         | Value                                                                        |
+| ------------- | ---------------------------------------------------------------------------- |
+| Target app    | repo root (pnpm workspace: `packages/tokens`, `packages/react`, `apps/docs`) |
+| Active module | L10 (Release, versioning & deprecation), `in-progress`                       |
+| Sub-step      | PR 5 of 5 (release pipeline) open; settings await Emil; PRs 1 to 4 merged    |
+| Last verified | 2026-10-29: `pnpm check`; `pnpm test` 32 + 955 + 56; a version-PR dry run    |
+| Updated       | 2026-10-29                                                                   |
 
 ## Brief
 
@@ -22,7 +22,7 @@ each push to `main`. L10 is delivered in five PRs (Emil):
    (#22, merged).
 3. `sourceHash`: ADR-0022 amending L02, `a11y:stamp`, backfill into the nine contracts (#23,
    merged).
-4. Changesets job, changeset text check, changelog and migration pages (this PR).
+4. Changesets job, changeset text check, changelog and migration pages (#24, merged).
 5. **Release pipeline:**
    - `release.yml` and the reusable `gate-full`;
    - `check-a11y-contracts.mjs --release`, and dispatching `ci.yml` and `changesets.yml` on the
@@ -57,6 +57,10 @@ each push to `main`. L10 is delivered in five PRs (Emil):
 
 ## Next action
 
-1. Merge PR 4.
-2. PR 5: the release pipeline and settings above; agree the settings changes with Emil before
-   applying them.
+1. Emil: OK the repository settings and the `npm` environment (listed in PR 5's description), then
+   they are applied and the README says so.
+2. Merge PR 5. Then dispatch `release.yml` on a throwaway branch with `probe: fail` (the CI half of
+   the gate probe), and review the Version packages pull request it opens.
+3. Merge that, then Emil's manual first publish (CONTRIBUTING.md, "Releasing"), trusted publishers,
+   and the dispatch that tags and deploys. Then delete the API diff baseline, walk L10's acceptance
+   criteria and mark L10 done.

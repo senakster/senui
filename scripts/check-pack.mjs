@@ -9,7 +9,7 @@
 //
 // Needs a built workspace (`pnpm build`).
 import { execFileSync, execSync } from 'node:child_process';
-import { mkdtempSync, readdirSync, rmSync } from 'node:fs';
+import { existsSync, mkdtempSync, readdirSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -60,7 +60,9 @@ try {
       if (!rules.allowed.some((re) => re.test(f)))
         errors.push(`${manifest.name}: unexpected file in the tarball: ${f}`);
     }
-    for (const f of rules.required) {
+    // CHANGELOG.md exists from the first `changeset version` on, and then it ships too.
+    const changelog = existsSync(join(root, dir, 'CHANGELOG.md')) ? ['CHANGELOG.md'] : [];
+    for (const f of [...rules.required, ...changelog]) {
       if (!files.includes(f)) errors.push(`${manifest.name}: the tarball is missing ${f}`);
     }
     const text = JSON.stringify(manifest);

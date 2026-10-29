@@ -10,18 +10,19 @@ Settings alone, or the two drift apart.
 
 ## What [`main.json`](main.json) enforces
 
-| Rule                       | Setting                                                                   |
-| -------------------------- | ------------------------------------------------------------------------- |
-| Pull request required      | 0 approvals: GitHub doesn't let a sole maintainer approve their own PR    |
-| Conversations resolved     | Every review thread resolved before merging                               |
-| Merge method               | Squash only: one commit per PR on `main`                                  |
-| Required check             | `verify` (the CI job in `.github/workflows/ci.yml`), branch up to date    |
-| Linear history             | No merge commits                                                          |
-| No force-push, no deletion | `main` can't be rewritten or deleted                                      |
-| Bypass                     | Nobody, admins included. Disable the ruleset in Settings for an emergency |
+| Rule                       | Setting                                                                         |
+| -------------------------- | ------------------------------------------------------------------------------- |
+| Pull request required      | 0 approvals: GitHub doesn't let a sole maintainer approve their own PR          |
+| Conversations resolved     | Every review thread resolved before merging                                     |
+| Merge method               | Squash only: one commit per PR on `main`                                        |
+| Required checks            | `verify` (`ci.yml`) and `changesets` (`changesets.yml`, L10), branch up to date |
+| Linear history             | No merge commits                                                                |
+| No force-push, no deletion | `main` can't be rewritten or deleted                                            |
+| Bypass                     | Nobody, admins included. Disable the ruleset in Settings for an emergency       |
 
 `integration_id: 15368` is the GitHub Actions app, so only a check reported by Actions satisfies
-`verify`. If the CI job is renamed, rename the check here too, or every PR stays blocked.
+`verify` or `changesets`. If either job is renamed, rename the check here too, or every PR stays
+blocked.
 
 ## Applying it
 

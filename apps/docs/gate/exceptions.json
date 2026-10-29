@@ -14,6 +14,62 @@
       "rules": ["color-contrast:incomplete"],
       "reason": "Same as components-dialog--fullscreen: axe-core 4.14 can't compute the contrast of a sticky title in a scrolling dialog and names no obscuring element (L08 probe, 2026-10-27). fg.default on bg.raised is checked by the L01 token build. Only incomplete contrast is hidden.",
       "expires": "2027-04-27"
+    },
+    {
+      "component": "AlertDialog",
+      "check": "stale-run",
+      "sourceHash": "1b931aa2276a1f72",
+      "reason": "1.0.0 ships without new manual runs (L10 decision 6, Emil 2026-10-28). The ADR-0022 backfill found this component's manual runs predate real behaviour changes (scope-decisions.md, L10 PR 3); its docs mark them as not re-tested since. Re-run and stamp before this expires.",
+      "expires": "2027-04-28"
+    },
+    {
+      "component": "Button",
+      "check": "stale-run",
+      "sourceHash": "e3d80417317e94f3",
+      "reason": "1.0.0 ships without new manual runs (L10 decision 6, Emil 2026-10-28). The ADR-0022 backfill found this component's manual runs predate real behaviour changes (scope-decisions.md, L10 PR 3); its docs mark them as not re-tested since. Re-run and stamp before this expires.",
+      "expires": "2027-04-28"
+    },
+    {
+      "component": "Checkbox",
+      "check": "stale-run",
+      "sourceHash": "9f6712eaca4dba64",
+      "reason": "1.0.0 ships without new manual runs (L10 decision 6, Emil 2026-10-28). The ADR-0022 backfill found this component's manual runs predate real behaviour changes (scope-decisions.md, L10 PR 3); its docs mark them as not re-tested since. Re-run and stamp before this expires.",
+      "expires": "2027-04-28"
+    },
+    {
+      "component": "CheckboxGroup",
+      "check": "stale-run",
+      "sourceHash": "0a5e54d87228cd41",
+      "reason": "1.0.0 ships without new manual runs (L10 decision 6, Emil 2026-10-28). The ADR-0022 backfill found this component's manual runs predate real behaviour changes (scope-decisions.md, L10 PR 3); its docs mark them as not re-tested since. Re-run and stamp before this expires.",
+      "expires": "2027-04-28"
+    },
+    {
+      "component": "Dialog",
+      "check": "stale-run",
+      "sourceHash": "e5bb79a3972a617c",
+      "reason": "1.0.0 ships without new manual runs (L10 decision 6, Emil 2026-10-28). The ADR-0022 backfill found this component's manual runs predate real behaviour changes (scope-decisions.md, L10 PR 3); its docs mark them as not re-tested since. Re-run and stamp before this expires.",
+      "expires": "2027-04-28"
+    },
+    {
+      "component": "FormField",
+      "check": "stale-run",
+      "sourceHash": "ca7b4a75d7229c0a",
+      "reason": "1.0.0 ships without new manual runs (L10 decision 6, Emil 2026-10-28). The ADR-0022 backfill found this component's manual runs predate real behaviour changes (scope-decisions.md, L10 PR 3); its docs mark them as not re-tested since. Re-run and stamp before this expires.",
+      "expires": "2027-04-28"
+    },
+    {
+      "component": "Switch",
+      "check": "stale-run",
+      "sourceHash": "12a57766899e1f36",
+      "reason": "1.0.0 ships without new manual runs (L10 decision 6, Emil 2026-10-28). The ADR-0022 backfill found this component's manual runs predate real behaviour changes (scope-decisions.md, L10 PR 3); its docs mark them as not re-tested since. Re-run and stamp before this expires.",
+      "expires": "2027-04-28"
+    },
+    {
+      "component": "TextInput",
+      "check": "stale-run",
+      "sourceHash": "2dc0de863d23f224",
+      "reason": "1.0.0 ships without new manual runs (L10 decision 6, Emil 2026-10-28). The ADR-0022 backfill found this component's manual runs predate real behaviour changes (scope-decisions.md, L10 PR 3); its docs mark them as not re-tested since. Re-run and stamp before this expires.",
+      "expires": "2027-04-28"
     }
   ]
 }

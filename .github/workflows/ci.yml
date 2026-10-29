@@ -10,6 +10,9 @@ on:
   push:
     branches: [main]
     paths-ignore: ['docs/**', '*.md', '.changeset/**']
+  # L10: the release workflow dispatches this on the Version packages branch, whose pull request,
+  # opened by Actions, starts no workflow by itself.
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -23,6 +26,8 @@ concurrency:
 jobs:
   verify:
     runs-on: ubuntu-latest
+    outputs:
+      release: ${{ steps.release.outputs.release }}
     # L08: the pinned Playwright image (same version as the playwright dev dependencies) carries every
     # browser and its OS libraries, so nothing is installed per run, and the forced-colours
     # screenshot baselines are compared in the image they were generated in. Bump it with Playwright.
@@ -58,6 +63,11 @@ jobs:
           node-version-file: .node-version
           cache: pnpm
       - run: pnpm install --frozen-lockfile
+      # L10: a release commit's site is deployed by release.yml, built as the release, after the
+      # publish; this run's unreleased build must not replace it.
+      - id: release
+        if: github.event_name == 'push'
+        run: node scripts/release.mjs detect
       - if: steps.changes.outputs.code == 'false'
         run: pnpm format:check
       - if: steps.changes.outputs.code != 'false'
@@ -66,8 +76,8 @@ jobs:
         run: pnpm test
       - if: steps.changes.outputs.code != 'false'
         run: pnpm --filter docs build-storybook
-      # L08: the a11y gate over the built Storybook, in Chromium. The three-engine workflow
-      # (gate-full.yml) is disabled for budget reasons; Firefox and WebKit are checked locally.
+      # L08: the a11y gate over the built Storybook, in Chromium. The three-engine gate
+      # (gate-full.yml) runs for every release and by hand, never per push (budget; ADR-0023).
       # Budget (Emil, 2026-10-28): 15 min, raised from 10 when the L09 docs pages took the step to
       # 13 min 56 s. A step over 15 min is reviewed; the timeout only stops a hang.
       - if: steps.changes.outputs.code != 'false'
@@ -89,7 +99,7 @@ jobs:
           path: apps/docs/storybook-static
 
   deploy-storybook:
-    if: github.event_name == 'push'
+    if: github.event_name == 'push' && needs.verify.outputs.release != 'true'
     needs: verify
     runs-on: ubuntu-latest
     permissions:

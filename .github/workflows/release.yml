@@ -1,0 +1,174 @@
+name: Release
+
+# L10 (ADR-0023). Every push to main runs `detect`; nothing else runs unless there is something to do:
+# - pending changesets: `version-pr` opens or updates the Version packages pull request;
+# - a version on main that npm lacks, or whose tag is missing: `gate` runs the full release gate,
+#   `publish` publishes exactly the gated tarballs, and `tag-and-deploy` tags what npm has and, once
+#   every version is on npm, deploys the site built as the release.
+# A first publish (a package npm has never seen) is done by hand (CONTRIBUTING.md, "Releasing"):
+# `publish` skips it, and a dispatch of this workflow afterwards tags it and deploys the site.
+#
+# Untrusted text (pull-request titles, branch names, changeset text) never reaches a shell: the
+# scripts read it from files, and every `run:` here is fixed text.
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      probe:
+        description: "'fail': a gate that fails at once, to show nothing after it runs (never on main)."
+        type: choice
+        options: ['', fail]
+        default: ''
+
+permissions: {}
+
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+jobs:
+  detect:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    outputs:
+      pending: ${{ steps.detect.outputs.pending }}
+      release: ${{ inputs.probe == 'fail' && 'true' || steps.detect.outputs.release }}
+      publish: ${{ steps.detect.outputs.publish }}
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          # The history says which commit set each version (a first publish is gated there only).
+          fetch-depth: 0
+      - uses: actions/setup-node@v5
+        with:
+          node-version-file: .node-version
+          package-manager-cache: false
+      - id: detect
+        run: node scripts/release.mjs detect
+
+  version-pr:
+    needs: detect
+    if: needs.detect.outputs.pending == 'true' && inputs.probe != 'fail' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+      actions: write
+    steps:
+      # The install below runs dependencies' scripts, so the write token is neither left in the git
+      # config nor in the job's environment: only the last two steps get it.
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: pnpm/action-setup@v6
+      - uses: actions/setup-node@v5
+        with:
+          node-version-file: .node-version
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm changeset version
+      # The changelogs and versions it wrote, formatted as the repository is.
+      - run: pnpm install --lockfile-only
+      - run: pnpm exec prettier --write "packages/*/CHANGELOG.md" "packages/*/package.json" .changeset
+      - name: Push the Version packages branch and open or update its pull request
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git switch -C changeset-release/main
+          git add -A
+          git commit -m "Version packages"
+          git push --force "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" changeset-release/main
+          if ! gh pr view changeset-release/main --json number > /dev/null 2>&1; then
+            gh pr create --base main --head changeset-release/main --title "Version packages" \
+              --body "The versions and changelogs from the pending changesets (L10). Merging it releases: the release workflow gates and publishes what it says."
+          fi
+      # A pull request opened with Actions' own token starts no workflow, so the required checks
+      # would never run; a dispatch is the one event this token can start. Their check runs attach
+      # to the branch's commit, which is what the ruleset reads.
+      - env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh workflow run ci.yml --ref changeset-release/main
+          gh workflow run changesets.yml --ref changeset-release/main
+
+  gate:
+    needs: detect
+    if: needs.detect.outputs.release == 'true'
+    permissions:
+      contents: read
+    uses: ./.github/workflows/gate-full.yml
+    with:
+      release: true
+      probe: ${{ inputs.probe }}
+
+  publish:
+    needs: [detect, gate]
+    if: needs.gate.result == 'success' && needs.detect.outputs.publish != '[]' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    # Trusted publishing: npm checks this repository, this workflow file and this environment, and
+    # the environment admits main only, after a person approves.
+    environment: npm
+    permissions:
+      contents: read
+      id-token: write
+    # The jobs that hold `id-token: write` pin their actions to commits, not movable tags.
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
+        with:
+          persist-credentials: false
+      # No `registry-url`: the `.npmrc` it writes can block npm's OIDC exchange.
+      - uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5.0.0
+        with:
+          node-version-file: .node-version
+          package-manager-cache: false
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        with:
+          name: tarballs
+          path: tarballs
+      - run: node scripts/release.mjs publish tarballs
+
+  tag-and-deploy:
+    needs: [detect, gate, publish]
+    # After a publish, or when there was nothing left to publish (a first publish done by hand, or a
+    # re-run): tags and the site follow what npm has, never what was attempted.
+    if: >-
+      !cancelled() && needs.gate.result == 'success' && github.ref == 'refs/heads/main' &&
+      (needs.publish.result == 'success' || needs.publish.result == 'skipped')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    # One deploy at a time, shared with ci.yml's.
+    concurrency:
+      group: pages
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
+        with:
+          # Each tag goes on the commit that set its version, which needs the history.
+          fetch-depth: 0
+      - uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5.0.0
+        with:
+          node-version-file: .node-version
+          package-manager-cache: false
+      - id: tags
+        env:
+          # What publish just published: waited for, since npm's cached listing can lag.
+          EXPECT: ${{ needs.detect.outputs.publish }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          node scripts/release.mjs tag
+      # The site says "released" only when npm has every version it describes.
+      - id: deployment
+        if: steps.tags.outputs.allPublished == 'true'
+        uses: actions/deploy-pages@368f82528645a54fb793d4d04e342629a3f51346 # v5.0.1

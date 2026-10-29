@@ -133,3 +133,37 @@ A second, light workflow, [`changesets.yml`](.github/workflows/changesets.yml), 
 `changesets` job on every pull request and again when its labels change: it fails a pull request
 that changes what a package ships without a changeset or the `no-release` label, and a changeset
 whose text breaks the published-text rules. Adding the label re-runs only that job, not `verify`.
+The ruleset requires `changesets` too.
+
+## Releasing
+
+Releases are made from `main` by [`release.yml`](.github/workflows/release.yml) (ADR-0023):
+
+1. Merged changesets make it open (or update) the **Version packages** pull request, with the new
+   versions and changelogs. It dispatches `verify` and `changesets` on it, since a pull request
+   opened by Actions starts no workflow by itself.
+2. Merging that pull request is the release. The full gate runs (three engines, React 18.3, the
+   stale-run check, the API diff, the publish checks) over the build that ships, then packs it.
+3. The `publish` job waits for a maintainer's approval (the `npm` environment), then publishes
+   exactly the gated tarballs, tokens first, with provenance, through trusted publishing: there is
+   no npm token anywhere. A re-run publishes only what npm doesn't have yet.
+4. `tag-and-deploy` tags each version npm has, and once npm has them all, deploys the site built as
+   the release.
+
+**The first publish is by hand** (1.0.0, and any new package), without provenance, because npm can
+configure a trusted publisher only for a package that exists:
+
+1. Merge the Version packages pull request. The release run gates the release commit and uploads
+   the tarballs (the `tarballs` artifact); `detect` reports each package as a first publish, and
+   `publish` skips it.
+2. Download the artifact, and publish the tokens first, then the components:
+   `npm publish senakster-senui-tokens-1.0.0.tgz --access public`, then the same for
+   `senakster-senui-1.0.0.tgz`. Never `npm publish` from a folder: only the packed tarball has its
+   `workspace:` ranges rewritten.
+3. Straight away, on npmjs.com, give each package a trusted publisher: this repository, the
+   workflow `release.yml`, the environment `npm`. An unused configuration expires after two days.
+4. Run the release workflow by hand (`gh workflow run release.yml`): it finds the versions on npm,
+   tags them and deploys the site as released.
+
+**Probing the release gate** never spends a real release: dispatch `release.yml` on a throwaway
+branch with `probe: fail`, and check that `publish` and `tag-and-deploy` were skipped.

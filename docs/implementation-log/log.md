@@ -772,3 +772,11 @@ Entry format: date — module · Did · Verified · Scope decisions · Plan adju
 - **Review:** `wcag-auditor` and `modern-web-curator`, eleven findings: nine fixed, two recorded.
 - **Verified:** `pnpm check`; `pnpm test`: tokens 32, react 955, scripts 45; the docs-page gate on all 13 pages (78) and on the fixture probe (18); the `--require` probes.
 - **Next:** merge PR 4, then PR 5 (release pipeline, repository settings with Emil's OK, the 1.0.0 changesets, stale-run exceptions, the first publish).
+
+## 2026-10-29 — L10 PR 5: the release pipeline
+
+- **Built:** `scripts/release.mjs` (detect, publish, tag), `release.yml` (five jobs, `probe: fail`), `gate-full.yml` as the release gate (ADR-0023), `ci.yml` dispatchable and not deploying a release commit, the 1.0.0 changeset, eight pinned stale-run exceptions, `CHANGELOG.md` in the tarballs, the ruleset JSON with `changesets`, the CONTRIBUTING runbook.
+- **Found:** 0.0.0 would have read as a first publish on every push (fixed); the tarball lacked the root `CHANGELOG.md` (fixed, found by a version-PR dry run).
+- **Review:** `server-boundary-enforcer`, eight findings: six fixed (token scope in `version-pr`, tags on the version commit, first publish gated once, registry lag, pinned actions, npm check before the gate), two recorded.
+- **Verified:** `pnpm check`; `pnpm test`: tokens 32, react 955, scripts 56; the dry run; the local failing-gate probe.
+- **Next:** Emil's OK for the settings; merge; the CI probe; the Version packages pull request; the manual first publish.
