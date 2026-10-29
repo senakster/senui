@@ -31,6 +31,9 @@ jobs:
       - uses: actions/setup-node@v5
         with:
           node-version-file: .node-version
+          # setup-node v5 caches the `packageManager` (pnpm) by default and fails without it; this
+          # job installs nothing, so there is nothing to cache.
+          package-manager-cache: false
       # The label reaches the script through the environment, never interpolated into the command
       # (untrusted text never reaches a shell).
       - name: Check the changesets
