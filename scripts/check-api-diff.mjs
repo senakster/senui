@@ -9,9 +9,7 @@
 //   peer range on the tokens changes, which Changesets alone bumps only as a patch (L10 PR 1 probe).
 //
 // Needs built packages (`pnpm build`). `--write-baseline` rewrites the committed baseline.
-import { execSync } from 'node:child_process';
-import { mkdtempSync, readFileSync, rmSync } from 'node:fs';
-import { tmpdir } from 'node:os';
+import { readdirSync, readFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { baselineOf, writeBaseline } from './api-diff/baseline.mjs';
@@ -41,16 +39,26 @@ if (process.argv.includes('--write-baseline')) {
 const json = (path) => JSON.parse(readFileSync(path, 'utf8'));
 const today = new Date().toISOString().slice(0, 10);
 
-/** Each package's pending bump, from `changeset status`. */
+/**
+ * Each package's pending bump: the largest one the changeset files under `.changeset/` name for it.
+ * Read from the files, not `changeset status`, which needs the git history back to `main` (CI's
+ * checkout is shallow). Bumps Changesets would add to dependents aren't counted; the one that
+ * matters here, a tokens major reaching the components package, is checked on its own.
+ */
 function pendingBumps() {
-  const out = mkdtempSync(join(tmpdir(), 'senui-changesets-'));
-  try {
-    const file = join(out, 'status.json');
-    execSync(`pnpm changeset status --output="${file}"`, { cwd: root, stdio: 'pipe' });
-    return Object.fromEntries(json(file).releases.map((r) => [r.name, r.type]));
-  } finally {
-    rmSync(out, { recursive: true, force: true });
+  const dir = join(root, '.changeset');
+  const bumps = {};
+  for (const file of readdirSync(dir).filter((f) => f.endsWith('.md') && f !== 'README.md')) {
+    const front = /^---\r?\n([\s\S]*?)\r?\n---/.exec(readFileSync(join(dir, file), 'utf8'));
+    if (!front) throw new Error(`.changeset/${file}: no front matter`);
+    for (const line of front[1].split(/\r?\n/).filter((l) => l.trim())) {
+      const entry = /^\s*['"]?([^'":]+)['"]?\s*:\s*(major|minor|patch|none)\s*$/.exec(line);
+      if (!entry) throw new Error(`.changeset/${file}: can't read "${line}"`);
+      const [, name, type] = entry;
+      bumps[name] = max(bumps[name] ?? 'none', type);
+    }
   }
+  return bumps;
 }
 
 /** The level of the bump from one version to another (`0.3.1` → `1.0.0` is a major). */

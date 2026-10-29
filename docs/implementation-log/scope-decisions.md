@@ -1642,8 +1642,10 @@ delete-merged-branches settings are still off and stay for PR 5.
     each package's npm `latest` (fetched and checked against the registry's integrity hash, never
     installed), or the committed baseline while the package isn't on npm. The facts follow
     CONVENTIONS "Public surface". Narrowing is the compiler's: each baseline `*Props` type must be
-    assignable to this build's, in a throwaway program. The pending bump comes from
-    `changeset status`, or, on the version pull request, from `package.json` against the baseline.
+    assignable to this build's, in a throwaway program. The pending bump comes from the changeset
+    files themselves, or, on the version pull request, from `package.json` against the baseline.
+    The first version called `changeset status`, which failed in CI's shallow checkout ("Failed to
+    find where HEAD diverged from main"); reading the front matter needs no git history.
   - **Majors travel together** (decision 2, ADR-0021, new): a pending tokens major needs a pending
     components major.
   - `api-exceptions.json`: `{ package, fact, reason, expires }`. Expired or unused entries fail,
