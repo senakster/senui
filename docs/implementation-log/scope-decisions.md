@@ -2022,3 +2022,142 @@ Recorded, not fixed:
 - **A note in `published-text.ts`** that it must stay import-free for type stripping. That file is
   under `src`, so the note would need a changeset or the `no-release` label, which PR 5 creates. It
   sits beside the import in `check-changesets.mjs` instead.
+
+**After merge (2026-10-29): the `changesets` job's first CI run failed in `setup-node`.** v5 caches
+the `packageManager` (pnpm) by default and fails when pnpm isn't installed, which this job never
+installs. The fix is `package-manager-cache: false` (e4e460f). Local checks can't see it: it happens
+only on a runner. Every job without pnpm (`changesets`, and in PR 5 `detect`, `publish` and
+`tag-and-deploy`) passes it.
+
+### PR 5 (2026-10-29): the release pipeline
+
+- **Built:**
+  - **`scripts/release.mjs`:** `detect`, `publish` and `tag`. They read npm and the tags at the
+    moment they run, never what an earlier step attempted. The planning is pure
+    (`plan`, `publishPlan`) and probed by `scripts/release.test.mjs` against fixture registry
+    states.
+  - **`release.yml`**, with five jobs:
+    - `detect`;
+    - `version-pr`: `changeset version`, push `changeset-release/main`, open its pull request, and
+      dispatch `ci.yml` and `changesets.yml` on it;
+    - `gate`, which calls `gate-full.yml`;
+    - `publish`: environment `npm`, trusted publishing, the gated tarballs, tokens first;
+    - `tag-and-deploy`.
+
+    Its `probe: fail` input replaces the gate with one failing job.
+
+  - **`gate-full.yml`** (ADR-0023, new): `push` removed, `workflow_call` added. With `release`, it
+    runs `pnpm check`, `pnpm test` and the stale-run check as an error. It runs the gate in three
+    engines over the release Storybook, and React 18.3 with its browser project in three engines.
+    Then it packs and uploads the tarballs and the release site.
+  - **`ci.yml`:** `workflow_dispatch`, and no Pages deploy on a release commit.
+  - **`.changeset/release-1-0-0.md`:** both packages major, so 1.0.0. The text is a draft for Emil.
+  - **Eight `stale-run` exceptions,** one per stale component, pinned to today's fingerprints and
+    expiring 2027-04-28 (decision 6: no re-runs before 1.0.0).
+  - **Both packages' `files` include `CHANGELOG.md`.** The pack check requires it once it exists.
+  - **The ruleset JSON requires `changesets`.** CONTRIBUTING has "Releasing", the first-publish
+    runbook and the probe.
+
+#### Deviations from the plan
+
+1. **`0.0.0` is never a release, and a pending first publish gates only the commit that set its
+   version.** Without the first rule, both unpublished packages would read as first publishes on
+   every push to `main` until 1.0.0; without the second (review), every push between the version
+   commit and the manual publish would, each one running the full gate.
+2. **A first publish costs two gate runs:** the release commit's, then a dispatch after the manual
+   publish that tags and deploys. The plan's runbook left the tags and the site after a manual
+   publish unsaid.
+3. **The CI probe runs after merge.** GitHub dispatches only workflows that exist on the default
+   branch. The local half ran here: one failing gate test makes `playwright test` exit 1.
+4. **The publish job also checks `github.ref == 'refs/heads/main'`,** besides the environment's
+   branch rule, so a dispatch on another branch can't reach it.
+
+#### Probes
+
+- **The release plan** (`release.test.mjs`, 9 tests):
+  - nothing to release does nothing, and 0.0.0 is no release;
+  - 1.0.0 on `main` with npm empty gives two manual first publishes;
+  - after them, both are tagged;
+  - a partial publish leaves only the missing package, and tags only the published one;
+  - publishing goes tokens first, never a first publish, and refuses a tarball whose version isn't
+    `main`'s.
+- **A dry run of the Version packages pull request,** on a throwaway branch, discarded:
+  - `changeset version` gives both packages 1.0.0, with changelogs in the default format;
+  - the API diff reads a major, with no changesets left;
+  - `detect` reports two first publishes;
+  - `llms.txt` links the changelog, and the packed peer range is `^1.0.0`;
+  - the changelog pages, built from the real changelog, pass the docs-page gate (12 checks);
+  - the tarball lacked the root `CHANGELOG.md`, so `files` now lists it, and a probe without it
+    fails the pack check.
+- **Release mode:** `check-a11y-contracts.mjs --release` passes with the eight exceptions and
+  failed without them (PR 3).
+
+#### Verified
+
+- `pnpm check`: the API diff shows a pending major for both packages.
+- `pnpm test`: tokens 32, react 955, scripts 56.
+
+#### Review (`server-boundary-enforcer`, read-only)
+
+Eight findings. Six were fixed:
+
+- **`version-pr` held a write token during `pnpm install`:** the checkout left it in the git config
+  and the job's environment, where any dependency's install script could read it. Now
+  `persist-credentials: false`, and the token reaches only the push step (by URL) and the dispatch
+  step.
+- **Tags went on whatever commit was checked out,** so a partial publish's later run, or the
+  dispatch after a manual first publish, could tag a later commit. `versionCommit` now finds the
+  commit that set the version (the oldest of the newest unbroken run of commits with it), and the
+  tag goes there. Probed in a throwaway repository: 1.0.0 and 1.1.0, each with later edits.
+- **While a first publish was pending, every push to `main` would run the full gate.** A first
+  publish is now a release only at its version commit (`plan`'s `atVersionCommit`). Probed.
+- **npm's cached listing can lag a publish,** which would leave the tags and the site waiting for
+  the next release. `tag` now waits up to five minutes for what `publish` just published (`EXPECT`,
+  the `detect` job's list).
+- **The actions in the jobs that hold `id-token: write` were movable tags.** In `publish` and
+  `tag-and-deploy` they are now pinned to commits: `checkout` v5.1.0, `setup-node` v5.0.0,
+  `download-artifact` v4.3.0, `deploy-pages` v5.0.1.
+- **npm's version (11.5.1 or later, for OIDC) was checked only after the gate.** `detect` now checks
+  it whenever there is something to publish.
+
+Recorded, not fixed:
+
+- **The `pack` job builds again rather than packing the build the gate tested.** Packing in `checks`
+  would need that job to build as the release, and `manifest.test.ts` asserts the build is
+  unreleased unless `SENUI_RELEASE=1`. The same commit builds the same bytes: the generator is
+  checked for determinism (`manifest.test.ts`, "is deterministic"), tsdown is pinned, and
+  `publish` refuses a tarball whose version isn't `main`'s. **Revisit when** a build step is found
+  to vary between runs.
+- **`needs.publish.result == 'skipped'` also covers a skipped gate,** and `tag-and-deploy` is only
+  correct because it also requires `needs.gate.result == 'success'`. That guard is kept, with this
+  note.
+
+The environment settings it asks to verify (`npm`: `main` only, with a required reviewer;
+`github-pages`: `main` only) are part of the settings Emil applies.
+
+#### Settings, and cheapest-first ordering (Emil, 2026-10-29)
+
+Emil OKed all four groups of settings. Applied before merge, each checked after:
+
+- **Merges:** squash only, with the pull request's title and body; delete branches on merge.
+- **Actions:** may create pull requests; the default token stays read-only.
+- **The ruleset:** updated from `main.json`, so `changesets` is required beside `verify`. Compared
+  with the live ruleset ignoring key order, it matches.
+- **The `no-release` label** exists.
+- **Environment `npm`:** `main` only, Emil as required reviewer, no secrets. `github-pages` was
+  already `main` only.
+- **"Gate (all engines)":** re-enabled only after this pull request merges. The version on `main`
+  until then still has its `push` trigger, so enabling it first would run three engines on any push
+  in between.
+
+**Emil:** "order so cheap pipeline like changeset that fail blocks ci if dependency allows it".
+
+- **`gate-full.yml`:** at release, `gate` and `react-18` need `checks`, so a failing check never
+  spends three engines. Run by hand, `checks` is skipped and they start at once.
+- **`ci.yml`:** a new seconds-long `changeset-text` job runs `check-changesets.mjs` (text only), and
+  `verify` needs it.
+  - The "needs a changeset or the label" rule stays only in `changesets.yml`. Gating `verify` on it
+    would leave `verify` skipped when the label is added later, and a skipped required job reads as
+    passing.
+  - For the same reason, a skipped `verify` after a failed text check is safe: the required
+    `changesets` check runs the same text check and fails too, so the merge stays blocked.

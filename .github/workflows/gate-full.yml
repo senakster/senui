@@ -1,26 +1,79 @@
 name: Gate (all engines)
 
 # L08 decision 11: pull requests run the gate in Chromium (ci.yml); this workflow runs Chromium,
-# Firefox and WebKit. It is disabled on GitHub for budget reasons (Emil, 2026-10-28): the three
-# engines and React 18.3 are checked locally until it is re-enabled, when it runs on every push to
-# main. No scheduled run (Emil, 2026-10-27).
-# Decision 9a: the same runs test the package against the lowest React its peer range admits.
+# Firefox and WebKit, and React 18.3 (decision 9a: the lowest React the peer range admits).
+#
+# L10 decision 3 (ADR-0023): it runs for every release, called by release.yml, and by hand; never on
+# a push (budget, Emil, 2026-10-28). Called with `release`, it is the release gate: the checks and
+# tests too, the stale-run check as an error, a Storybook and a manifest built as the release, and
+# the tarballs it gated, packed once and uploaded for the publish job.
 on:
-  push:
-    branches: [main]
-    # Docs-only changes can't change a result (see ci.yml).
-    paths-ignore: ['docs/**', '*.md', '.changeset/**']
+  workflow_call:
+    inputs:
+      release:
+        description: Gate a release, and pack and upload what it gated.
+        type: boolean
+        default: false
+      probe:
+        description: "'fail' replaces the whole gate with one failing job (the release probe)."
+        type: string
+        default: ''
   workflow_dispatch:
 
 permissions:
   contents: read
 
+# Keyed on the calling workflow: a manual run never cancels a release, and nothing cancels a gate
+# half-way.
 concurrency:
-  group: gate-full-${{ github.ref }}
-  cancel-in-progress: true
+  group: gate-full-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
 
 jobs:
+  # L10 probe: the cheapest gate that fails, so release.yml's wiring can be shown to stop a publish
+  # without spending a three-engine run (Emil, 2026-10-28).
+  probe:
+    if: inputs.probe == 'fail'
+    runs-on: ubuntu-latest
+    steps:
+      - run: |
+          echo "Release probe: this gate fails on purpose, and nothing after it may run."
+          exit 1
+
+  checks:
+    if: inputs.release && inputs.probe == ''
+    runs-on: ubuntu-latest
+    container:
+      image: mcr.microsoft.com/playwright:v1.64.0-noble
+      options: --ipc=host
+    env:
+      HOME: /root
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      # The container runs as root over a checkout it doesn't own: mark it safe for git (L09 docs).
+      - run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
+      - uses: pnpm/action-setup@v6
+      - uses: actions/setup-node@v5
+        with:
+          node-version-file: .node-version
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      # Includes the API diff (decision 5) and the publish checks (decision 9).
+      - run: pnpm check
+      - run: pnpm test
+      # Decision 6: at release, a stale manual run fails unless a pinned exception covers it.
+      - run: node scripts/check-a11y-contracts.mjs --release
+
+  # Cheapest first (Emil, 2026-10-29): at release, the three-engine gate and the React 18.3 job
+  # start only after the checks pass, so a failing check never spends them. Run by hand (no
+  # `release`), `checks` is skipped and they start at once.
   gate:
+    needs: checks
+    if: >-
+      !cancelled() && inputs.probe == '' &&
+      (needs.checks.result == 'success' || needs.checks.result == 'skipped')
     runs-on: ubuntu-latest
     container:
       image: mcr.microsoft.com/playwright:v1.64.0-noble
@@ -29,9 +82,12 @@ jobs:
       HOME: /root
       SENUI_GATE_CONTAINER: '1'
       SENUI_GATE_BROWSERS: chromium,firefox,webkit
+      # L09 decision 10: the gated pages are the published ones.
+      SENUI_RELEASE: ${{ inputs.release && '1' || '' }}
     steps:
       - uses: actions/checkout@v5
-      # The container runs as root over a checkout it doesn't own: mark it safe for git (L09 docs).
+        with:
+          fetch-depth: 0
       - run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
       - uses: pnpm/action-setup@v6
       - uses: actions/setup-node@v5
@@ -48,21 +104,33 @@ jobs:
           name: gate-results-all-engines
           path: apps/docs/test-results/
           retention-days: 7
+      # The site as released, deployed by release.yml only after a successful publish.
+      - if: inputs.release
+        run: test ! -e apps/docs/storybook-static/manifests
+      - if: inputs.release
+        uses: actions/upload-pages-artifact@v5
+        with:
+          path: apps/docs/storybook-static
 
   react-18:
     # The packages publish `react: ^18.3 || ^19`, and the lockfile resolves 19. This job swaps in
-    # 18.3 for the package's unit, ssr and browser projects. The lockfile change stays on the runner.
-    # It proves runtime behaviour only: @types/react stays at 19, so the type tests still check the
-    # .d.ts against React 19's types, not what an 18 consumer compiles against.
+    # 18.3 for the package's unit, ssr and browser projects, in all three engines. The lockfile
+    # change stays on the runner. It proves runtime behaviour only: @types/react stays at 19, so the
+    # type tests still check the .d.ts against React 19's types, not what an 18 consumer compiles
+    # against.
+    needs: checks
+    if: >-
+      !cancelled() && inputs.probe == '' &&
+      (needs.checks.result == 'success' || needs.checks.result == 'skipped')
     runs-on: ubuntu-latest
     container:
       image: mcr.microsoft.com/playwright:v1.64.0-noble
       options: --ipc=host
     env:
       HOME: /root
+      SENUI_BROWSERS: chromium,firefox,webkit
     steps:
       - uses: actions/checkout@v5
-      # The container runs as root over a checkout it doesn't own: mark it safe for git (L09 docs).
       - run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
       - uses: pnpm/action-setup@v6
       - uses: actions/setup-node@v5
@@ -78,3 +146,30 @@ jobs:
       - run: pnpm --filter @senakster/senui test
         env:
           SENUI_EXPECT_REACT: 18.3.1
+
+  # Decision 1: the gated build, packed once. The publish job publishes exactly these tarballs.
+  pack:
+    if: >-
+      !cancelled() && inputs.release && inputs.probe == '' && needs.checks.result == 'success' &&
+      needs.gate.result == 'success' && needs.react-18.result == 'success'
+    needs: [checks, gate, react-18]
+    runs-on: ubuntu-latest
+    env:
+      SENUI_RELEASE: '1'
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - uses: pnpm/action-setup@v6
+      - uses: actions/setup-node@v5
+        with:
+          node-version-file: .node-version
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm build
+      - run: pnpm --filter "./packages/*" exec pnpm pack --pack-destination "$GITHUB_WORKSPACE/tarballs"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: tarballs
+          path: tarballs/*.tgz
+          retention-days: 30
