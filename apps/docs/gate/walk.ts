@@ -64,11 +64,15 @@ function checkStop(page: Page, checkRing: boolean): Promise<Stop | null> {
           bottom: box.bottom + offset + width,
         };
         const clip = m.clipRect(el);
+        // With no clipping ancestor the box is the viewport, and only its sides clip: Firefox
+        // doesn't scroll a focused element that is already partly in view, so a tall one's ring
+        // can run past the bottom, where the reader scrolls to it. Off screen entirely is the
+        // check above.
+        const contained = m.clipAncestor(el) !== null;
         if (
           outer.left < clip.left - 0.5 ||
-          outer.top < clip.top - 0.5 ||
           outer.right > clip.right + 0.5 ||
-          outer.bottom > clip.bottom + 0.5
+          (contained && (outer.top < clip.top - 0.5 || outer.bottom > clip.bottom + 0.5))
         ) {
           problems.push('the focus ring is clipped by its container');
         }
