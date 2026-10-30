@@ -443,7 +443,7 @@ describe('Dialog in a browser', () => {
             }
             return performance.now() - since >= 300;
           },
-          { intervals: [100] },
+          { interval: 100 },
         )
         .toBe(true);
       return last;
