@@ -226,10 +226,13 @@
 }
 
 /* A modal story's placeholder (DocsStory): it sits in the canvas, outside the page's scope. */
+/* A flex column, not a grid: narrowed after load, WebKit keeps a grid row's old height, so a
+   button whose label wraps overflows it. */
 .docs-canvas__request {
-  display: grid;
+  display: flex;
+  flex-direction: column;
   gap: var(--senui-space-3);
-  justify-items: start;
+  align-items: flex-start;
   font-family: var(--senui-font-family-sans);
   color: var(--senui-color-fg-default);
 }

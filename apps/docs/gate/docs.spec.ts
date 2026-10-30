@@ -287,6 +287,9 @@ for (const docs of docsEntries) {
   // Decision 6a, as a page: every stop is keyboard focus, named, not covered, with a real ring;
   // no assumption that a stop belongs to one component's root. Tab must leave the page.
   test(`docs page tab walk: ${docs.id}`, async ({ page, browserName }) => {
+    // Hundreds of stops on the longest pages: Button's takes 17 s alone in WebKit, and timed out
+    // at 30 s with three engines running at once.
+    test.setTimeout(60_000);
     await openDocs(page, docs);
     await injectMeasure(page);
     const failures = await walk(page, browserName, true, { maxPresses: 800, mustFinish: true });
