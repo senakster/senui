@@ -44,6 +44,12 @@ describe('plan', () => {
     assert.equal(plan(at('1.0.0'), npm, [], () => false).release, false);
   });
 
+  test('run by hand, a pending first publish is gated on a later commit too', () => {
+    const npm = { [TOKENS]: null, [COMPONENTS]: null };
+    assert.equal(plan(at('1.0.0'), npm, [], () => false, true).release, true);
+    assert.equal(plan(at('0.0.0'), npm, [], () => false, true).release, false);
+  });
+
   test('after the manual first publish, the versions npm has get their tags', () => {
     const p = plan(at('1.0.0'), { [TOKENS]: ['1.0.0'], [COMPONENTS]: ['1.0.0'] }, []);
     assert.deepEqual(p.untagged.map(tagOf), ['@scope/tokens@1.0.0', '@scope/components@1.0.0']);

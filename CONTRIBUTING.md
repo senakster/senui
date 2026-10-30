@@ -155,7 +155,9 @@ configure a trusted publisher only for a package that exists:
 
 1. Merge the Version packages pull request. The release run gates the release commit and uploads
    the tarballs (the `tarballs` artifact); `detect` reports each package as a first publish, and
-   `publish` skips it.
+   `publish` skips it. If that gate fails, merge the fix, then run the release workflow by hand
+   (`gh workflow run release.yml`): run by hand, it gates a pending first publish on `main` as it
+   is now. A push never does, so the full gate doesn't run on every push until the publish.
 2. Download the artifact, and publish the tokens first, then the components:
    `npm publish senakster-senui-tokens-1.0.0.tgz --access public`, then the same for
    `senakster-senui-1.0.0.tgz`. Never `npm publish` from a folder: only the packed tarball has its

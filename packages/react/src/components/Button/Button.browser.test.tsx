@@ -92,11 +92,11 @@ describe('Button in a browser', () => {
     expect(box.height).toBeGreaterThanOrEqual(24);
   });
 
-  test('draws focus as an offset outline, not a box-shadow (ADR-0005)', () => {
+  test('draws focus as an offset outline, not a box-shadow (ADR-0005)', async () => {
     const { getByRole } = render(<Button>Save</Button>);
-    const button = getByRole('button');
-    button.focus();
-    const style = getComputedStyle(button);
+    // A real Tab: Firefox and WebKit don't match `:focus-visible` for a scripted `focus()`.
+    await userEvent.tab();
+    const style = getComputedStyle(getByRole('button'));
     expect(style.outlineStyle).toBe('solid');
     expect(parseFloat(style.outlineWidth)).toBeGreaterThan(0);
     expect(style.boxShadow).toBe('none');

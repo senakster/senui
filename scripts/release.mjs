@@ -59,8 +59,10 @@ export const tagOf = ({ name, version }) => `${name}@${version}`;
  * @param {string[]} tags The repository's tags.
  * @param {(pkg: { name: string, version: string }) => boolean} [atVersionCommit] Whether this
  *   commit is the one that set the package's version.
+ * @param {boolean} [manual] Run by hand: a pending first publish is gated on any commit, so a gate
+ *   that failed at the version commit can be run again after the fix is merged.
  */
-export function plan(packages, npm, tags, atVersionCommit = () => true) {
+export function plan(packages, npm, tags, atVersionCommit = () => true, manual = false) {
   // `0.0.0` is the version before any release, never one to publish; without this, every push
   // before 1.0.0 would read as a release and run the full gate.
   const first = packages.filter((p) => npm[p.name] === null && p.version !== '0.0.0');
@@ -77,7 +79,10 @@ export function plan(packages, npm, tags, atVersionCommit = () => true) {
      * never seen (gated once, for the manual first publish; later pushes don't re-run the gate
      * while it is pending).
      */
-    release: publish.length + untagged.length > 0 || first.some(atVersionCommit),
+    release:
+      publish.length + untagged.length > 0 ||
+      (first.length > 0 && manual) ||
+      first.some(atVersionCommit),
     /** Every package's version is on npm: the site may say "released". */
     allPublished: packages.every((p) => npm[p.name]?.includes(p.version) === true),
   };
@@ -157,6 +162,7 @@ async function detect() {
     await npmState(packages),
     remoteTags(),
     (pkg) => versionCommit(pkg) === head,
+    process.env.GITHUB_EVENT_NAME === 'workflow_dispatch',
   );
   if (p.publish.length > 0) assertNpm();
   const names = (list) => list.map(tagOf);
