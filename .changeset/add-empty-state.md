@@ -1,6 +1,5 @@
 ---
 '@senakster/senui': minor
-'@senakster/senui-tokens': minor
 ---
 
 Add `EmptyState`: says there is nothing here, why, and what you can do next. It renders a heading, a description, a decorative illustration and your actions in a plain `<div>`, with no role, no landmark and no live region.
@@ -12,5 +11,3 @@ It adapts to the width of its container: compact (the illustration beside the te
 It never moves focus or announces anything. Announce the change from a `role="status"` region that is already in the page. When the control that emptied the view disappears, move focus to the first action or to the heading, which `headingRef` gives you (it has `tabindex="-1"`).
 
 Styles: `@senakster/senui/styles.css`, or `styles/EmptyState.css`. Fourteen `--senui-empty-state-*` tokens are the override points.
-
-Add the `--senui-size-illustration-sm` and `-lg` tokens (an illustration beside text, and above it).

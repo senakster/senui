@@ -47,6 +47,23 @@ describe('parseChangelog', () => {
     assert.deepEqual(deps.paragraphs, []);
   });
 
+  test('merges a group’s dependency updates into one entry', () => {
+    const [group] = parseChangelog(
+      [
+        '# @senakster/senui',
+        '## 1.0.0',
+        '### Patch Changes',
+        '- Updated dependencies [e7d4d8c]',
+        '- Updated dependencies [e7d4d8c]',
+        '- Updated dependencies [7952797]',
+        '  - @senakster/senui-tokens@1.0.0',
+      ].join('\n'),
+    ).versions[0].groups;
+    assert.deepEqual(group.entries, [
+      { paragraphs: [], dependencies: ['@senakster/senui-tokens@1.0.0'], commit: 'e7d4d8c' },
+    ]);
+  });
+
   test('an empty or missing changelog has no versions', () => {
     assert.deepEqual(parseChangelog(''), { name: undefined, versions: [] });
   });

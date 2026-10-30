@@ -67,6 +67,13 @@ export function parseChangelog(text) {
       flush();
       const deps = /^Updated dependencies(?: \[([^\]]*)\])?\s*$/.exec(item[1]);
       if (deps) {
+        // Changesets writes one such line per changeset, and lists the versions under the last
+        // only: one entry per group, or the page shows empty lists.
+        const shared = group.entries.find((e) => e.dependencies);
+        if (shared) {
+          entry = shared;
+          continue;
+        }
         entry = { paragraphs: [], dependencies: [] };
         if (deps[1]) entry.commit = deps[1].split(',')[0]?.trim();
       } else {

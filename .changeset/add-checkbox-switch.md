@@ -11,7 +11,3 @@ Add `Checkbox`, `CheckboxGroup` and `Switch`, all native `<input type="checkbox"
 `Switch` is an on/off setting with `role="switch"`; it takes no `indeterminate`, `required` or `error`.
 
 Styles: `@senakster/senui/styles.css`, or the per-component `Checkbox.css`, `CheckboxGroup.css` and `Switch.css`.
-
-FormField now shares its wiring with these controls internally; its API is unchanged.
-
-Form controls now always render `aria-invalid`: `"true"` while an error shows, `"false"` otherwise (previously absent when valid). Without it, browsers announce a control's native invalidity, such as a bad default value, before the user has done anything. TextInput is affected too; selectors on `[aria-invalid="true"]` are unchanged.

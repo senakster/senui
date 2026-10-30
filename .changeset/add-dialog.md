@@ -1,6 +1,5 @@
 ---
 '@senakster/senui': minor
-'@senakster/senui-tokens': minor
 ---
 
 Add `Dialog` and `AlertDialog`, both a native `<dialog>` opened with `showModal()`: the page behind is inert and focus stays inside, with no portal or focus trap.
@@ -16,5 +15,3 @@ Focus returns to the element that opened the dialog. Pass `finalFocus` for when 
 While one of these dialogs is open, the page doesn't scroll (ADR-0014). Set `html { scrollbar-gutter: stable }` to avoid a shift on open; to turn the lock off, add `html { overflow: auto }`.
 
 Styles: `@senakster/senui/styles.css`, or `styles/Dialog.css` (which brings Button's styles, for its close and footer buttons) / `styles/AlertDialog.css` (which brings Dialog's).
-
-Add the `--senui-color-bg-backdrop` token (the scrim behind a modal) and `--senui-size-dialog-sm`, `-md` and `-lg` (dialog widths).
