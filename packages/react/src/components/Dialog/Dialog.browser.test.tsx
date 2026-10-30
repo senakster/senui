@@ -427,16 +427,24 @@ describe('Dialog in a browser', () => {
     expect(document.activeElement).toBe(dialog);
     expect(dialog.scrollHeight).toBeGreaterThan(dialog.clientHeight);
     // Keyboard scrolling may be smooth: wait for it to start, then read the position once it stops
-    // changing. (Settling alone could pass two samples taken before the first frame.)
+    // changing. (Settling alone could pass two samples taken before the first frame.) Stopped means
+    // unchanged for 300 ms: under load, WebKit's smooth scroll can skip a frame, and two equal
+    // samples in a row read as stopped mid-scroll.
     const settled = async (from: number) => {
       await expect.poll(() => dialog.scrollTop).not.toBe(from);
       let last = -1;
+      let since = performance.now();
       await expect
-        .poll(() => {
-          const same = dialog.scrollTop === last;
-          last = dialog.scrollTop;
-          return same;
-        })
+        .poll(
+          () => {
+            if (dialog.scrollTop !== last) {
+              last = dialog.scrollTop;
+              since = performance.now();
+            }
+            return performance.now() - since >= 300;
+          },
+          { interval: 100 },
+        )
         .toBe(true);
       return last;
     };
