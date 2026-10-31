@@ -1,6 +1,6 @@
 {
   "name": "@senakster/senui",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "senui React components: plain CSS on design tokens, accessible by contract.",
   "license": "MIT",
   "homepage": "https://senakster.github.io/senui/",
