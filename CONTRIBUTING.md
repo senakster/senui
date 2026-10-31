@@ -140,15 +140,17 @@ The ruleset requires `changesets` too.
 Releases are made from `main` by [`release.yml`](.github/workflows/release.yml) (ADR-0023):
 
 1. Merged changesets make it open (or update) the **Version packages** pull request, with the new
-   versions and changelogs. It dispatches `verify` and `changesets` on it, since a pull request
-   opened by Actions starts no workflow by itself.
+   versions and changelogs. Actions opened it, so its `verify` and `changesets` runs wait for a
+   maintainer: approve them on the pull request ("workflows awaiting approval") before it can merge.
 2. Merging that pull request is the release. The full gate runs (three engines, React 18.3, the
    stale-run check, the API diff, the publish checks) over the build that ships, then packs it.
 3. The `publish` job waits for a maintainer's approval (the `npm` environment), then publishes
    exactly the gated tarballs, tokens first, with provenance, through trusted publishing: there is
    no npm token anywhere. A re-run publishes only what npm doesn't have yet.
-4. `tag-and-deploy` tags each version npm has, and once npm has them all, deploys the site built as
-   the release.
+4. `tag-and-deploy` tags each version npm has, at the commit that set it, and once npm has them all,
+   deploys the site built as the release. If GitHub refuses a tag, the job's error prints the
+   `git tag` and `git push` to run by hand; then re-run the failed job
+   (`gh run rerun <run id> --failed`), which finds the tag and deploys.
 
 **The first publish is by hand** (1.0.0, and any new package), without provenance, because npm can
 configure a trusted publisher only for a package that exists:

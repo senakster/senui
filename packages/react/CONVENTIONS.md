@@ -527,8 +527,8 @@ published at stable paths; their prose is informative.
 listing its public classes, data-attribute values and component tokens.
 
 **Enforced by:** [`scripts/check-api-diff.mjs`](../../scripts/check-api-diff.mjs) (`pnpm check:api`,
-in `pnpm check`), against each package's `latest` on npm, or the committed baseline in
-`scripts/api-diff/baseline/` until it is published. It compares every fact above (descriptions,
+in `pnpm check`), against each package's `latest` on npm; a package npm has never seen is a first
+publish, with nothing to compare. It compares every fact above (descriptions,
 summaries and printed types aren't facts, so rewording is no change), plus the `package.json`
 facts (each subpath's target, `sideEffects`, peer ranges) and the layer order. It type-checks every
 exported type both builds share: a value of the baseline's type must fit this build's (narrowing is

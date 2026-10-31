@@ -10,9 +10,6 @@ on:
   push:
     branches: [main]
     paths-ignore: ['docs/**', '*.md', '.changeset/**']
-  # L10: the release workflow dispatches this on the Version packages branch, whose pull request,
-  # opened by Actions, starts no workflow by itself.
-  workflow_dispatch:
 
 permissions:
   contents: read

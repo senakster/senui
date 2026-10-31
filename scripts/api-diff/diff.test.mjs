@@ -1,11 +1,14 @@
-// L10 acceptance criteria, "API diff": each a probe against the committed baseline. A test changes
-// a copy of the baseline the way a pull request would, and checks what the diff concludes.
+// L10 acceptance criteria, "API diff": each a probe against the fixture, the packages as they were
+// before 1.0.0 (the committed baseline until the first publish). A test changes a copy of it the way
+// a pull request would, and checks what the diff concludes.
 import assert from 'node:assert/strict';
 import { cpSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
-import { join } from 'node:path';
+import { dirname, join } from 'node:path';
 import { describe, test } from 'node:test';
-import { BASELINE } from './baseline.mjs';
+import { fileURLToPath } from 'node:url';
+
+const BASELINE = join(dirname(fileURLToPath(import.meta.url)), 'fixture');
 import {
   componentFacts,
   compare,
