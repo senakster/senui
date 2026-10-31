@@ -2161,3 +2161,116 @@ Emil OKed all four groups of settings. Applied before merge, each checked after:
     passing.
   - For the same reason, a skipped `verify` after a failed text check is safe: the required
     `changesets` check runs the same text check and fails too, so the merge stays blocked.
+
+### Releasing 1.0.0 and 1.0.1 (2026-10-30 to 2026-10-31)
+
+- **1.0.0, both packages:** #25 merged, then #26 (Version packages). The release gate ran three
+  times before it passed: #28, #29 and #30 fixed what failed (below). Emil published the CI-gated
+  tarballs by hand, tokens first, on 2026-10-30. He then set up each package's trusted publisher
+  (this repository, `release.yml`, environment `npm`, "Allow npm publish" only), and set publishing
+  access to 2FA with tokens disallowed.
+- **Tagging 1.0.0:** GitHub refused the run's `git push` of the tags: "refusing to allow a GitHub
+  App to create or update workflow `.github/workflows/ci.yml` without `workflows` permission".
+  The tags go on the version commit (c44989e), and #31 had changed `ci.yml` on `main` since then.
+  Emil pushed the two tags by hand, and a re-run of the failed job deployed the site as released.
+- **1.0.1, `@senakster/senui` only:** #33 (the README for 1.0; npm showed the package README's
+  pre-release notice), #34, then #35. It is the first CI release: published through the trusted
+  publisher with provenance, and tagged through the API with no refusal.
+
+#### Fixed during the release
+
+- **#27, changelog text:** a changeset naming both packages puts its whole text in both
+  changelogs, so the token additions got changesets of their own. The changelog page lists a
+  group's "Updated dependencies" once (Changesets writes one line per changeset and lists the
+  versions under the last only).
+- **#28:**
+  - Button's focus-ring test pressed Tab instead of calling `focus()`: Firefox and WebKit don't
+    match `:focus-visible` for a scripted focus without prior keyboard input.
+  - A failed first-publish gate could not run again: run by hand, `detect` now gates a pending
+    first publish on any commit.
+  - The ring-clipping check ignored a viewport edge the element can't clip against (Firefox).
+  - The docs canvas request block moved from grid to flex (a WebKit grid row kept its old height
+    after a resize).
+  - The docs tab walk got 60 s.
+- **#29 and #30, WebKit under a loaded runner:**
+  - the Dialog scroll test waits until a smooth scroll has stopped for 300 ms;
+  - `closed()` waits 3 s, longer than Dialog's own 1 s fallback for an exit animation that never
+    finishes;
+  - the `resets` check gets 90 s per story.
+
+  Emil kept 4 gate workers in CI: at 2 the gate ran past its limit (1,498 tests in 16 min).
+
+- **#31:** a push that `release.yml` gates skips CI's `verify`. The release gate runs everything
+  `verify` runs, in three engines, and deploys the release's site itself. `detect` moved into the
+  cheap `changeset-text` job.
+- **#32:**
+  - tags are created through the API (`POST /git/refs`); a refusal prints the commands to tag by
+    hand, and the runbook says to re-run the failed job;
+  - the Version packages job's dispatch of `ci.yml` and `changesets.yml` is gone. The dispatched
+    runs never counted for the pull request: its own `pull_request` runs did, after Emil approved
+    them. The runbook says so;
+  - the API diff compares against npm only. The committed baseline is now the probes' fixture
+    (`scripts/api-diff/fixture/`), and `--write-baseline` is gone.
+- **#34:** the Version packages pull request was never opened for 1.0.1, because
+  `gh pr view <branch>` also finds the merged #26. The job now lists open pull requests only.
+
+#### Deviations from the plan
+
+1. **The CI probe of the failing gate ran on `main`'s workflow by dispatch** (run 41019608737):
+   `publish` and `tag-and-deploy` were skipped.
+2. **The first CI release is 1.0.1**, a patch, not a planned release. The README on npm forced it,
+   and it was the first run to show trusted publishing, provenance and API tagging work together.
+3. **Release pushes skip CI's `verify` (#31).** The plan has CI on every push; on a release push the
+   release gate runs a superset.
+4. **No `workflow_dispatch` in `ci.yml` (#32).** The plan's deliverable table lists it. It existed
+   only for the Version packages dispatch, which never counted.
+
+#### Done (2026-10-31)
+
+Every acceptance criterion is met, with these narrowings:
+
+- **"Every published version has a tag":** every release has one. npm also lists a `0.0.0-stage`
+  version of each package, created a minute before each 1.0.0, untagged and with no dist-tag.
+  Emil: leave it.
+- **"A direct push to `main` is rejected":** the live ruleset requires a pull request, squash, a
+  linear history and `verify` and `changesets` (read from the API on 2026-10-31). The direct push
+  wasn't probed: it would land if the rule were wrong.
+- **"The site reads as released, version 1.0.0":** it read 1.0.0 after the 1.0.0 run and reads
+  1.0.1 now.
+
+Evidence per group:
+
+- **Publishing:**
+  - Both 1.0.0 tarballs, fetched from npm, hold `CHANGELOG.md`, `LICENSE`, `README.md`, `dist` and
+    `package.json`, the manifest npm requires.
+  - The react package's tokens peer is `^1.0.0`, with no `workspace:` range. Its `components.json`
+    reads `released: true`, version 1.0.0.
+  - 1.0.1 has a SLSA provenance attestation. No repository or `npm` environment secret exists.
+  - `id-token: write` is held only by `ci.yml`'s `deploy-storybook` and `release.yml`'s `publish`
+    and `tag-and-deploy`.
+  - Partial publishes: `release.test.mjs`. attw and a stray file: PR 1's probes.
+- **Release gate:**
+  - Releases 1.0.0 and 1.0.1 ran the three-engine gate, React 18.3 in three engines and the
+    stale-run check over the release Storybook (`SENUI_RELEASE=1`).
+  - One failing gate stopped the publish: the probe run 41019608737, and the failed 1.0.0 runs.
+  - A push with nothing to release ran `detect` only (run 41179536267, #32's merge).
+  - The site deploys as released only from `tag-and-deploy`, after npm has every version.
+- **Changesets:** PR 4's probes. #26 and #35 got `verify` and `changesets` (after Emil's approval),
+  passed the API diff and merged under the ruleset.
+- **API diff:** the 21 probes in `scripts/api-diff/diff.test.mjs`, now on the fixture.
+- **Deprecation:** PR 2's probes. **Stale runs:** PR 3's probes, and the live `components.json` marks
+  eight components `sourceChangedSince` and EmptyState current.
+- **Tree-shaking:** PR 1's probes, and `check:components` in every release gate.
+- **Branch rules:** the ruleset above. Branches of pull requests merged since PR 5's settings are
+  deleted; older ones remain.
+- **Site:** PR 4's changelog probes (fixture and real changelog), and the live site.
+
+**Recorded, not done:**
+
+- The API tagging path has not yet met a workflow change between a version commit and its run; the
+  fallback is the manual tag push in the runbook.
+- WebKit `resets` timeouts in Button's matrix stories pass alone; only the forced-colours story has
+  failed in CI.
+
+**Verified:** the 1.0.1 release run (41185796538): `pnpm check`, `pnpm test`, the three-engine
+gate and React 18.3; `node --test scripts/` 58 locally; the live registry, tags and site above.

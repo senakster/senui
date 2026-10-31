@@ -780,3 +780,12 @@ Entry format: date — module · Did · Verified · Scope decisions · Plan adju
 - **Review:** `server-boundary-enforcer`, eight findings: six fixed (token scope in `version-pr`, tags on the version commit, first publish gated once, registry lag, pinned actions, npm check before the gate), two recorded.
 - **Verified:** `pnpm check`; `pnpm test`: tokens 32, react 955, scripts 56; the dry run; the local failing-gate probe.
 - **Next:** Emil's OK for the settings; merge; the CI probe; the Version packages pull request; the manual first publish.
+
+## 2026-10-31 — L10 done: 1.0.0 and 1.0.1 released
+
+- **Context:** #25 (PR 5) and #26 merged. Releasing took #27 to #35: three failed release gates (Firefox and WebKit behaviour, then WebKit under load), a tag push GitHub refused, and a Version packages pull request that was never opened.
+- **Released:** both packages 1.0.0, published by Emil by hand from the gated tarballs, then trusted publishers set up. `@senakster/senui` 1.0.1 (the README on npm) was the first CI release: OIDC, provenance, tags through the API. Tags for all three; the site reads released, 1.0.1.
+- **Fixed on the way:** changelog text per package (#27); Firefox/WebKit tests and a re-runnable first-publish gate (#28); WebKit time allowances (#29, #30); release pushes skip CI's `verify` (#31); tags through the API, no dispatch, the API diff baseline becomes the probes' fixture (#32); the Version packages job looked for any pull request, merged ones included (#34). Details in scope-decisions § L10, "Releasing".
+- **Done:** walked every acceptance criterion; three narrowings (the `0.0.0-stage` versions npm lists, the direct-push probe, the site now at 1.0.1).
+- **Verified:** release run 41185796538; `node --test scripts/` 58; the registry, tags and site.
+- **Next:** L11 (Motion) has no plan yet. Write it in the planner first.
