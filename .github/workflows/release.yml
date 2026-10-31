@@ -82,7 +82,8 @@ jobs:
           git add -A
           git commit -m "Version packages"
           git push --force "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" changeset-release/main
-          if ! gh pr view changeset-release/main --json number > /dev/null 2>&1; then
+          # Open ones only: `gh pr view <branch>` also finds the last, merged Version packages PR.
+          if [ -z "$(gh pr list --head changeset-release/main --state open --json number --jq '.[].number')" ]; then
             gh pr create --base main --head changeset-release/main --title "Version packages" \
               --body "The versions and changelogs from the pending changesets (L10). Merging it releases: the release workflow gates and publishes what it says."
           fi
