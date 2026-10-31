@@ -31,19 +31,29 @@ jobs:
   # which checks the same text.
   changeset-text:
     runs-on: ubuntu-latest
+    outputs:
+      release: ${{ steps.release.outputs.release }}
     steps:
       - uses: actions/checkout@v5
+        with:
+          # `detect` finds the commit that set each version (needs history).
+          fetch-depth: ${{ github.event_name == 'push' && 0 || 1 }}
       - uses: actions/setup-node@v5
         with:
           node-version-file: .node-version
           package-manager-cache: false
       - run: node scripts/check-changesets.mjs
+      # L10: a push that release.yml gates. Its gate runs `pnpm check`, `pnpm test` and the
+      # Storybook gate in three engines, Chromium among them, and deploys the site built as the
+      # release, so `verify` here would only repeat it (Emil, 2026-10-31).
+      - id: release
+        if: github.event_name == 'push'
+        run: node scripts/release.mjs detect
 
   verify:
     needs: changeset-text
+    if: github.event_name != 'push' || needs.changeset-text.outputs.release != 'true'
     runs-on: ubuntu-latest
-    outputs:
-      release: ${{ steps.release.outputs.release }}
     # L08: the pinned Playwright image (same version as the playwright dev dependencies) carries every
     # browser and its OS libraries, so nothing is installed per run, and the forced-colours
     # screenshot baselines are compared in the image they were generated in. Bump it with Playwright.
@@ -79,11 +89,6 @@ jobs:
           node-version-file: .node-version
           cache: pnpm
       - run: pnpm install --frozen-lockfile
-      # L10: a release commit's site is deployed by release.yml, built as the release, after the
-      # publish; this run's unreleased build must not replace it.
-      - id: release
-        if: github.event_name == 'push'
-        run: node scripts/release.mjs detect
       - if: steps.changes.outputs.code == 'false'
         run: pnpm format:check
       - if: steps.changes.outputs.code != 'false'
@@ -115,7 +120,8 @@ jobs:
           path: apps/docs/storybook-static
 
   deploy-storybook:
-    if: github.event_name == 'push' && needs.verify.outputs.release != 'true'
+    # Never on a release push: `verify` is skipped then, and release.yml deploys the release's site.
+    if: github.event_name == 'push' && needs.verify.result == 'success'
     needs: verify
     runs-on: ubuntu-latest
     permissions:
