@@ -7,9 +7,6 @@ name: Changesets
 on:
   pull_request:
     types: [opened, synchronize, reopened, labeled, unlabeled]
-  # The Version packages pull request is opened by Actions, which starts no workflow; the release
-  # job dispatches this one on its branch (L10 PR 5). Dispatched, only the text is checked.
-  workflow_dispatch:
 
 permissions:
   contents: read
@@ -37,10 +34,6 @@ jobs:
       # The label reaches the script through the environment, never interpolated into the command
       # (untrusted text never reaches a shell).
       - name: Check the changesets
-        if: github.event_name == 'pull_request'
         env:
           NO_RELEASE: ${{ contains(github.event.pull_request.labels.*.name, 'no-release') }}
         run: node scripts/check-changesets.mjs --require HEAD^1
-      - name: Check the changesets' text
-        if: github.event_name != 'pull_request'
-        run: node scripts/check-changesets.mjs

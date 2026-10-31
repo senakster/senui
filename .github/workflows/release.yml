@@ -55,7 +55,6 @@ jobs:
     permissions:
       contents: write
       pull-requests: write
-      actions: write
     steps:
       # The install below runs dependencies' scripts, so the write token is neither left in the git
       # config nor in the job's environment: only the last two steps get it.
@@ -87,14 +86,8 @@ jobs:
             gh pr create --base main --head changeset-release/main --title "Version packages" \
               --body "The versions and changelogs from the pending changesets (L10). Merging it releases: the release workflow gates and publishes what it says."
           fi
-      # A pull request opened with Actions' own token starts no workflow, so the required checks
-      # would never run; a dispatch is the one event this token can start. Their check runs attach
-      # to the branch's commit, which is what the ruleset reads.
-      - env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          gh workflow run ci.yml --ref changeset-release/main
-          gh workflow run changesets.yml --ref changeset-release/main
+      # Its pull_request runs wait for a maintainer's approval (Actions opened it), and they are
+      # the checks the ruleset reads (CONTRIBUTING.md, "Releasing").
 
   gate:
     needs: detect
@@ -164,10 +157,9 @@ jobs:
         env:
           # What publish just published: waited for, since npm's cached listing can lag.
           EXPECT: ${{ needs.detect.outputs.publish }}
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          node scripts/release.mjs tag
+          # The tags are created through the API (release.mjs, `createTag`).
+          GITHUB_TOKEN: ${{ github.token }}
+        run: node scripts/release.mjs tag
       # The site says "released" only when npm has every version it describes.
       - id: deployment
         if: steps.tags.outputs.allPublished == 'true'

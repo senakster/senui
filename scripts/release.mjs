@@ -230,6 +230,32 @@ async function publish(dir) {
 }
 
 /**
+ * Creates a tag through GitHub's API, not `git push`: a pushed ref whose workflow files differ from
+ * the default branch's (a workflow changed after the version commit) needs the `workflows`
+ * permission, which Actions' token can never have, and the 1.0.0 tags were refused that way.
+ */
+async function createTag(name, sha) {
+  const response = await fetch(
+    `https://api.github.com/repos/${String(process.env.GITHUB_REPOSITORY)}/git/refs`,
+    {
+      method: 'POST',
+      headers: {
+        accept: 'application/vnd.github+json',
+        authorization: `Bearer ${String(process.env.GITHUB_TOKEN)}`,
+        'x-github-api-version': '2022-11-28',
+      },
+      body: JSON.stringify({ ref: `refs/tags/${name}`, sha }),
+    },
+  );
+  if (!response.ok) {
+    throw new Error(
+      `${name}: GitHub answered ${String(response.status)}: ${await response.text()}\n` +
+        `Push it by hand (CONTRIBUTING.md, "Releasing"): git tag ${name} ${sha} && git push origin refs/tags/${name}`,
+    );
+  }
+}
+
+/**
  * Tags each version npm has, at the commit that set it. `expected` (the versions `publish` just
  * published) is waited for, up to five minutes: npm's cached package document can lag a publish.
  */
@@ -244,8 +270,7 @@ async function tag(expected) {
   }
   const p = plan(packages, npm, remoteTags());
   for (const pkg of p.untagged) {
-    git('tag', tagOf(pkg), versionCommit(pkg));
-    git('push', 'origin', `refs/tags/${tagOf(pkg)}`);
+    await createTag(tagOf(pkg), versionCommit(pkg));
     console.log(`tag: ${tagOf(pkg)}`);
   }
   output({ allPublished: String(p.allPublished) });

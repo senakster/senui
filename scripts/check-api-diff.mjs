@@ -1,5 +1,5 @@
-// L10 decision 5. Compares each package's public surface with its baseline (npm `latest`, or the
-// committed baseline while it is unpublished) and fails when:
+// L10 decision 5. Compares each package's public surface with its baseline (npm `latest`; a package
+// npm has never seen is a first publish, with nothing to compare) and fails when:
 // - the pending bump is lower than the largest difference (a removal or narrowing needs a major, an
 //   addition a minor). The pending bump comes from the changesets; on the version pull request,
 //   where they've been consumed, from the version `package.json` already has;
@@ -8,11 +8,11 @@
 // - the tokens package takes a major and the components package doesn't: the components package's
 //   peer range on the tokens changes, which Changesets alone bumps only as a patch (L10 PR 1 probe).
 //
-// Needs built packages (`pnpm build`). `--write-baseline` rewrites the committed baseline.
+// Needs built packages (`pnpm build`).
 import { readFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { baselineOf, writeBaseline } from './api-diff/baseline.mjs';
+import { baselineOf } from './api-diff/baseline.mjs';
 import {
   componentFacts,
   compare,
@@ -30,12 +30,6 @@ const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const REACT = '@senakster/senui';
 const TOKENS = '@senakster/senui-tokens';
 const EXCEPTIONS = join(root, 'scripts/api-diff/api-exceptions.json');
-
-if (process.argv.includes('--write-baseline')) {
-  writeBaseline(root);
-  console.log('api diff: wrote scripts/api-diff/baseline from the built packages');
-  process.exit(0);
-}
 
 const json = (path) => JSON.parse(readFileSync(path, 'utf8'));
 const today = new Date().toISOString().slice(0, 10);
@@ -77,7 +71,7 @@ const lines = [];
 async function diffPackage(name, dir, facts) {
   let base;
   try {
-    base = await baselineOf(name, dir);
+    base = await baselineOf(name);
   } catch (error) {
     // Offline is only tolerated on a developer's machine; CI must compare.
     if (!process.env.CI && error instanceof TypeError) {
@@ -85,6 +79,11 @@ async function diffPackage(name, dir, facts) {
       process.exit(0);
     }
     throw error;
+  }
+  if (!base) {
+    bumps[name] = pending[name] ?? 'none';
+    lines.push(`api diff: ${name} isn't on npm: a first publish, nothing to compare`);
+    return;
   }
   try {
     const pkg = json(join(root, 'packages', dir, 'package.json'));
