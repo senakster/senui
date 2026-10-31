@@ -16,10 +16,15 @@ Status legend — plan: `plan-ready` · `not-planned` (plan not written yet upst
 | L07 | EmptyState                        | L07-empty-state               | plan-ready  | done           | 2026-10-27   |
 | L08 | Test & a11y gate                  | L08-test-and-a11y-gate        | plan-ready  | done           | 2026-10-27   |
 | L09 | Docs & machine-readable manifest  | L09-docs-and-manifest         | plan-ready  | done           | 2026-10-28   |
-| L10 | Release, versioning & deprecation | L10-release-and-versioning    | plan-ready  | in-progress    | 2026-10-29   |
+| L10 | Release, versioning & deprecation | L10-release-and-versioning    | plan-ready  | done           | 2026-10-31   |
 | L11 | Motion                            | —                             | not-planned | not-started    | 2026-10-15   |
 
 ## Changelog
+
+- **2026-10-31** — L10 done. Both packages are on npm at 1.0.0, published by Emil from the CI-gated tarballs, and `@senakster/senui` 1.0.1 is the first CI release: trusted publishing with provenance, tagged through the API. The site reads released.
+  - **Releasing took nine more PRs (#27 to #35):** changelog text per package; Firefox and WebKit test fixes and time allowances; a first-publish gate that can run again; release pushes skip CI's `verify`; tags created through the API after GitHub refused a pushed tag; no dispatch for the Version packages pull request, whose own runs need Emil's approval; the API diff against npm only.
+  - **Acceptance criteria:** all met, with three narrowings in scope-decisions § L10, "Done": npm's untagged `0.0.0-stage` versions (Emil: leave them), the direct push to `main` not probed, and the site now at 1.0.1.
+  - **Verified:** release run 41185796538 (`pnpm check`, `pnpm test`, three engines, React 18.3); `node --test scripts/` 58.
 
 - **2026-10-29** — L10 PR 5 of 5 (open): the release pipeline (`release.yml`, the release gate in `gate-full.yml`, ADR-0023), the 1.0.0 changeset and eight pinned stale-run exceptions. Repository settings and the `npm` environment wait for Emil; then the manual first publish.
 - **2026-10-29** — L10 PR 4 of 5: a light `changesets` job (a pull request that changes what a package ships needs a changeset or the `no-release` label), changeset text checked as published text, and a gated changelog page per package with an Unreleased section and migration links. Six override rows for review findings accepted as reasoned.
