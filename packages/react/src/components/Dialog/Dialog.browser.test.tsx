@@ -70,8 +70,10 @@ const open = async () => {
   await expect.poll(dialogEl).not.toBeNull();
   return dialogEl() as HTMLDialogElement;
 };
+// Longer than Dialog's own 1 s fallback for an exit animation that never finishes: a loaded runner
+// can stall WebKit's animation until that fallback fires, as the poll's 1 s default gives up.
 const closed = async (dialog: HTMLDialogElement) => {
-  await expect.poll(() => dialog.open).toBe(false);
+  await expect.poll(() => dialog.open, { timeout: 3000 }).toBe(false);
 };
 
 afterEach(async () => {
