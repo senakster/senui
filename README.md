@@ -4,8 +4,12 @@ A small React component library built on plain CSS and design tokens. Components
 finished: every state is designed, accessibility is checked in CI, and each component ships a
 machine-readable accessibility contract.
 
-> **Status: pre-release.** Nothing is published to npm yet. The token package and the component
-> conventions are in place; the first component (Button) is in progress. APIs may change until 1.0.
+> **Status: stable, 1.0.** Both packages are on npm. From 1.0.0 on, nothing is
+> renamed or removed without a major version and a deprecation release before it. See the
+> [changelogs](#releases).
+
+**Docs:** [senakster.github.io/senui](https://senakster.github.io/senui/), with every component's
+props, states and accessibility contract.
 
 ## Packages
 
@@ -13,6 +17,9 @@ machine-readable accessibility contract.
 | --------------------------------------------- | ----------------------------------------------------------------- |
 | [`@senakster/senui-tokens`](packages/tokens/) | Design tokens as CSS custom properties, plus a typed JS map       |
 | [`@senakster/senui`](packages/react/)         | React components, styled by plain CSS stylesheets on those tokens |
+
+The components in 1.0: AlertDialog, Button, Checkbox, CheckboxGroup, Dialog, EmptyState, FormField,
+Switch and TextInput.
 
 ## Quick start
 
@@ -55,6 +62,20 @@ time, theming and overriding styles.
   versions) and what your app still has to do.
 - **Semver means it.** Removing or renaming a prop, export, CSS class or public token is a major
   version, preceded by a release that warns in development and says what to use instead.
+
+## For AI agents and tools
+
+`@senakster/senui` ships its docs as data: `@senakster/senui/components.json` (every component's
+props, values and accessibility contract), `@senakster/senui/llms.txt` and
+`@senakster/senui/llms-full.txt`.
+
+## Releases
+
+Each package has its own changelog: [`@senakster/senui`](packages/react/CHANGELOG.md) and
+[`@senakster/senui-tokens`](packages/tokens/CHANGELOG.md), also on the docs site under
+"Changelog". The two packages are versioned independently, but a major version of the tokens is
+always a major version of the components too. How a release is made is in
+[CONTRIBUTING.md](CONTRIBUTING.md), "Releasing".
 
 ## Requirements
 

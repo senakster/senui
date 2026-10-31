@@ -3,7 +3,8 @@
 senui's React components: native elements, plain CSS on design tokens, and an accessibility
 contract for each component.
 
-> **Pre-release.** Not yet published to npm.
+**Docs:** [senakster.github.io/senui](https://senakster.github.io/senui/), with every component's
+props, states and accessibility contract.
 
 ## Install
 
