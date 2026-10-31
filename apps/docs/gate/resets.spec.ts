@@ -54,6 +54,9 @@ async function rings(page: Page): Promise<{ name: string; ring: boolean }[]> {
 for (const story of loadStories()) {
   test(`resets: ${story.id}`, async ({ page }) => {
     test.skip(Boolean(exceptionFor(story, 'resets')), 'Excepted (exceptions.json)');
+    // Four story loads and up to 30 Tab presses each: a busy story (Button's forced colours) ran
+    // past the default 30 s in WebKit on a loaded runner.
+    test.setTimeout(90_000);
     const failures: string[] = [];
     for (const [label, css] of Object.entries(KEEPS)) {
       await openStory(page, story);
