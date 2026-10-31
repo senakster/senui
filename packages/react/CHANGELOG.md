@@ -1,5 +1,11 @@
 # @senakster/senui
 
+## 1.0.1
+
+### Patch Changes
+
+- 69de17a: The package README no longer says the package is unpublished, and links the docs site.
+
 ## 1.0.0
 
 ### Major Changes
