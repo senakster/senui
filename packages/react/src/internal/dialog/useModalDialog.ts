@@ -54,10 +54,11 @@ export interface ModalDialog {
 }
 
 /**
- * A safety net for an exit animation whose `finished` never settles (L06: "timeout fallback").
- * Longer than the slowest motion token, so it never cuts a running animation short.
+ * How long the safety net waits past the slowest exit animation's own end, for timer jitter. The
+ * net is for an animation whose `finished` never settles (paused, or a zero playback rate); a
+ * running one resolves first.
  */
-const EXIT_TIMEOUT_MS = 1000;
+const EXIT_MARGIN_MS = 100;
 
 /**
  * The behaviour Dialog and AlertDialog share (L06 decisions 1, 3, 4, 5, 9, 11 and 22):
@@ -256,24 +257,46 @@ export function useModalDialog(options: UseModalDialogOptions): ModalDialog {
 }
 
 /**
- * Resolves when the dialog's own exit animations (on the element and its `::backdrop`) finish.
- * Descendants are ignored: a spinner inside would never finish.
+ * Resolves when the dialog's own exit animations (on the element and its `::backdrop`) finish, or
+ * at once when it has none. Descendants and the dialog's other pseudo-elements are ignored: a
+ * spinner inside would never finish.
+ *
+ * The safety net (L06: "timeout fallback") is timed from the animations themselves, not a constant
+ * (L11 decision 9): the longest end time over the playback rate, plus a margin. A consumer who
+ * lengthens the exit, or only the backdrop's, isn't cut short. A zero rate counts as 1, so a
+ * stalled animation still ends. A transition replaced mid-exit settles its `finished` early, so the
+ * animations are read again until none is left.
  */
-function exitFinished(dialog: HTMLDialogElement): Promise<void> {
-  if (typeof dialog.getAnimations !== 'function') return Promise.resolve();
-  const own = dialog.getAnimations({ subtree: true }).filter((animation) => {
+async function exitFinished(dialog: HTMLDialogElement): Promise<void> {
+  if (typeof dialog.getAnimations !== 'function') return;
+  for (;;) {
+    const own = exitAnimations(dialog);
+    if (own.length === 0) return;
+    const net = Math.max(...own.map(({ ms }) => ms)) + EXIT_MARGIN_MS;
+    const settled = await Promise.race([
+      Promise.allSettled(own.map(({ animation }) => animation.finished)).then(() => true),
+      new Promise<false>((resolve) => setTimeout(resolve, net, false)),
+    ]);
+    if (!settled) return;
+  }
+}
+
+/** The dialog's own unfinished, finite animations, each with how long it can take to end. */
+function exitAnimations(dialog: HTMLDialogElement): { animation: Animation; ms: number }[] {
+  const own: { animation: Animation; ms: number }[] = [];
+  for (const animation of dialog.getAnimations({ subtree: true })) {
     const effect = animation.effect;
-    return (
-      effect instanceof KeyframeEffect &&
-      effect.target === dialog &&
-      effect.getComputedTiming().endTime !== Infinity
-    );
-  });
-  if (own.length === 0) return Promise.resolve();
-  return Promise.race([
-    Promise.allSettled(own.map((animation) => animation.finished)).then(() => undefined),
-    new Promise<void>((resolve) => setTimeout(resolve, EXIT_TIMEOUT_MS)),
-  ]);
+    if (!(effect instanceof KeyframeEffect) || effect.target !== dialog) continue;
+    // WebKit reports a `::backdrop` transition's pseudo-element as '' (seen in L11), so only a named
+    // pseudo-element other than the backdrop is left out.
+    if (effect.pseudoElement && effect.pseudoElement !== '::backdrop') continue;
+    if (animation.playState === 'finished' || animation.playState === 'idle') continue;
+    const timing = effect.getComputedTiming().endTime;
+    const end = typeof timing === 'number' ? timing : 0;
+    if (end === Infinity) continue;
+    own.push({ animation, ms: end / (Math.abs(animation.playbackRate) || 1) });
+  }
+  return own;
 }
 
 /**

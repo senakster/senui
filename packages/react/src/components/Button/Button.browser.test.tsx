@@ -3,6 +3,7 @@ import { describe, expect, test, vi } from 'vitest';
 import { commands, userEvent } from 'vitest/browser';
 import { composeStories } from '@storybook/react-vite';
 import { expectNoAxeViolations } from '../../internal/testing/axe.js';
+import { REDUCED, reduceMotion } from '../../internal/testing/motion.js';
 import * as stories from './Button.stories.js';
 import '@senakster/senui-tokens/tokens.css';
 import '../../styles/index.css';
@@ -100,6 +101,41 @@ describe('Button in a browser', () => {
     expect(style.outlineStyle).toBe('solid');
     expect(parseFloat(style.outlineWidth)).toBeGreaterThan(0);
     expect(style.boxShadow).toBe('none');
+  });
+});
+
+// ADR-0024's Essential pattern: the spinner never stops, it slows to a quarter of its speed.
+describe('Button spinner', () => {
+  /**
+   * The spinner's period, read by seeking as the gate does: paused at a quarter and half of its
+   * duration, it has turned a quarter and half of a turn. First, it is running and never ends:
+   * a spinner that stops reads as a hang.
+   */
+  function period(button: HTMLElement): number {
+    const spinner = button.querySelector<HTMLElement>('.senui-button__spinner');
+    const [animation] = spinner?.getAnimations() ?? [];
+    if (!spinner || !animation) throw new Error('the spinner does not animate');
+    const timing = animation.effect?.getComputedTiming();
+    expect(animation.playState).toBe('running');
+    expect(timing?.iterations).toBe(Infinity);
+    const duration = Number(timing?.duration);
+    animation.pause();
+    for (const turn of [0.25, 0.5]) {
+      animation.currentTime = duration * turn;
+      expect(parseFloat(getComputedStyle(spinner).rotate)).toBeCloseTo(360 * turn, 0);
+    }
+    return duration;
+  }
+
+  test('turns once every 960 ms', () => {
+    const { getByRole } = render(<Button loading>Save</Button>);
+    expect(period(getByRole('button'))).toBe(960);
+  });
+
+  test.each(REDUCED)('with %s, it keeps turning, once every 3840 ms', async (how) => {
+    await reduceMotion(how);
+    const { getByRole } = render(<Button loading>Save</Button>);
+    expect(period(getByRole('button'))).toBe(3840);
   });
 });
 

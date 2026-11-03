@@ -4,13 +4,13 @@ Single source of truth for **where the implementation is right now**. Overwritte
 `implement-module` skill at the end of every run. For history, see `log.md`; for status, see
 `docs/PROGRESS.md`.
 
-| Field         | Value                                                                        |
-| ------------- | ---------------------------------------------------------------------------- |
-| Target app    | repo root (pnpm workspace: `packages/tokens`, `packages/react`, `apps/docs`) |
-| Active module | L11 (Motion), in progress                                                    |
-| Sub-step      | PR 1 of 2 built and reviewed (`feat/L11-motion-core`), awaiting Emil         |
-| Last verified | 2026-11-03: `pnpm check`, `pnpm test`, the Chromium gate                     |
-| Updated       | 2026-11-03                                                                   |
+| Field         | Value                                                                                           |
+| ------------- | ----------------------------------------------------------------------------------------------- |
+| Target app    | repo root (pnpm workspace: `packages/tokens`, `packages/react`, `apps/docs`)                    |
+| Active module | L11 (Motion), in progress                                                                       |
+| Sub-step      | PR 1 merged (#37); PR 2 built and reviewed (`feat/L11-motion-runtime`), uncommitted             |
+| Last verified | 2026-11-03: `pnpm check`, `pnpm test`, the Chromium gate, motion browser tests in three engines |
+| Updated       | 2026-11-03                                                                                      |
 
 ## Brief
 
@@ -20,17 +20,13 @@ tagged. The docs site at `https://senakster.github.io/senui/` reads released, 1.
 L11 (plan `.catalogue/library_catalogue/L11-motion.md`, ADR-0024). Emil: Claude writes the
 component files, Emil reviews; two PRs.
 
-- **PR 1** (built, reviewed, triaged): the ADR, the rotation token, `'instant'`, Switch and Button,
-  2.3.3 rows, Stylelint, `packages/react/scripts/motion.mjs` with the contract cross-check, the
-  gate's motion check, re-pinned exceptions, CONVENTIONS section 13, two changesets.
-- **PR 2** (next): the dialog exit fallback from `getComputedTiming().endTime ÷ |playbackRate|` of
-  the dialog's and backdrop's animations plus a margin (`internal/dialog/useModalDialog.ts`,
-  `EXIT_TIMEOUT_MS`); browser tests for Switch (thumb jumps and reaches its end, colour still
-  transitions; read the computed position, a 0 s transition fires no events), Button (960 ms and
-  3840 ms by seeking) and Dialog (2 s and backdrop-only overrides stay open until the exit ends; no
-  exit closes at once), each under reduce and with the factor at 0 without the media query; the
-  Motion docs page (generated per-component table, consumer example story, docs-page gate); re-pin
-  Dialog's and AlertDialog's exceptions again.
+- **PR 1** (merged as #37, `e1cbee4`): the ADR, the rotation token, `'instant'`, Switch and Button,
+  2.3.3 rows, Stylelint, the static check, the gate's motion check, CONVENTIONS section 13.
+- **PR 2** (built, reviewed, triaged; uncommitted on `feat/L11-motion-runtime`): the dialog exit
+  fallback timed from its animations, the browser tests in both reduced modes
+  (`internal/testing/motion.ts`), the Motion docs page with its gated consumer example
+  (`apps/docs/gate/motion-page.spec.ts`), Dialog's and AlertDialog's exceptions re-pinned again, the
+  components changeset extended. Emil kept `.app-panel`.
 
 Releases run from `main` through `release.yml` (CONTRIBUTING.md, "Releasing"): merged changesets
 open the Version packages pull request; merging it runs the full gate, then `publish` (trusted
@@ -57,5 +53,6 @@ publishing, provenance, Emil approves the `npm` environment), then `tag-and-depl
 
 ## Next action
 
-1. Emil: review PR 1 (`feat/L11-motion-core`); commit and open the pull request on his OK.
-2. After it merges: PR 2 from a new branch off `main` (see Brief).
+1. Emil: review PR 2; commit and open the pull request on his OK.
+2. After it merges: L11 done. Walk the acceptance criteria, update `PROGRESS.md`, the log and this
+   checkpoint; then `/modular-web:next-step`.

@@ -106,6 +106,8 @@ export function claimText(
   index: number,
 ): Text;
 export function adaptationRows(adaptation: ManifestAdaptation): { label: string; text: Text }[];
+/** What reduced motion does to the component, without the full stop (the Motion docs page). */
+export function reducedMotionText(adaptation: ManifestAdaptation): Text;
 export function testRunRows(
   manifest: Manifest,
   component: ManifestComponent,

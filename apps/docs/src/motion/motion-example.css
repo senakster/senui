@@ -1,0 +1,22 @@
+/* A panel that slides up and fades in when it appears. The distance is multiplied by
+   --senui-motion-reduce, so under reduced motion, or with the factor set to 0, only the fade
+   remains. */
+.app-panel {
+  margin-block-start: var(--senui-space-3);
+  padding: var(--senui-space-4);
+  border: var(--senui-border-width-default) solid var(--senui-color-border-default);
+  border-radius: var(--senui-radius-md);
+  opacity: 1;
+  translate: 0 0;
+  transition-property: opacity, translate;
+  transition-duration: var(--senui-motion-duration-moderate);
+  transition-timing-function: var(--senui-motion-easing-enter);
+}
+
+/* Where the entry starts. Browsers without @starting-style show the panel at once. */
+@starting-style {
+  .app-panel {
+    opacity: 0;
+    translate: 0 calc(var(--senui-motion-distance-sm) * var(--senui-motion-reduce));
+  }
+}

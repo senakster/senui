@@ -64,13 +64,8 @@ remain. Components that use these tokens respect the preference without any code
 
 senui components also multiply every movement by `--senui-motion-reduce`, which is `0` under
 reduced motion. Because of that, overriding a distance can't bring motion back for those users.
-Your own wrapper elements and animations should do the same:
-
-```css
-.my-panel {
-  translate: 0 calc(var(--senui-motion-distance-md) * var(--senui-motion-reduce));
-}
-```
+The <a href="./?path=/docs/motion--docs" target="_top">Motion</a> page says what each component
+does, how to do the same in your own CSS, and how to offer reduced motion as an in-app setting.
 
 ## Contrast
 

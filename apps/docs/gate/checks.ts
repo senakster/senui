@@ -168,4 +168,12 @@ export const GATE_CHECKS: readonly GateCheck[] = [
       "every docs page's surface changes between light and dark, and each framed story takes the page's colour scheme",
     criteria: [],
   },
+  // L11: the advice on the Motion page, run as the page gives it.
+  {
+    title: 'Motion page',
+    spec: 'motion-page.spec.ts',
+    checks:
+      "the Motion page's table carries each component's contract wording, and its consumer example slides in by default and only fades under reduced motion and with `--senui-motion-reduce` at 0 and no media query",
+    criteria: [],
+  },
 ];
