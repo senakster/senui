@@ -165,6 +165,12 @@ export const a11y = defineA11yContract<DialogProps>()({
       how: 'Native dialog role, modal through showModal(); name from the title or a required aria-label / aria-labelledby.',
       evidence: ['automated', 'screen reader'],
     },
+    {
+      criterion: '2.3.3',
+      claim: 'enables',
+      how: 'Under reduced motion or with `--senui-motion-reduce` at 0, the dialog and its backdrop only fade in and out; the slide and the scale are removed (ADR-0024).',
+      evidence: ['automated'],
+    },
   ],
   testedWith: [
     {

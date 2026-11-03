@@ -1,6 +1,8 @@
 // ADR-0007, amended by ADR-0009: component CSS uses tokens only (principle 4), and base selectors
 // stay overridable (ADR-0001). Run on packages/react/src/**/*.css by `pnpm lint`; the docs app's
 // CSS and the generated tokens.css are not component CSS.
+import { MOVEMENT, NOT_MOVEMENT } from './packages/react/scripts/motion.mjs';
+
 const TOKEN = String.raw`var\(--senui-[a-z0-9-]+\)`;
 const KEYWORDS = ['inherit', 'initial', 'unset', 'revert', 'none'];
 const TOKEN_VALUE = [new RegExp(`^${TOKEN}$`), ...KEYWORDS];
@@ -10,6 +12,24 @@ const TOKEN_LIST = [new RegExp(`^${TOKEN}(\\s*,\\s*${TOKEN})*$`), ...KEYWORDS];
 // don't trip it.
 const EASING_KEYWORD =
   /(?<![\w-])(ease|ease-in|ease-out|ease-in-out|linear|step-start|step-end)(?![\w-])/;
+
+// ADR-0024: a transition's duration is a duration token, alone (Removed: the moved value carries
+// the factor) or times the reduce factor (Instant); an animation's is the rotation token slowed by
+// it (Essential). Only duration tokens, never a component or private property: one source (the
+// rejected wider list is in OVERRIDES.md). Comma-separated; whitespace, line breaks included, between
+// the parts.
+const DURATION = String.raw`var\(--senui-motion-duration-[a-z]+\)`;
+const REDUCE = String.raw`var\(--senui-motion-reduce\)`;
+const listOf = (item) => [new RegExp(String.raw`^${item}(\s*,\s*${item})*$`)];
+const TRANSITION_DURATION = listOf(
+  String.raw`(?:${DURATION}|calc\(\s*${DURATION}\s*\*\s*${REDUCE}\s*\))`,
+);
+const ANIMATION_DURATION = listOf(
+  String.raw`calc\(\s*var\(--senui-motion-duration-rotation\)\s*\*\s*\(\s*4\s*-\s*3\s*\*\s*${REDUCE}\s*\)\s*\)`,
+);
+// ADR-0024: `transition-property` names movement or a property classified as not moving; anything
+// else is classified (packages/react/scripts/motion.mjs) before it ships.
+const TRANSITION_PROPERTY = listOf(`(?:${[...MOVEMENT, ...NOT_MOVEMENT].join('|')})`);
 
 // Four space-separated values (`margin: 0 1rem 0 2rem`): top, right, bottom, left. A token value
 // with commas or nested parentheses is one value, so split on whitespace outside parentheses.
@@ -59,6 +79,8 @@ export default {
     'declaration-property-value-disallowed-list': {
       '/.*/': [/--senui-primitive-/, /--senui-color-[a-z]+-\d+/],
       '/^(transition|animation)$/': [EASING_KEYWORD],
+      // ADR-0024: a keyframes name is named outright, so the motion check can find its keyframes.
+      'animation-name': [/var\(/],
       // L08 decision 10: inline-direction values and four-value shorthands are physical, so they
       // don't mirror in right-to-left text. Use `start`/`end` and the logical longhands.
       'text-align': [/^(left|right)$/],
@@ -75,7 +97,13 @@ export default {
       /^(left|right)$/,
       /^(margin|padding|border|inset|scroll-margin|scroll-padding)-(left|right)(-|$)/,
       /^border-(top|bottom)-(left|right)-radius$/,
+      // ADR-0024: the shorthands would carry a duration past the rule on the longhands below.
+      'transition',
+      'animation',
     ],
+    // ADR-0024: reduced motion goes through --senui-motion-reduce, which a consumer can also set.
+    // A media block is a second mechanism their setting can't reach.
+    'media-feature-name-disallowed-list': ['prefers-reduced-motion'],
     // Properties whose raw values use no unit or colour function, so the rules above can't see them.
     'declaration-property-value-allowed-list': {
       font: TOKEN_VALUE,
@@ -88,6 +116,10 @@ export default {
       'box-shadow': TOKEN_LIST,
       'transition-timing-function': TOKEN_VALUE,
       'animation-timing-function': TOKEN_VALUE,
+      'transition-duration': TRANSITION_DURATION,
+      'animation-duration': ANIMATION_DURATION,
+      // Neither `all` nor `var()`: every moving property is named, so the motion check sees it.
+      'transition-property': [...TRANSITION_PROPERTY, 'none'],
     },
   },
 };

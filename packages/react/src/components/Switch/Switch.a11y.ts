@@ -74,7 +74,8 @@ export const a11y = defineA11yContract<SwitchProps>()({
     targetSize: 'min-24',
     activatesOn: 'click',
     forcedColors: 'system-colour',
-    reducedMotion: 'motion-factor',
+    // ADR-0024: the thumb's side is the state, so under reduced motion it jumps rather than vanishes.
+    reducedMotion: 'instant',
     rtl: 'mirrors',
     textOverflow: 'wraps',
   },
@@ -120,6 +121,12 @@ export const a11y = defineA11yContract<SwitchProps>()({
       claim: 'meets',
       how: 'Switch role on a native checkbox; checked state; name from a label or a required aria-label / aria-labelledby.',
       evidence: ['automated', 'screen reader'],
+    },
+    {
+      criterion: '2.3.3',
+      claim: 'enables',
+      how: 'Under reduced motion or with `--senui-motion-reduce` at 0, the thumb changes side at once, without animating; only its colour fades (ADR-0024).',
+      evidence: ['automated'],
     },
   ],
   testedWith: [

@@ -406,7 +406,7 @@ export interface ManifestAdaptation {
   readonly forcedColors: OpenEnum<'border' | 'system-colour' | 'no-states'>;
   readonly rtl: OpenEnum<'mirrors' | 'direction-neutral'>;
   readonly textOverflow: OpenEnum<'wraps' | 'truncates'>;
-  readonly reducedMotion: OpenEnum<'motion-factor' | 'no-motion'>;
+  readonly reducedMotion: OpenEnum<'motion-factor' | 'instant' | 'no-motion'>;
   /** The one animation kept under reduced motion, on purpose. */
   readonly essentialMotion?: OpenEnum<'progress-rotation'>;
 }

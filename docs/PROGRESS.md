@@ -17,9 +17,11 @@ Status legend — plan: `plan-ready` · `not-planned` (plan not written yet upst
 | L08 | Test & a11y gate                  | L08-test-and-a11y-gate        | plan-ready  | done           | 2026-10-27   |
 | L09 | Docs & machine-readable manifest  | L09-docs-and-manifest         | plan-ready  | done           | 2026-10-28   |
 | L10 | Release, versioning & deprecation | L10-release-and-versioning    | plan-ready  | done           | 2026-10-31   |
-| L11 | Motion                            | —                             | not-planned | not-started    | 2026-10-15   |
+| L11 | Motion                            | L11-motion                    | plan-ready  | in-progress    | 2026-11-03   |
 
 ## Changelog
+
+- **2026-11-03** — L11 in progress, PR 1 of 2 (`feat/L11-motion-core`). ADR-0024 makes motion three patterns through `--senui-motion-reduce`: Removed (Dialog), Instant (Switch, a new contract value `'instant'`), Essential (Button's spinner, on a new `--senui-motion-duration-rotation` token). Stylelint and `check-component-css.mjs` enforce the patterns and cross-check each contract; the gate fails unknown values and checks the spinner as a z-axis rotation in place, four times slower. Switch's thumb colour now keeps its fade under reduced motion. Four `stale-run` exceptions re-pinned. Review: three reviewers, findings merged and triaged with Emil, all accepted but two rejections (`OVERRIDES.md`) and one non-defect; `@property` for the factor deferred. Next: PR 2 (dialog exit fallback, browser tests, Motion docs page).
 
 - **2026-10-31** — L10 done. Both packages are on npm at 1.0.0, published by Emil from the CI-gated tarballs, and `@senakster/senui` 1.0.1 is the first CI release: trusted publishing with provenance, tagged through the API. The site reads released.
   - **Releasing took nine more PRs (#27 to #35):** changelog text per package; Firefox and WebKit test fixes and time allowances; a first-publish gate that can run again; release pushes skip CI's `verify`; tags created through the API after GitHub refused a pushed tag; no dispatch for the Version packages pull request, whose own runs need Emil's approval; the API diff against npm only.

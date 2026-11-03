@@ -193,13 +193,25 @@ export type Adaptation = {
   readonly textOverflow: 'wraps' | 'truncates';
 } & (
   | {
-      /** ADR-0005: movement is scaled by `--senui-motion-reduce`, so it stops under reduced motion. */
+      /**
+       * ADR-0024, the Removed pattern: the moved value is multiplied by `--senui-motion-reduce`, so
+       * under reduced motion the movement is removed; colour and opacity keep their duration.
+       */
       readonly reducedMotion: 'motion-factor';
       /**
        * ADR-0017: the one animation the component keeps under reduced motion, on purpose.
        * `'progress-rotation'`: an in-place rotation that shows work is in progress (a spinner).
        */
       readonly essentialMotion?: 'progress-rotation';
+    }
+  | {
+      /**
+       * ADR-0024, the Instant pattern: the end position carries meaning (a switch's thumb), so only
+       * the movement's duration is multiplied by `--senui-motion-reduce`; under reduced motion it
+       * changes position at once, without animating.
+       */
+      readonly reducedMotion: 'instant';
+      readonly essentialMotion?: never;
     }
   | {
       /** The component moves nothing, in either mode. */

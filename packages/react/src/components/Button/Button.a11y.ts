@@ -76,6 +76,7 @@ export const a11y = defineA11yContract<ButtonProps>()({
     RESPONSIBILITIES.labelInName,
     'Announce the outcome of an action that sets `loading`: Button stays silent so it never announces twice.',
     'While loading or `aria-disabled`, Button ignores click activation (`onClick`, `onClickCapture`); pointer handlers and native listeners on its ref still fire, so keep actions in click handlers.',
+    'End or time out every loading state: the spinner turns for as long as `loading` is set (WCAG 2.2.2).',
   ],
   adaptation: {
     targetSize: 'min-24',
@@ -140,6 +141,18 @@ export const a11y = defineA11yContract<ButtonProps>()({
       criterion: '2.5.2',
       claim: 'meets',
       how: 'Activates on click, the up event.',
+      evidence: ['automated'],
+    },
+    {
+      criterion: '2.2.2',
+      claim: 'enables',
+      how: 'The spinner is a progress indicator: it shows only while `loading` is set, so it is essential to the activity and needs no pause control, and the app ends or times out the loading state. Button offers no other way to stop it while it shows for more than 5 seconds.',
+      evidence: ['automated'],
+    },
+    {
+      criterion: '2.3.3',
+      claim: 'enables',
+      how: 'Nothing moves under reduced motion or with `--senui-motion-reduce` at 0, except the spinner, which turns in place four times slower (ADR-0017, ADR-0024). It is essential: the label is hidden while loading, and a stopped spinner reads as a hang. It neither translates nor scales, and it covers a small area.',
       evidence: ['automated'],
     },
   ],

@@ -87,6 +87,30 @@ describe('A11yContract', () => {
     });
   });
 
+  test('instant motion keeps nothing moving (ADR-0024)', () => {
+    void define({
+      ...minimal,
+      adaptation: { ...minimal.adaptation, reducedMotion: 'instant' },
+    });
+    void define({
+      ...minimal,
+      adaptation: {
+        ...minimal.adaptation,
+        reducedMotion: 'instant',
+        // @ts-expect-error -- an instant component jumps; it has no motion to keep
+        essentialMotion: 'progress-rotation',
+      },
+    });
+    void define({
+      ...minimal,
+      adaptation: {
+        ...minimal.adaptation,
+        // @ts-expect-error -- not a reduced-motion pattern
+        reducedMotion: 'stops',
+      },
+    });
+  });
+
   test('every section is required', () => {
     const { adaptation: _omitted, ...missingASection } = minimal;
     // @ts-expect-error -- adaptation is required (ADR-0008)
