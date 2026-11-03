@@ -820,7 +820,7 @@
     },
     "duration": {
       "$type": "duration",
-      "$description": "Not reduced under reduced motion, so opacity fades remain.",
+      "$description": "Not reduced under reduced motion, so colour and opacity changes keep their duration. Where a movement's end position carries meaning, multiply only that movement's duration by motion.reduce (ADR-0024).",
       "fast": {
         "$value": {
           "value": 120,
@@ -836,6 +836,13 @@
       "slow": {
         "$value": {
           "value": 320,
+          "unit": "ms"
+        }
+      },
+      "rotation": {
+        "$description": "One turn of essential continuous rotation (a progress spinner), and nothing else. Slow it by the factor rather than stopping it: × (4 − 3 × motion.reduce) (ADR-0017, ADR-0024).",
+        "$value": {
+          "value": 960,
           "unit": "ms"
         }
       }

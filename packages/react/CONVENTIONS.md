@@ -419,6 +419,37 @@ props that exist; a component can't name itself);
 text, examples); and `scripts/check-a11y-contracts.mjs` in `pnpm check`, which fails a component
 without one.
 
+## 13. Motion
+
+[ADR-0024](../../docs/decisions/0024-motion-patterns.md). **Movement** is a change in any property
+of the list in [`scripts/motion.mjs`](scripts/motion.mjs): transforms, insets and margins (physical
+and logical) and sizes. Colour and opacity are not movement and keep their duration under reduced
+motion. Every movement follows one pattern, through `--senui-motion-reduce` (1, and 0 under reduced
+motion or when a consumer sets it):
+
+| Pattern   | Use it when                                        | Write                                                                                                                                    | Contract                                                      |
+| --------- | -------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------- |
+| Removed   | The motion decorates a change (enter, exit)        | Multiply the moved value: `translate: 0 calc(var(--senui-motion-distance-md) * var(--senui-motion-reduce))`                              | `reducedMotion: 'motion-factor'`                              |
+| Instant   | The end position is the state (a thumb's side)     | Multiply only the movement's duration, in the slot `transition-property` pairs with it; colour keeps its own duration                    | `reducedMotion: 'instant'`                                    |
+| Essential | The motion is the information (a progress spinner) | `@keyframes` of `rotate` alone, `animation-duration: calc(var(--senui-motion-duration-rotation) * (4 - 3 * var(--senui-motion-reduce)))` | `'motion-factor'` with `essentialMotion: 'progress-rotation'` |
+
+- A component declares the strictest pattern among its elements (`instant` over `motion-factor`), or
+  `'no-motion'`.
+- No `@media (prefers-reduced-motion)`: a consumer's factor can't reach it.
+- Longhands only (`transition-property`, `transition-duration`…), with `transition-duration` in the
+  same rule as `transition-property`. `transition-property` names each property outright, from the
+  movement list or the not-moving list in `scripts/motion.mjs` (no `all`, no `var()`); a property on
+  neither list is classified there first.
+- Colour and opacity transitions keep their duration: never multiply theirs by the factor.
+- A state rule that changes only `transition-duration` keeps the factor in every Instant slot.
+- New motion is a per-component decision with its own manual runs: changing CSS makes a component's
+  runs stale (ADR-0022).
+
+**Enforced by:** Stylelint (durations, transitioned properties, shorthands, the media feature);
+`scripts/check-component-css.mjs` in `pnpm check`, which finds each movement's pattern and fails a
+contract that doesn't declare it (it proves the factor is present, not that it zeroes the
+movement); and the gate's motion check (below), which is the proof.
+
 ## The a11y gate (L08)
 
 Every story is also checked by the gate in `apps/docs/gate/`: Playwright over the **built**
@@ -434,8 +465,9 @@ What it checks, on every story, from the component's contract:
 - reflow at 320 px (the component never scrolls sideways or pushes the page past the viewport) and
   WCAG's text-spacing overrides (no clipped, spilling or overlapping text);
 - `reducedMotion`: every animation from first paint, through the play function and a run of focus
-  moves; only `essentialMotion` (ADR-0017) may move under reduced motion, and a `no-motion`
-  component never moves (colour and opacity aren't motion);
+  moves; nothing moves under reduced motion but an `essentialMotion` (ADR-0017) rotation, sampled
+  at 0, ¼ and ½ of its period as a pure rotation with a fixed centre; a `no-motion` component never
+  moves; an unknown value fails (section 13, "Motion");
 - `rtl: 'mirrors'`: boxes and pseudo-element offsets mirror when `<html dir>` flips (and Stylelint
   rejects physical properties and `:dir()`, ADR-0018);
 - a tab walk at two viewports: keyboard focus, never inside `aria-hidden` or `inert`, named, not

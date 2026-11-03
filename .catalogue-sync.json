@@ -3,7 +3,7 @@
   "profile": "library",
   "progress": "docs/PROGRESS.md",
   "pluginVersion": "0.3.0",
-  "syncedAt": "2026-10-28",
+  "syncedAt": "2026-11-03",
   "files": {
     "library_catalogue/L00-workspace-and-harness.md": {
       "target": ".catalogue/library_catalogue/L00-workspace-and-harness.md",
@@ -19,7 +19,7 @@
     },
     "library_catalogue/L03-button.md": {
       "target": ".catalogue/library_catalogue/L03-button.md",
-      "sha256": "6d829b8912d31259711df5d91c43bebb654db3f503a71db547963290449904aa"
+      "sha256": "fd27ef6394f4f9c87490f365d0263475ab2cbcc219f015f7d2474511e122cddb"
     },
     "library_catalogue/L04-formfield-and-textinput.md": {
       "target": ".catalogue/library_catalogue/L04-formfield-and-textinput.md",
@@ -27,7 +27,7 @@
     },
     "library_catalogue/L05-checkbox-and-switch.md": {
       "target": ".catalogue/library_catalogue/L05-checkbox-and-switch.md",
-      "sha256": "c9e874f3e3406dd98b245ac7464b1aaeecb12c58669b1c75ce569998499f9ba2"
+      "sha256": "c770ef31e19fe54a82b3896dbf8db495043859eae91615b46a917ab5ebbd54bb"
     },
     "library_catalogue/L06-dialog.md": {
       "target": ".catalogue/library_catalogue/L06-dialog.md",
@@ -39,19 +39,23 @@
     },
     "library_catalogue/L08-test-and-a11y-gate.md": {
       "target": ".catalogue/library_catalogue/L08-test-and-a11y-gate.md",
-      "sha256": "a9e0fd63a0219a9c5deb8e701244930f9e31ebfb2b1cdec43b3d1bd45c192da9"
+      "sha256": "f2df949b77c8dd9ffe9655b968e736287df5bdebefef150aa6399908040d53ae"
     },
     "library_catalogue/L09-docs-and-manifest.md": {
       "target": ".catalogue/library_catalogue/L09-docs-and-manifest.md",
-      "sha256": "8ca445279a5ae75dd140bb1d608f69288d640d1d105b276a7569b47db57b35e9"
+      "sha256": "1a7f02b0c7dfcdca4bc236bf44e728c6eed2434a7d6cae16021cbd839b44947f"
     },
     "library_catalogue/L10-release-and-versioning.md": {
       "target": ".catalogue/library_catalogue/L10-release-and-versioning.md",
-      "sha256": "370c2727e0884ecba1e0a0f7a88289a55c13fc3b51046ec6b9de180fafa87141"
+      "sha256": "a95c9f86d67608a58c66b2154031d1833618ecb610cd05e94a53545bfe1bbab2"
+    },
+    "library_catalogue/L11-motion.md": {
+      "target": ".catalogue/library_catalogue/L11-motion.md",
+      "sha256": "140664d2e299369f6c9068ef92b05c1d5cb6a89e09a38d9acbde6e14ba02d7d3"
     },
     "library_catalogue/PLAN.md": {
       "target": ".catalogue/library_catalogue/PLAN.md",
-      "sha256": "0acf9eba3d67fae23895bfe45bbdb0dac92a69a56a1e19f2f281a4673139e4d6"
+      "sha256": "c9afc2a538d27e9729dee1588fbcc7692d37f19320f42bb15cd5406ebc71df06"
     }
   }
 }

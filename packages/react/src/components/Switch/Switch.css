@@ -56,9 +56,10 @@
     transition-timing-function: var(--senui-motion-easing-standard);
   }
 
-  /* The thumb's position is the non-colour cue (WCAG 1.4.1). Under reduced motion it still moves
-     the whole way, instantly: --senui-motion-reduce scales the duration, never the distance,
-     because the position is the state (L05 open question 1, resolved). */
+  /* The thumb's position is the non-colour cue (WCAG 1.4.1). ADR-0024's Instant pattern: under
+     reduced motion it still moves the whole way, at once, because the position is the state.
+     --senui-motion-reduce scales the movement's duration, never its distance; durations pair with
+     the properties by index, so the thumb's colour keeps its full duration. */
   :where(.senui-switch__control)::before {
     content: '';
     box-sizing: border-box;
@@ -67,7 +68,9 @@
     border-radius: var(--senui-radius-full);
     background-color: var(--senui-switch-thumb);
     transition-property: margin-inline-start, background-color;
-    transition-duration: calc(var(--senui-motion-duration-fast) * var(--senui-motion-reduce));
+    transition-duration:
+      calc(var(--senui-motion-duration-fast) * var(--senui-motion-reduce)),
+      var(--senui-motion-duration-fast);
     transition-timing-function: var(--senui-motion-easing-standard);
   }
 

@@ -2274,3 +2274,83 @@ Evidence per group:
 
 **Verified:** the 1.0.1 release run (41185796538): `pnpm check`, `pnpm test`, the three-engine
 gate and React 18.3; `node --test scripts/` 58 locally; the live registry, tags and site above.
+
+## L11 — Motion
+
+Plan written in the planner on 2026-10-31 with Emil:
+
+- **Review:** `wcag-auditor`, `modern-web-curator` and `component-api-reviewer`, 30 findings, all
+  adopted.
+- **Read by Emil** and marked plan-ready on 2026-11-03.
+- **Synced** the same day, together with the L10 field report's plan updates (L03, L05, L08, L09,
+  L10, PLAN.md).
+
+Day-one probes (2026-11-03):
+
+- **`sourceHash` and `adaptation`:** only `announcements` and `keyboard` are fingerprinted, so
+  Switch's new contract value alone changes nothing. Its CSS edit does.
+- **`internal/dialog/` is in Dialog's and AlertDialog's value-import graph.** Both also changed in
+  PR 1 already: Dialog's stylesheet imports Button's, so Button's CSS and its new token read reach
+  them. All four exceptions (Button, Switch, Dialog, AlertDialog) re-pin in PR 1, and Dialog's and
+  AlertDialog's again in PR 2.
+- **The manifest's `css.tokens`** lists only the component tokens a component declares, not the
+  semantic tokens it reads. Button's new token read is invisible to the API diff; decision 10
+  stands.
+
+| Deliverable / criterion                                                  | Decision                                                                                                                                                                                                                                                                                                                            | Reason                                                                    | Re-include when                                           |
+| ------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------- | --------------------------------------------------------- |
+| Component files (Switch and Button CSS and contracts, the browser tests) | in, Claude writes and Emil reviews                                                                                                                                                                                                                                                                                                  | Emil, 2026-11-03 (as in L03 to L10)                                       | —                                                         |
+| Delivery                                                                 | in: two PRs. <ol><li>ADR, token, contract value, wording, manifest, Switch and Button, Stylelint, the check script, the gate, the exceptions, CONVENTIONS, both changesets</li><li>The dialog exit fallback, the browser tests, the Motion docs page</li></ol>                                                                      | Emil, 2026-11-03                                                          | —                                                         |
+| `transition` and `animation` shorthands                                  | changed: banned outright (Stylelint `property-disallowed-list`). The plan had them as already restricted; they weren't, and a shorthand would carry a duration past the longhand rule. No component used one                                                                                                                        | Found implementing PR 1                                                   | A component needs a shorthand the longhands can't express |
+| Imported stylesheets in the static check                                 | changed: an imported component stylesheet counts toward the importing component only when its root wears that component's root class (AlertDialog is a `senui-dialog`). Dialog imports Button's stylesheet because it renders Buttons; counting it made Dialog Essential. This is how the gate attributes motion (the nearest root) | Found implementing PR 1                                                   | A component composes another's motion some other way      |
+| `transition-duration` beside `transition-property`                       | changed: the static check requires both in one rule when a movement is transitioned. Pairing across rules would need the cascade; every component already writes them together                                                                                                                                                      | Found implementing PR 1                                                   | —                                                         |
+| Essential motion in the docs wording                                     | changed: folded into the "Reduced motion" row ("its movement is removed, except its progress spinner, which keeps turning, four times slower; …"), and the separate "Essential motion" row is gone, as the plan's wording implies                                                                                                   | Plan wording                                                              | —                                                         |
+| "stops" grep                                                             | narrowed to motion wording. Two unrelated hits remain in generated output: Switch's `aria-invalid` state ("the explicit value stops a native custom validity being announced") and an EmptyState CSS comment                                                                                                                        | Neither is about motion; rewording Emil's contract text isn't L11's scope | —                                                         |
+| The tokens peer range                                                    | no change: `workspace:^` packs as `^1.1.0` once the release versions tokens, so a consumer can't pair the new Button CSS with tokens 1.0                                                                                                                                                                                            | ADR-0021                                                                  | —                                                         |
+
+### PR 1 review (2026-11-03)
+
+`component-api-reviewer`, `wcag-auditor` and `modern-web-curator` reviewed PR 1, read-only.
+Merged across reviewers, Emil triaged them in two batches:
+
+- **Accepted, the static check:**
+  - Resting values were too loose: `1rem` counted as rest. Now only `none`, `auto`, `0` and a
+    unitless `1` rest.
+  - The Instant and Essential duration forms were interchangeable. Each property now takes only
+    its own form.
+  - Movement on properties outside the list went unseen. The list is wider, and Stylelint's
+    `transition-property` is an allow-list, with no `var()` in it or in `animation-name`.
+  - A rule that sets only durations could undo an Instant slot.
+  - Shorthand families were one-way, and physical and logical properties weren't linked.
+  - `var()` fallbacks could bypass the factor.
+  - One part of a multi-value `translate` could go unscaled.
+  - A comment in a `.tsx` could attribute an import, and the import walk had no visited set.
+- **Accepted, the gate:**
+  - A 3D `rotate` axis and a far `transform-origin` passed as rotation. Now:
+    - the sampled `rotate` must be about the z-axis;
+    - the origin must be the element's centre;
+    - a ⅛ sample is added.
+  - Round-trip keyframes were invisible. Now ¼, ½ and ¾ samples are read for every animation.
+  - The essential period wasn't checked. Under reduced motion it must now be 4× the rotation
+    token.
+- **Accepted, contract and wording:**
+  - The changeset now states the tokens floor, the new rows and responsibility, Switch's value
+    change, and the wording change.
+  - Button's 2.2.2 and 2.3.3 `how` texts give the essential and 5-second reasoning.
+  - Switch, Dialog and AlertDialog gain 2.3.3 `enables` rows.
+  - "Colour and opacity keep their duration" is now enforced: a non-movement transition carrying
+    the factor fails. Instant reads "its position changes at once, without animating; colour
+    changes keep their duration".
+- **Rejected (two rows in `OVERRIDES.md`):**
+  - qualifying "four times slower" for fractional factors;
+  - a wider duration allow-list.
+- **Not a defect:** the "dead `split('; ')`" finding. The `motion-factor` clause does contain
+  `'; '`, and the built Button docs show the join.
+- **Engine note for PR 2:** a 0 s transition fires no transition events and creates no
+  `CSSTransition`. Tests of an Instant thumb read the computed position; they never wait for
+  `transitionend`.
+
+| Deliverable / criterion                             | Decision                                                                                            | Reason                                                                         | Re-include when                                     |
+| --------------------------------------------------- | --------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------ | --------------------------------------------------- |
+| Switch toggled and the factor at 0 in the gate      | out: PR 2's browser tests cover both, in both modes and with the factor set without the media query | Emil, 2026-11-03: each gate mode is about 226 runs in three engines at release | A browser test can't reach a case the gate would    |
+| `@property` registration of `--senui-motion-reduce` | out                                                                                                 | Emil, 2026-11-03: a tokens pipeline change and an ADR, beyond consolidate-only | A consumer reports a broken spinner or factor value |

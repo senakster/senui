@@ -3,9 +3,12 @@
 // - every other stylesheet under src/ is entirely inside one `@layer senui.components { … }` block,
 //   so no senui rule can land unlayered and beat a consumer's override;
 // - every `@container` query names a senui- container its own stylesheet declares, and uses rem on
-//   size features only (ADR-0016), which no built-in Stylelint rule can see.
+//   size features only (ADR-0016), which no built-in Stylelint rule can see;
+// - every movement follows one of ADR-0024's patterns, and the component's contract declares it.
 import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import { join, relative } from 'node:path';
+import { withModuleLoader } from '../packages/react/scripts/docs/load.mjs';
+import { expectedAdaptation, motionPatterns } from '../packages/react/scripts/motion.mjs';
 
 const SRC = 'packages/react/src';
 const ENTRY = join(SRC, 'styles/index.css');
@@ -128,10 +131,71 @@ for (const file of cssFiles(SRC)) {
   }
 }
 
+// ADR-0024: each component's motion follows a pattern (packages/react/scripts/motion.mjs), and its
+// contract declares the strictest one found. Contracts load the way the docs generator loads them.
+// An imported stylesheet counts when the component's root wears that component's root class
+// (AlertDialog is a `senui-dialog`); otherwise the import is for a component it renders inside it
+// (Dialog's Buttons), whose motion is judged by its own contract, as the gate judges it.
+const rootClassOf = (component) =>
+  `senui-${component.replace(/(?<=[a-z])(?=[A-Z])/g, '-').toLowerCase()}`;
+const sheetsOf = (
+  component,
+  file = join(SRC, 'components', component, `${component}.css`),
+  seen = new Set(),
+) => {
+  if (seen.has(file)) return [];
+  seen.add(file);
+  const css = readFileSync(file, 'utf8');
+  // The component's source without comments, so a comment naming a class doesn't count.
+  const source = readFileSync(join(SRC, 'components', component, `${component}.tsx`), 'utf8')
+    .replace(/\/\*[\s\S]*?\*\/|\/\/[^\n]*/g, '')
+    .replace(/`/g, '"');
+  const imported = [...stripComments(css).matchAll(/@import\s+['"]\.\.\/([^/'"]+)\/\1\.css['"]/g)]
+    .map(([, other]) => other)
+    .filter((other) => new RegExp(`['"\\s]${rootClassOf(other)}['"\\s]`).test(source));
+  return [
+    { name: relative(SRC, file), css },
+    ...imported.flatMap((other) =>
+      sheetsOf(component, join(SRC, 'components', other, `${other}.css`), seen),
+    ),
+  ];
+};
+const found = {};
+for (const component of componentDirs) {
+  const file = join(SRC, 'components', component, `${component}.css`);
+  if (!existsSync(file)) {
+    found[component] = new Set();
+    continue;
+  }
+  const { patterns, errors: motionErrors } = motionPatterns(sheetsOf(component));
+  errors.push(...motionErrors);
+  found[component] = patterns;
+}
+await withModuleLoader('packages/react', async (load) => {
+  for (const component of componentDirs) {
+    const path = `/src/components/${component}/${component}.a11y.ts`;
+    if (!existsSync(join('packages/react', path))) continue;
+    const { a11y } = await load(path);
+    const expected = expectedAdaptation(found[component]);
+    if ('error' in expected) {
+      errors.push(`${component}: ${expected.error}`);
+      continue;
+    }
+    const { reducedMotion, essentialMotion } = a11y.adaptation;
+    if (reducedMotion !== expected.reducedMotion || essentialMotion !== expected.essentialMotion) {
+      const show = (a) =>
+        `reducedMotion: '${a.reducedMotion}'${a.essentialMotion ? `, essentialMotion: '${a.essentialMotion}'` : ''}`;
+      errors.push(
+        `${component}.a11y.ts: its stylesheets move as ${[...found[component]].join(' and ') || 'nothing'}, so the contract declares ${show(expected)}, not ${show({ reducedMotion, essentialMotion })} (ADR-0024)`,
+      );
+    }
+  }
+});
+
 if (errors.length > 0) {
   console.error(`component CSS check failed:\n  ${errors.join('\n  ')}`);
   process.exit(1);
 }
 console.log(
-  'component CSS: entry imports layers.css then components only; all other CSS is layered.',
+  'component CSS: entry imports layers.css then components only; all other CSS is layered; every movement follows a motion pattern its contract declares.',
 );

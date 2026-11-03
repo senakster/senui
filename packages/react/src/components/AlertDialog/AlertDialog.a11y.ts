@@ -148,6 +148,12 @@ export const a11y = defineA11yContract<AlertDialogProps>()({
       how: 'role="alertdialog" on a native modal dialog; name from the title or a required aria-label / aria-labelledby; description required.',
       evidence: ['automated', 'screen reader'],
     },
+    {
+      criterion: '2.3.3',
+      claim: 'enables',
+      how: 'Under reduced motion or with `--senui-motion-reduce` at 0, it only fades in and out, as Dialog does; the slide and the scale are removed (ADR-0024).',
+      evidence: ['automated'],
+    },
   ],
   testedWith: [
     {

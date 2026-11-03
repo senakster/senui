@@ -144,10 +144,11 @@
     border-block-start-color: transparent;
     border-radius: var(--senui-radius-full);
     animation-name: senui-button-spin;
-    /* About a second per turn. Under reduced motion (--senui-motion-reduce: 0) it turns four times
-       slower rather than stopping, so it still shows that something is happening. */
+    /* ADR-0024's Essential pattern: one turn per rotation period. Under reduced motion
+       (--senui-motion-reduce: 0) it turns four times slower rather than stopping, so it still shows
+       that something is happening. */
     animation-duration: calc(
-      var(--senui-motion-duration-slow) * 3 * (4 - 3 * var(--senui-motion-reduce))
+      var(--senui-motion-duration-rotation) * (4 - 3 * var(--senui-motion-reduce))
     );
     animation-timing-function: var(--senui-motion-easing-linear);
     animation-iteration-count: infinite;

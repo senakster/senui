@@ -18,15 +18,15 @@
     {
       "component": "AlertDialog",
       "check": "stale-run",
-      "sourceHash": "1b931aa2276a1f72",
-      "reason": "1.0.0 ships without new manual runs (L10 decision 6, Emil 2026-10-28). The ADR-0022 backfill found this component's manual runs predate real behaviour changes (scope-decisions.md, L10 PR 3); its docs mark them as not re-tested since. Re-run and stamp before this expires.",
+      "sourceHash": "1f1c173a56d115d9",
+      "reason": "1.0.0 ships without new manual runs (L10 decision 6, Emil 2026-10-28). The ADR-0022 backfill found this component's manual runs predate real behaviour changes (scope-decisions.md, L10 PR 3); its docs mark them as not re-tested since. Re-run and stamp before this expires. Re-pinned 2026-11-03 by L11 (ADR-0024): motion CSS and token edits only, nothing a manual run heard (L11 decision 11).",
       "expires": "2027-04-28"
     },
     {
       "component": "Button",
       "check": "stale-run",
-      "sourceHash": "e3d80417317e94f3",
-      "reason": "1.0.0 ships without new manual runs (L10 decision 6, Emil 2026-10-28). The ADR-0022 backfill found this component's manual runs predate real behaviour changes (scope-decisions.md, L10 PR 3); its docs mark them as not re-tested since. Re-run and stamp before this expires.",
+      "sourceHash": "22097aff21278e4a",
+      "reason": "1.0.0 ships without new manual runs (L10 decision 6, Emil 2026-10-28). The ADR-0022 backfill found this component's manual runs predate real behaviour changes (scope-decisions.md, L10 PR 3); its docs mark them as not re-tested since. Re-run and stamp before this expires. Re-pinned 2026-11-03 by L11 (ADR-0024): motion CSS and token edits only, nothing a manual run heard (L11 decision 11).",
       "expires": "2027-04-28"
     },
     {
@@ -46,8 +46,8 @@
     {
       "component": "Dialog",
       "check": "stale-run",
-      "sourceHash": "e5bb79a3972a617c",
-      "reason": "1.0.0 ships without new manual runs (L10 decision 6, Emil 2026-10-28). The ADR-0022 backfill found this component's manual runs predate real behaviour changes (scope-decisions.md, L10 PR 3); its docs mark them as not re-tested since. Re-run and stamp before this expires.",
+      "sourceHash": "d5094b427ba78fae",
+      "reason": "1.0.0 ships without new manual runs (L10 decision 6, Emil 2026-10-28). The ADR-0022 backfill found this component's manual runs predate real behaviour changes (scope-decisions.md, L10 PR 3); its docs mark them as not re-tested since. Re-run and stamp before this expires. Re-pinned 2026-11-03 by L11 (ADR-0024): motion CSS and token edits only, nothing a manual run heard (L11 decision 11).",
       "expires": "2027-04-28"
     },
     {
@@ -60,8 +60,8 @@
     {
       "component": "Switch",
       "check": "stale-run",
-      "sourceHash": "12a57766899e1f36",
-      "reason": "1.0.0 ships without new manual runs (L10 decision 6, Emil 2026-10-28). The ADR-0022 backfill found this component's manual runs predate real behaviour changes (scope-decisions.md, L10 PR 3); its docs mark them as not re-tested since. Re-run and stamp before this expires.",
+      "sourceHash": "623efd1bdf889c27",
+      "reason": "1.0.0 ships without new manual runs (L10 decision 6, Emil 2026-10-28). The ADR-0022 backfill found this component's manual runs predate real behaviour changes (scope-decisions.md, L10 PR 3); its docs mark them as not re-tested since. Re-run and stamp before this expires. Re-pinned 2026-11-03 by L11 (ADR-0024): motion CSS and token edits only, nothing a manual run heard (L11 decision 11).",
       "expires": "2027-04-28"
     },
     {

@@ -103,10 +103,11 @@ const ADAPTATION = {
     wraps: 'text wraps when space runs out (WCAG 1.4.10, 1.4.12)',
     truncates: 'text is truncated when space runs out',
   },
+  // ADR-0024's patterns. Only what the contract records: no claim about fades it doesn't hold.
   reducedMotion: {
-    'motion-factor':
-      'movement is scaled by `--senui-motion-reduce`, so it stops when the user asks for reduced motion',
-    'no-motion': 'nothing moves, whatever the motion setting',
+    'motion-factor': 'its movement is removed; colour and opacity changes keep their duration',
+    instant: 'its position changes at once, without animating; colour changes keep their duration',
+    'no-motion': "it doesn't move",
   },
 };
 const ADAPTATION_LABEL = {
@@ -117,9 +118,9 @@ const ADAPTATION_LABEL = {
   textOverflow: 'Text overflow',
   reducedMotion: 'Reduced motion',
 };
+// Joined into the reduced-motion clause, after its first part (ADR-0017, ADR-0024).
 const ESSENTIAL_MOTION = {
-  'progress-rotation':
-    'one animation is kept under reduced motion, on purpose: an in-place rotation that shows work is in progress (ADR-0017)',
+  'progress-rotation': 'except its progress spinner, which keeps turning, four times slower',
 };
 const TAB_STOP = {
   none: 'never focused',
@@ -525,20 +526,17 @@ function evidenceText(claim, evidence, component) {
 
 /** Each adaptation value: its label and what it means. */
 export function adaptationRows(adaptation) {
-  return [
-    ...Object.keys(ADAPTATION_LABEL).map((key) => {
-      const value = adaptation[key];
-      return { label: ADAPTATION_LABEL[key], text: `${ADAPTATION[key][value] ?? unknown(value)}.` };
-    }),
-    ...(adaptation.essentialMotion
-      ? [
-          {
-            label: 'Essential motion',
-            text: `${ESSENTIAL_MOTION[adaptation.essentialMotion] ?? unknown(adaptation.essentialMotion)}.`,
-          },
-        ]
-      : []),
-  ];
+  return Object.keys(ADAPTATION_LABEL).map((key) => {
+    const value = adaptation[key];
+    let text = ADAPTATION[key][value] ?? unknown(value);
+    if (key === 'reducedMotion' && adaptation.essentialMotion) {
+      const except =
+        ESSENTIAL_MOTION[adaptation.essentialMotion] ?? unknown(adaptation.essentialMotion);
+      const [first, ...rest] = text.split('; ');
+      text = [`${first}, ${except}`, ...rest].join('; ');
+    }
+    return { label: ADAPTATION_LABEL[key], text: `${text}.` };
+  });
 }
 
 /**
