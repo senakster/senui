@@ -142,6 +142,10 @@ Releases are made from `main` by [`release.yml`](.github/workflows/release.yml) 
 1. Merged changesets make it open (or update) the **Version packages** pull request, with the new
    versions and changelogs. Actions opened it, so its `verify` and `changesets` runs wait for a
    maintainer: approve them on the pull request ("workflows awaiting approval") before it can merge.
+   It opens as soon as the first changeset reaches `main`, so it often appears while a module's
+   later pull requests are still open; leave it, since every merge to `main` updates it. Merge it
+   only when everything on `main` is meant to ship: merged early, it releases half a module, and a
+   pull request that edits one of its consumed changesets then conflicts.
 2. Merging that pull request is the release. The full gate runs (three engines, React 18.3, the
    stale-run check, the API diff, the publish checks) over the build that ships, then packs it.
 3. The `publish` job waits for a maintainer's approval (the `npm` environment), then publishes
