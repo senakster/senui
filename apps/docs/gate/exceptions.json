@@ -18,8 +18,8 @@
     {
       "component": "AlertDialog",
       "check": "stale-run",
-      "sourceHash": "1f1c173a56d115d9",
-      "reason": "1.0.0 ships without new manual runs (L10 decision 6, Emil 2026-10-28). The ADR-0022 backfill found this component's manual runs predate real behaviour changes (scope-decisions.md, L10 PR 3); its docs mark them as not re-tested since. Re-run and stamp before this expires. Re-pinned 2026-11-03 by L11 (ADR-0024): motion CSS and token edits only, nothing a manual run heard (L11 decision 11).",
+      "sourceHash": "682b77ba9ed3b90b",
+      "reason": "1.0.0 ships without new manual runs (L10 decision 6, Emil 2026-10-28). The ADR-0022 backfill found this component's manual runs predate real behaviour changes (scope-decisions.md, L10 PR 3); its docs mark them as not re-tested since. Re-run and stamp before this expires. Re-pinned 2026-11-03 by L11 (ADR-0024): motion CSS and token edits only, nothing a manual run heard (L11 decision 11). Re-pinned again 2026-11-03 by L11 PR 2: the exit fallback timed from the animations (L11 decision 9), nothing a manual run heard.",
       "expires": "2027-04-28"
     },
     {
@@ -46,8 +46,8 @@
     {
       "component": "Dialog",
       "check": "stale-run",
-      "sourceHash": "d5094b427ba78fae",
-      "reason": "1.0.0 ships without new manual runs (L10 decision 6, Emil 2026-10-28). The ADR-0022 backfill found this component's manual runs predate real behaviour changes (scope-decisions.md, L10 PR 3); its docs mark them as not re-tested since. Re-run and stamp before this expires. Re-pinned 2026-11-03 by L11 (ADR-0024): motion CSS and token edits only, nothing a manual run heard (L11 decision 11).",
+      "sourceHash": "9bfbd7c9ebeef6b0",
+      "reason": "1.0.0 ships without new manual runs (L10 decision 6, Emil 2026-10-28). The ADR-0022 backfill found this component's manual runs predate real behaviour changes (scope-decisions.md, L10 PR 3); its docs mark them as not re-tested since. Re-run and stamp before this expires. Re-pinned 2026-11-03 by L11 (ADR-0024): motion CSS and token edits only, nothing a manual run heard (L11 decision 11). Re-pinned again 2026-11-03 by L11 PR 2: the exit fallback timed from the animations (L11 decision 9), nothing a manual run heard.",
       "expires": "2027-04-28"
     },
     {

@@ -799,3 +799,12 @@ Entry format: date — module · Did · Verified · Scope decisions · Plan adju
 - **Review:** three reviewers, findings merged into seven triage items: five accepted (static check, gate, contract and changeset text, wording enforced), two rejected (`OVERRIDES.md`), one non-defect; coverage left to PR 2's browser tests; `@property` deferred.
 - **Verified:** `pnpm check` (API diff: tokens one minor difference; components none, minor pending); `pnpm test`: tokens 32, react 956, scripts 84; the full gate in Chromium; probes, each failing then restored: nine Stylelint forms, three wrong contracts, two static-check regressions against the tests, and seven gate cases (a translating spinner, Button as `'instant'`, an unknown value, a flip, an orbit, a full-speed spinner, a round-trip shake).
 - **Next:** Emil reviews and merges PR 1; then PR 2: the dialog exit fallback from animation timing, the Switch, Button and Dialog browser tests (both modes and the factor at 0), the Motion docs page; re-pin Dialog's and AlertDialog's exceptions.
+
+## 2026-11-03 — L11 PR 2: exit fallback, browser tests, Motion page
+
+- **Context:** PR 1 merged as #37 (`e1cbee4`). PR 2 on `feat/L11-motion-runtime`, from `main`.
+- **Built:** the dialog exit fallback timed from its own animations (longest `endTime ÷ |playbackRate|` plus 100 ms, read again when a replaced transition settles early); browser tests for Switch, Button and Dialog under reduced motion and with the factor at 0 and no media query (`internal/testing/motion.ts`); the Motion docs page with a table generated from the contracts and a live consumer example, gated by `motion-page.spec.ts`; Dialog's and AlertDialog's exceptions re-pinned; the components changeset extended; CONVENTIONS section 13 on testing both ways.
+- **Found:** WebKit names a `::backdrop` transition's pseudo-element `''`; `dialog.open` turns false before `data-state="closed"` commits; only the factor-at-0 case catches movement read from the media-bound tokens.
+- **Review:** `modern-web-curator` and `wcag-auditor`; all accepted but two rejections (the table's region name, a docs prefix on `.app-panel`; `OVERRIDES.md`).
+- **Verified:** `pnpm check` (API diff unchanged from PR 1); `pnpm test`; the full Chromium gate (1469 passed, 122 skipped); the motion browser tests in Chromium, Firefox and WebKit (330 passed); probes, each failing then restored: the 1 s constant, no re-read, Switch and Button without the factor, Dialog on media-bound tokens, the example without the factor.
+- **Next:** Emil OKs the commit; after the merge, L11 done.

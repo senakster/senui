@@ -450,6 +450,13 @@ motion or when a consumer sets it):
 contract that doesn't declare it (it proves the factor is present, not that it zeroes the
 movement); and the gate's motion check (below), which is the proof.
 
+**Test it both ways.** A component with movement has browser tests under reduced motion and with the
+factor at 0 and no media query: `test.each(REDUCED)` with `reduceMotion(how)` from
+`internal/testing/motion.ts`. Only the second catches movement that reads the media-bound tokens
+instead of the factor. For Instant, read the end position in the frame of the change: a
+zero-length transition creates nothing and fires no event. A modal's exit waits for its own
+animations, however long, with a safety net timed from them (`useModalDialog.ts`).
+
 ## The a11y gate (L08)
 
 Every story is also checked by the gate in `apps/docs/gate/`: Playwright over the **built**

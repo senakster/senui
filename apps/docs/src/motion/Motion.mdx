@@ -1,0 +1,95 @@
+import { Meta } from '@storybook/addon-docs/blocks';
+import { MotionExample, MotionExampleCode, ReducedMotionByComponent } from './MotionBlocks';
+
+<Meta title="Motion" />
+
+# Motion
+
+senui moves little, and every movement it makes answers to one custom property,
+`--senui-motion-reduce`. It is `1` by default and `0` when the user asks for reduced motion
+(`prefers-reduced-motion: reduce`). You can set it to `0` yourself, and every component then
+behaves as it does for those users.
+
+## The three patterns
+
+Each movement follows one of three patterns, and each component's accessibility contract records
+which one.
+
+- **Removed:** motion that decorates a change, such as a dialog sliding in. The distance is
+  multiplied by the factor, so under reduced motion nothing moves; colour and opacity changes keep
+  their duration. Contract value `motion-factor`.
+- **Instant:** the end position carries meaning, such as which side a switch's thumb is on. Only
+  the movement's duration is multiplied by the factor, so under reduced motion the element jumps to
+  its end position, and its colour still fades. Contract value `instant`.
+- **Essential:** continuous motion that is the information, such as a progress spinner. It only
+  rotates in place, and under reduced motion it keeps turning, four times slower, rather than
+  stopping and looking like a hang. Contract value `motion-factor`, with `essentialMotion` set to
+  `progress-rotation`.
+
+Colour and opacity changes are never shortened under reduced motion: an instant change can be more
+jarring than a short fade.
+
+## What each component does
+
+Generated from each component's accessibility contract, so it always matches the component pages.
+
+<ReducedMotionByComponent />
+
+## Your own motion
+
+Multiply what moves by the factor, and use the motion tokens for durations and easing. The same
+stylesheet runs the example below:
+
+<MotionExampleCode />
+
+<MotionExample />
+
+Prefer the factor to a `prefers-reduced-motion` media query. A media query only answers the
+operating system's setting, while the factor also answers an in-app setting, so your motion and
+senui's always agree. Under reduced motion, the distance tokens are also `0px`, but an app that
+sets the factor itself doesn't change them, so multiply anyway.
+
+## An in-app setting
+
+To offer reduced motion as a setting in your app, set the factor to `0`. Include `[data-theme]`
+elements in the selector: tokens are declared on every themed subtree as well as the root, so a
+value set on the root alone stops at the first `data-theme` element (ADR-0010).
+
+```css
+[data-motion='reduce'],
+[data-motion='reduce'] [data-theme] {
+  --senui-motion-reduce: 0;
+}
+```
+
+```js
+document.documentElement.dataset.motion = 'reduce';
+```
+
+Set it on the root element, or on any subtree that should stop moving. The setting can only add
+reduced motion: users whose operating system already asks for it get it with or without the
+setting, and setting the factor to `1` doesn't bring motion back for them.
+
+## Changing a duration
+
+A dialog waits for its own exit transitions, however long you make them, before it closes. To slow
+every dialog's exit, and only its exit, override the duration on its closing state:
+
+```css
+.senui-dialog[data-state='closing'],
+.senui-dialog[data-state='closing']::backdrop {
+  transition-duration: var(--senui-motion-duration-slow);
+}
+```
+
+The duration tokens are public too, and you can override them like any other token, but each one
+changes every component that reads it. A longer duration still respects the factor: the distance
+it moves is still multiplied by it.
+
+## Loading spinners
+
+Button's loading spinner is the one movement that continues under reduced motion. It turns in
+place, and four times slower, so it still says that something is happening. It turns for as long as
+`loading` is set, and senui offers no other way to stop it. A spinner is essential only while the
+work it shows is really pending, so end or time out every loading state, and show an error or a way
+to retry when it fails (WCAG 2.2.2).

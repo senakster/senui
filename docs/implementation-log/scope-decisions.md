@@ -2354,3 +2354,61 @@ Merged across reviewers, Emil triaged them in two batches:
 | --------------------------------------------------- | --------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------ | --------------------------------------------------- |
 | Switch toggled and the factor at 0 in the gate      | out: PR 2's browser tests cover both, in both modes and with the factor set without the media query | Emil, 2026-11-03: each gate mode is about 226 runs in three engines at release | A browser test can't reach a case the gate would    |
 | `@property` registration of `--senui-motion-reduce` | out                                                                                                 | Emil, 2026-11-03: a tokens pipeline change and an ADR, beyond consolidate-only | A consumer reports a broken spinner or factor value |
+
+### PR 2 (2026-11-03): exit fallback, browser tests, Motion page
+
+- **Exit fallback** (`internal/dialog/useModalDialog.ts`): the safety net is the longest
+  `endTime ÷ |playbackRate|` among the dialog's own exit animations, plus a 100 ms margin, instead
+  of a fixed second. A zero rate counts as 1. With no exit animation it closes at once, as before.
+- **Browser tests**, each under reduced motion and with the factor at 0 and no media query
+  (`internal/testing/motion.ts`, `REDUCED` and `reduceMotion`):
+  - Switch: the thumb reaches its end in the frame of the change, and its colour still fades.
+  - Button: a running, endless spinner with a 960 ms period, and 3840 ms reduced, read by seeking.
+  - Dialog: only the fade remains; a 2 s exit, and a backdrop-only one, stay open until they end;
+    a paused exit, or one at a zero rate, closes after its own length; a transition replaced
+    part-way is waited for; no exit closes at once.
+- **Motion page** (`apps/docs/src/motion/`): the three patterns, a per-component table generated
+  from the contracts (`reducedMotionText`, shared with the Adaptation row), a live consumer example
+  whose code block is the stylesheet it runs, an in-app setting, a duration override, and the
+  spinner's 2.2.2 duty. The Tokens page points to it instead of repeating the advice.
+- **Probes**, each failing as required and then restored:
+  - the 1 s constant fails both 2 s tests (closed at about 1003 ms);
+  - one read with no re-read fails the replaced-transition test;
+  - Switch's movement without the factor, and Button's spinner without it, fail their reduced tests;
+  - Dialog's movement read from the media-bound tokens alone passes under reduced motion and fails
+    with the factor at 0, which is why every test runs both ways;
+  - the example's CSS without the factor fails only the factor-at-0 gate test.
+- **Engine facts found:**
+  - WebKit reports a `::backdrop` transition's `pseudoElement` as `''`, not `'::backdrop'`. A filter
+    for the backdrop by name dropped it there; the fallback now leaves out only named
+    pseudo-elements other than the backdrop.
+  - `dialog.open` turns false before React commits `data-state="closed"`. WebKit caught tests that
+    read the exit's length on `open`; they now wait for the recorded `closed` state.
+
+| Deliverable / criterion               | Decision                                                                                                                                                                                                                                         | Reason                                                                                             | Re-include when                               |
+| ------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------- | --------------------------------------------- |
+| The consumer example "run in a story" | changed: it runs on the Motion docs page itself, tested by `apps/docs/gate/motion-page.spec.ts` (listed in `checks.ts`). The gate checks every story against a component's contract, and the example has none; on the page it runs the CSS shown | Found implementing PR 2; stronger than a story, because the tested CSS is the published code block | —                                             |
+| The zero-rate branch (`\|\| 1`)       | tested by behaviour only: a test sets the rate after the fallback has read it, so it proves a stalled exit ends after its own length, not the branch itself                                                                                      | A rate of 0 at the moment of the read can't be arranged from a test without a hook into the hook   | A consumer reports a dialog that never closes |
+| Every motion test runs both ways      | in: `test.each(REDUCED)`, and CONVENTIONS section 13 says so                                                                                                                                                                                     | Only the factor-at-0 case catches movement that reads the media-bound tokens (probe above)         | —                                             |
+
+### PR 2 review (2026-11-03)
+
+`modern-web-curator` and `wcag-auditor` reviewed PR 2, read-only.
+
+- **Accepted:**
+  - the fallback leaves out the dialog's other pseudo-elements, and reads the animations again when
+    a replaced transition settles early (a new test);
+  - "closes at once" is bounded at 50 ms, well under the margin;
+  - the zero-rate stall is tested beside the paused one;
+  - the spinner tests assert a running, endless animation before seeking;
+  - the gate test counts only running transitions, and asserts the table's wording for Switch,
+    Button and Dialog;
+  - the page: the duration override is described as the dialog's exit only, the in-app setting
+    can only add reduced motion, the spinner's 2.2.2 text no longer says ending the state is all
+    it takes, and the table labels `progress-rotation` as essential motion.
+- **Settled by a three-engine run:** the reviewer couldn't confirm `::backdrop` animations outside
+  Chromium. They are reported in all three, under the empty pseudo-element name in WebKit (above).
+- **Rejected (`OVERRIDES.md`):**
+  - a different name for the Motion table's scroll region (Emil: keep it as the Props tables have
+    it);
+  - a docs prefix on the example's `.app-panel` class (Emil: keep `.app-panel`).

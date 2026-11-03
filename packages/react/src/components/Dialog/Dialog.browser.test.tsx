@@ -6,6 +6,7 @@ import { commands, page, userEvent } from 'vitest/browser';
 import '@senakster/senui-tokens/tokens.css';
 import '../../styles/index.css';
 import { expectNoAxeViolations } from '../../internal/testing/axe.js';
+import { REDUCED, addStyle, reduceMotion } from '../../internal/testing/motion.js';
 import * as alertStories from '../AlertDialog/AlertDialog.stories.js';
 import { Button } from '../Button/Button.js';
 import { Dialog, type DialogOpenChangeDetails, type DialogProps } from './Dialog.js';
@@ -70,8 +71,9 @@ const open = async () => {
   await expect.poll(dialogEl).not.toBeNull();
   return dialogEl() as HTMLDialogElement;
 };
-// Longer than Dialog's own 1 s fallback for an exit animation that never finishes: a loaded runner
-// can stall WebKit's animation until that fallback fires, as the poll's 1 s default gives up.
+// Longer than Dialog's own fallback for an exit animation that never finishes (the exit's length
+// plus a margin): a loaded runner can stall WebKit's animation until that fallback fires, and the
+// poll's 1 s default gave up first.
 const closed = async (dialog: HTMLDialogElement) => {
   await expect.poll(() => dialog.open, { timeout: 3000 }).toBe(false);
 };
@@ -339,29 +341,101 @@ describe('Dialog in a browser', () => {
     expect(exit.exitMs()).toBeGreaterThanOrEqual(100);
   });
 
-  test('with reduced motion only the fade remains', async () => {
-    // The properties the dialog's own exit transitions animate. A property whose start and end
-    // values are equal gets no transition, so under reduced motion translate and scale drop out.
-    const exiting = (dialog: HTMLDialogElement) =>
-      dialog
-        .getAnimations()
-        .filter((animation): animation is CSSTransition => animation instanceof CSSTransition)
-        .map((transition) => transition.transitionProperty)
-        .sort();
+  // The properties the dialog's own exit transitions animate. A property whose start and end values
+  // are equal gets no transition, so under reduced motion translate and scale drop out.
+  const exiting = async (dialog: HTMLDialogElement) => {
+    await userEvent.click(screen.getByRole('button', { name: 'Close' }));
+    await expect.poll(() => dialog.dataset.state).toBe('closing');
+    return dialog
+      .getAnimations()
+      .filter((animation): animation is CSSTransition => animation instanceof CSSTransition)
+      .map((transition) => transition.transitionProperty)
+      .sort();
+  };
 
+  test('the exit fades, slides and scales by default', async () => {
     render(<Opener />);
-    let dialog = await open();
-    await userEvent.click(screen.getByRole('button', { name: 'Close' }));
-    await expect.poll(() => dialog.dataset.state).toBe('closing');
-    expect(exiting(dialog)).toEqual(['opacity', 'scale', 'translate']);
+    const dialog = await open();
+    expect(await exiting(dialog)).toEqual(['opacity', 'scale', 'translate']);
     await closed(dialog);
+  });
 
-    await commands.emulateReducedMotion(true);
-    dialog = await open();
+  test.each(REDUCED)('with %s only the fade remains', async (how) => {
+    await reduceMotion(how);
+    render(<Opener />);
+    const dialog = await open();
+    expect(await exiting(dialog)).toEqual(['opacity']);
+    await closed(dialog);
+  });
+
+  // L11 decision 9: the safety net is timed from the exit's own animations, so a consumer's longer
+  // exit isn't cut short. Each failed on the old 1 s constant.
+  test.each([
+    ['the dialog', ".senui-dialog[data-state='closing'] { transition-duration: 2s; }"],
+    [
+      'only its backdrop',
+      ".senui-dialog[data-state='closing']::backdrop { transition-duration: 2s; }",
+    ],
+  ])('an exit lengthened to 2 s on %s stays open until it ends', async (_where, css) => {
+    addStyle(css);
+    render(<Opener />);
+    const dialog = await open();
+    const exit = recordStates(dialog);
+    await userEvent.click(screen.getByRole('button', { name: 'Close' }));
+    await expect.poll(() => exit.states.length, { timeout: 5000 }).toBe(2);
+    expect(exit.exitMs()).toBeGreaterThanOrEqual(1900);
+  });
+
+  test.each([
+    [
+      'paused',
+      (animation: Animation) => {
+        animation.pause();
+      },
+    ],
+    [
+      'stopped at a zero playback rate',
+      (animation: Animation) => {
+        animation.playbackRate = 0;
+      },
+    ],
+  ])('an exit %s still closes, after its own length', async (_how, stall) => {
+    addStyle(".senui-dialog[data-state='closing'] { transition-duration: 2s; }");
+    render(<Opener />);
+    const dialog = await open();
+    const exit = recordStates(dialog);
     await userEvent.click(screen.getByRole('button', { name: 'Close' }));
     await expect.poll(() => dialog.dataset.state).toBe('closing');
-    expect(exiting(dialog)).toEqual(['opacity']);
+    for (const animation of dialog.getAnimations({ subtree: true })) stall(animation);
+    await expect.poll(() => exit.states.length, { timeout: 5000 }).toBe(2);
+    expect(exit.exitMs()).toBeGreaterThanOrEqual(1900);
+    expect(exit.exitMs()).toBeLessThan(3000);
+  });
+
+  test('an exit transition replaced part-way is waited for too', async () => {
+    addStyle(".senui-dialog[data-state='closing'] { transition-duration: 1s; }");
+    render(<Opener />);
+    const dialog = await open();
+    const exit = recordStates(dialog);
+    await userEvent.click(screen.getByRole('button', { name: 'Close' }));
+    await expect.poll(() => dialog.dataset.state).toBe('closing');
+    // A new end value part-way restarts the opacity transition: the first one is cancelled, so its
+    // `finished` rejects and settles at once.
+    addStyle(".senui-dialog[data-state='closing'] { opacity: 0.01; transition-duration: 2s; }");
+    await expect.poll(() => exit.states.length, { timeout: 5000 }).toBe(2);
+    expect(exit.exitMs()).toBeGreaterThanOrEqual(1900);
+  });
+
+  test('with no exit animation it closes at once', async () => {
+    addStyle('.senui-dialog, .senui-dialog::backdrop { transition-duration: 0s; }');
+    render(<Opener />);
+    const dialog = await open();
+    const exit = recordStates(dialog);
+    await userEvent.click(screen.getByRole('button', { name: 'Close' }));
     await closed(dialog);
+    await expect.poll(() => exit.states.length).toBe(2);
+    // Well under the safety net's 100 ms margin: nothing waited.
+    expect(exit.exitMs()).toBeLessThan(50);
   });
 
   test('a backdrop click closes it only with dismiss="any"', async () => {

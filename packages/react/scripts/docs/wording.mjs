@@ -528,15 +528,27 @@ function evidenceText(claim, evidence, component) {
 export function adaptationRows(adaptation) {
   return Object.keys(ADAPTATION_LABEL).map((key) => {
     const value = adaptation[key];
-    let text = ADAPTATION[key][value] ?? unknown(value);
-    if (key === 'reducedMotion' && adaptation.essentialMotion) {
-      const except =
-        ESSENTIAL_MOTION[adaptation.essentialMotion] ?? unknown(adaptation.essentialMotion);
-      const [first, ...rest] = text.split('; ');
-      text = [`${first}, ${except}`, ...rest].join('; ');
-    }
+    const text =
+      key === 'reducedMotion'
+        ? reducedMotionText(adaptation)
+        : (ADAPTATION[key][value] ?? unknown(value));
     return { label: ADAPTATION_LABEL[key], text: `${text}.` };
   });
+}
+
+/**
+ * What reduced motion does to a component, without the full stop: its pattern's clause, with the
+ * essential-motion exception after the first part (ADR-0017, ADR-0024). The Motion docs page's
+ * table and the Adaptation row read the same words.
+ */
+export function reducedMotionText(adaptation) {
+  const text =
+    ADAPTATION.reducedMotion[adaptation.reducedMotion] ?? unknown(adaptation.reducedMotion);
+  if (!adaptation.essentialMotion) return text;
+  const except =
+    ESSENTIAL_MOTION[adaptation.essentialMotion] ?? unknown(adaptation.essentialMotion);
+  const [first, ...rest] = text.split('; ');
+  return [`${first}, ${except}`, ...rest].join('; ');
 }
 
 /**

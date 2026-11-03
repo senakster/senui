@@ -3,6 +3,7 @@ import { describe, expect, test } from 'vitest';
 import { userEvent } from 'vitest/browser';
 import '@senakster/senui-tokens/tokens.css';
 import '../../styles/index.css';
+import { REDUCED, reduceMotion } from '../../internal/testing/motion.js';
 import { Switch } from './Switch.js';
 
 // Real key presses, clicks and computed styles (Chromium) for Switch, the L05 criteria the plan
@@ -60,4 +61,45 @@ describe('Switch thumb', () => {
     await expect.poll(() => margin(control, 'right')).toBeGreaterThan(0);
     expect(margin(control, 'left')).toBe(0);
   });
+
+  // ADR-0024's Instant pattern. Toggled by `click()` and read in the same frame, because a real
+  // click can outlast the transition. A zero-length transition creates nothing and fires no event,
+  // so the end position is read, not waited for.
+  const thumbTransitions = (control: HTMLElement) =>
+    control
+      .getAnimations({ subtree: true })
+      .filter(
+        (animation): animation is CSSTransition =>
+          animation instanceof CSSTransition &&
+          animation.effect instanceof KeyframeEffect &&
+          animation.effect.pseudoElement === '::before',
+      )
+      .map((transition) => transition.transitionProperty);
+  const isMargin = (property: string) => property.startsWith('margin');
+
+  test('slides the thumb by default', () => {
+    const { getByRole } = render(<Switch label="Wi-Fi" />);
+    const control = getByRole('switch');
+    control.click();
+    expect(thumbTransitions(control).filter(isMargin)).toHaveLength(1);
+  });
+
+  test.each(REDUCED)(
+    'with %s, the thumb reaches its end at once, and its colour still fades',
+    async (how) => {
+      await reduceMotion(how);
+      const { getByRole } = render(<Switch label="Wi-Fi" />);
+      const control = getByRole('switch');
+      control.click();
+      const transitions = thumbTransitions(control);
+      expect(transitions.filter(isMargin)).toEqual([]);
+      expect(transitions).toContain('background-color');
+      const at = margin(control, 'left');
+      expect(at).toBeGreaterThan(0);
+      await Promise.all(
+        control.getAnimations({ subtree: true }).map((a) => a.finished.catch(() => undefined)),
+      );
+      expect(margin(control, 'left')).toBe(at);
+    },
+  );
 });
